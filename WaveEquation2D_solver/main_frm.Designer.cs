@@ -31,19 +31,19 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main_frm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.solverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel_zoom_value = new System.Windows.Forms.ToolStripStatusLabel();
-            this.addNodalConstraintsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addEdgeConstraintsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mediumPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dWaveEquationSolveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importTXTFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addNodalConstraintsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addEdgeConstraintsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mediumPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.solverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dWaveEquationSolveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel_zoom_value = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -57,7 +57,7 @@
             this.solverToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(570, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(868, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -73,6 +73,36 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // importTXTFileToolStripMenuItem
+            // 
+            this.importTXTFileToolStripMenuItem.Name = "importTXTFileToolStripMenuItem";
+            this.importTXTFileToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.importTXTFileToolStripMenuItem.Text = "Import TXT File";
+            // 
+            // importModelToolStripMenuItem
+            // 
+            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.importModelToolStripMenuItem.Text = "Import Model";
+            // 
+            // exportModelToolStripMenuItem
+            // 
+            this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.exportModelToolStripMenuItem.Text = "Export Model";
+            // 
+            // optionToolStripMenuItem
+            // 
+            this.optionToolStripMenuItem.Name = "optionToolStripMenuItem";
+            this.optionToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.optionToolStripMenuItem.Text = "Option";
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.exitToolStripMenuItem.Text = "Exit";
+            // 
             // loadsToolStripMenuItem
             // 
             this.loadsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -82,31 +112,6 @@
             this.loadsToolStripMenuItem.Name = "loadsToolStripMenuItem";
             this.loadsToolStripMenuItem.Size = new System.Drawing.Size(62, 24);
             this.loadsToolStripMenuItem.Text = "Loads";
-            // 
-            // solverToolStripMenuItem
-            // 
-            this.solverToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dWaveEquationSolveToolStripMenuItem});
-            this.solverToolStripMenuItem.Name = "solverToolStripMenuItem";
-            this.solverToolStripMenuItem.Size = new System.Drawing.Size(64, 24);
-            this.solverToolStripMenuItem.Text = "Solver";
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel_zoom_value});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 278);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(570, 26);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabel_zoom_value
-            // 
-            this.toolStripStatusLabel_zoom_value.Name = "toolStripStatusLabel_zoom_value";
-            this.toolStripStatusLabel_zoom_value.Size = new System.Drawing.Size(92, 20);
-            this.toolStripStatusLabel_zoom_value.Text = "Zoom: 100%";
             // 
             // addNodalConstraintsToolStripMenuItem
             // 
@@ -126,47 +131,42 @@
             this.mediumPropertiesToolStripMenuItem.Size = new System.Drawing.Size(242, 26);
             this.mediumPropertiesToolStripMenuItem.Text = "Medium Properties";
             // 
+            // solverToolStripMenuItem
+            // 
+            this.solverToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dWaveEquationSolveToolStripMenuItem});
+            this.solverToolStripMenuItem.Name = "solverToolStripMenuItem";
+            this.solverToolStripMenuItem.Size = new System.Drawing.Size(64, 24);
+            this.solverToolStripMenuItem.Text = "Solver";
+            // 
             // dWaveEquationSolveToolStripMenuItem
             // 
             this.dWaveEquationSolveToolStripMenuItem.Name = "dWaveEquationSolveToolStripMenuItem";
             this.dWaveEquationSolveToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.dWaveEquationSolveToolStripMenuItem.Text = "2D Wave Equation Solve";
             // 
-            // importTXTFileToolStripMenuItem
+            // statusStrip1
             // 
-            this.importTXTFileToolStripMenuItem.Name = "importTXTFileToolStripMenuItem";
-            this.importTXTFileToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.importTXTFileToolStripMenuItem.Text = "Import TXT File";
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel_zoom_value});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 526);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(868, 26);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
             // 
-            // importModelToolStripMenuItem
+            // toolStripStatusLabel_zoom_value
             // 
-            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
-            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.importModelToolStripMenuItem.Text = "Import Model";
-            // 
-            // exportModelToolStripMenuItem
-            // 
-            this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.exportModelToolStripMenuItem.Text = "Export Model";
-            // 
-            // optionToolStripMenuItem
-            // 
-            this.optionToolStripMenuItem.Name = "optionToolStripMenuItem";
-            this.optionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.optionToolStripMenuItem.Text = "Option";
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.exitToolStripMenuItem.Text = "Exit";
+            this.toolStripStatusLabel_zoom_value.Name = "toolStripStatusLabel_zoom_value";
+            this.toolStripStatusLabel_zoom_value.Size = new System.Drawing.Size(92, 20);
+            this.toolStripStatusLabel_zoom_value.Text = "Zoom: 100%";
             // 
             // main_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(570, 304);
+            this.ClientSize = new System.Drawing.Size(868, 552);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
