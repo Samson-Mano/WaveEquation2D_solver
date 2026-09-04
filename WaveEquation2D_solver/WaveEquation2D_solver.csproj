@@ -78,6 +78,8 @@
     <Compile Include="src\model_store\geom_objects\selectcircle_store.cs" />
     <Compile Include="src\model_store\geom_objects\selectrectangle_store.cs" />
     <Compile Include="src\model_store\geom_objects\shrunkmeshdata_store.cs" />
+    <Compile Include="src\model_store\modeldata_store.cs" />
+    <Compile Include="src\model_store\rslt_objects\rsltdata_store.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\GDIFontAtlas.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\IndexBuffer.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexArray.cs" />
@@ -118,7 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="other_windows\" />
-    <Folder Include="src\model_store\rslt_objects\" />
     <Folder Include="src\solver\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

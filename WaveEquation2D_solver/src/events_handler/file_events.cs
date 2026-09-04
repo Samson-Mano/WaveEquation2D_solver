@@ -1,11 +1,13 @@
-﻿using OpenTK;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using WaveEquation2D_solver.src.global_variables;
+using WaveEquation2D_solver.src.model_store.fe_objects;
 
 // OpenTK library
 using OpenTK;

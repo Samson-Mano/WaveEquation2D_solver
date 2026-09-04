@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using WaveEquation2D_solver.src.opentk_control.opentk_buffer;
+
 
 
 namespace WaveEquation2D_solver.src.global_variables

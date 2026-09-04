@@ -44,6 +44,7 @@
             this.dWaveEquationSolveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_zoom_value = new System.Windows.Forms.ToolStripStatusLabel();
+            this.glControl1 = new OpenTK.GLControl();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -57,7 +58,7 @@
             this.solverToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(868, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(802, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -150,9 +151,9 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_zoom_value});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 526);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 475);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(868, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(802, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -162,11 +163,22 @@
             this.toolStripStatusLabel_zoom_value.Size = new System.Drawing.Size(92, 20);
             this.toolStripStatusLabel_zoom_value.Text = "Zoom: 100%";
             // 
+            // glControl1
+            // 
+            this.glControl1.BackColor = System.Drawing.Color.Black;
+            this.glControl1.Location = new System.Drawing.Point(100, 97);
+            this.glControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.glControl1.Name = "glControl1";
+            this.glControl1.Size = new System.Drawing.Size(278, 172);
+            this.glControl1.TabIndex = 2;
+            this.glControl1.VSync = false;
+            // 
             // main_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(868, 552);
+            this.ClientSize = new System.Drawing.Size(802, 501);
+            this.Controls.Add(this.glControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -199,6 +211,7 @@
         private System.Windows.Forms.ToolStripMenuItem addEdgeConstraintsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mediumPropertiesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dWaveEquationSolveToolStripMenuItem;
+        private OpenTK.GLControl glControl1;
     }
 }
 

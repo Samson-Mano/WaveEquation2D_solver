@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using WaveEquation2D_solver.src.global_variables;
+using WaveEquation2D_solver.src.model_store;
+
 // OpenTK library
 using OpenTK;
 using OpenTK.Graphics;
