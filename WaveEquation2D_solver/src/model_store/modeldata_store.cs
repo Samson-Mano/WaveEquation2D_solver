@@ -44,7 +44,8 @@ namespace WaveEquation2D_solver.src.model_store
         public drawing_events graphic_events_control { get; private set; }
 
         // Update of mesh properties
-        public bool isConstraintUpdateInProgress = false;
+        public bool isNodeConstraintUpdateInProgress = false;
+        public bool isEdgeConstraintUpdateInProgress = false;
         public bool isLoadUpdateInProgress = false;
         public bool isMaterialUpdateInProgress = false;
         public bool isAnnotateResultInProgress = false;

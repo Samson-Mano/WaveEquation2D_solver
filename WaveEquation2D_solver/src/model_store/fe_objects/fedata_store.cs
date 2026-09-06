@@ -37,7 +37,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public elementtri_list_store fe_tris;
         public elementquad_list_store fe_quads;
 
-        public nodecnst_list_store fe_constraints;
+        public nodecnst_list_store fe_nodeconstraints;
+        public edgecnst_list_store fe_edgeconstraints;
         public nodeload_list_store fe_loads;
 
         public Dictionary<int, material_data> fe_materials;
@@ -54,6 +55,10 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public HashSet<int> selected_tri_ids { get; } = new HashSet<int>();
         public HashSet<int> selected_quad_ids { get; } = new HashSet<int>();
         public HashSet<int> selected_node_ids { get; } = new HashSet<int>();
+        public HashSet<int> selected_edge_ids { get; } = new HashSet<int>();
+
+
+     
 
 
         public fedata_store()
@@ -65,7 +70,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             fe_tris = new elementtri_list_store();
             fe_quads = new elementquad_list_store();
 
-            fe_constraints = new nodecnst_list_store();
+            fe_nodeconstraints = new nodecnst_list_store();
+            fe_edgeconstraints = new edgecnst_list_store();
             fe_loads = new nodeload_list_store();
 
             fe_materials = new Dictionary<int, material_data>();
@@ -126,7 +132,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             meshdrawingdata.paint_selected_mesh();
 
             // Paint the constraints
-            fe_constraints.paint_node_constraint();
+            fe_nodeconstraints.paint_node_constraint();
+            fe_edgeconstraints.paint_edge_constraint();
 
             // Paint the loads
             fe_loads.paint_node_load();
@@ -141,7 +148,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 return;
 
             meshdrawingdata.update_openTK_uniforms(graphic_events_control);
-            fe_constraints.update_openTK_uniforms(graphic_events_control);
+            fe_nodeconstraints.update_openTK_uniforms(graphic_events_control);
+            fe_edgeconstraints.update_openTK_uniforms(graphic_events_control);
             fe_loads.update_openTK_uniforms(graphic_events_control);
 
         }
@@ -224,6 +232,92 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             meshdrawingdata.clear_selected_points();
 
         }
+
+
+
+
+
+
+        public void select_edges(Vector2 corner_pt1, Vector2 corner_pt2, bool isRightButton, drawing_events graphic_events_control)
+        {
+            // Select the edges for load or constraint update
+            List<int> selected_edge_ids = new List<int>();
+
+            // Pre-compute MVP matrix
+            Matrix4 mvp = graphic_events_control.projectionMatrix *
+                          graphic_events_control.viewMatrix *
+                          graphic_events_control.modelMatrix;
+
+
+            Matrix4 invMVP = Matrix4.Invert(mvp);
+
+            // Transform rectangle corners from screen space to model space
+            Vector2 modelCorner1 = TransformToModelSpace(corner_pt1, invMVP);
+            Vector2 modelCorner2 = TransformToModelSpace(corner_pt2, invMVP);
+
+            // Loop through all edge in edgeMap
+            foreach (edge_store ed in fe_edges.edgeMap.Values)
+            {
+                //______________________________
+                Vector2 edge_pt = new Vector2((float)ed.edge_pt_x_coord, (float)ed.edge_pt_y_coord);
+
+                // Check whether the point inside a rectangle
+                if (gvariables_static.isPointSelected(modelCorner1, modelCorner2, node_pt) == true)
+                {
+                    selected_node_ids.Add(nd.node_id);
+
+                }
+
+            }
+
+            if (selected_node_ids.Count > 0)
+            {
+                add_selected_nodes(selected_node_ids, isRightButton);
+            }
+
+        }
+
+
+        private void add_selected_edges(List<int> selected_edge_ids, bool IsRemove)
+        {
+            bool is_selection_changed = false;
+
+            if (IsRemove == false)
+            {
+                // Add to the selected edge list
+                // Add all edges at once
+                int initialCount = this.selected_edge_ids.Count;
+                this.selected_edge_ids.UnionWith(selected_edge_ids);
+                is_selection_changed = this.selected_edge_ids.Count != initialCount;
+            }
+            else
+            {
+                // Remove from the selected edge list
+                // Remove all edges at once
+                int initialCount = this.selected_edge_ids.Count;
+                this.selected_edge_ids.ExceptWith(selected_edge_ids);
+                is_selection_changed = this.selected_edge_ids.Count != initialCount;
+            }
+
+
+            if (is_selection_changed == true)
+            {
+                // Add the selected edges
+                meshdrawingdata.add_selected_edges(this.selected_edge_ids.ToList());
+            }
+            //
+        }
+
+
+        public void clear_selected_edges()
+        {
+            this.selected_edge_ids.Clear();
+            meshdrawingdata.clear_selected_edges();
+
+        }
+
+
+
 
 
 

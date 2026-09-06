@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using WaveEquation2D_solver.Properties;
 using WaveEquation2D_solver.src.events_handler;
 using WaveEquation2D_solver.src.global_variables;
+using WaveEquation2D_solver.src.model_store.geom_objects;
 using WaveEquation2D_solver.src.opentk_control.opentk_buffer;
 using WaveEquation2D_solver.src.opentk_control.shader_compiler;
 
@@ -21,15 +22,18 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
     public class nodecnst_data
     {
-        public int cnst_set_id { get; set; } // constraint id
+        public int ndcnst_set_id { get; set; } // constraint id
 
         public List<Vector2> constraint_node_pts { get; set; }
 
         public List<int> constraint_node_ids { get; set; }
 
-        public int constraint_type { get; set; }// Constraint Type = 0 & 1
+        public double field_value { get; set; } // Dirichlet boundary condition
 
-        public double constraint_angle { get; set; } // Constraint Angle
+        public double source_value { get; set; } // Source/ External excitation 
+
+        public bool isField { get; set; } // is Field value
+
 
     }
 
@@ -39,10 +43,13 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
 
-        public Dictionary<int, nodecnst_data> cnstMap = new Dictionary<int, nodecnst_data>();
-        public int cnst_set_count = 0;
+        public Dictionary<int, nodecnst_data> ndcnstMap = new Dictionary<int, nodecnst_data>();
+        public int ndcnst_set_count = 0;
 
         private List<int> all_constraintset_ids = new List<int>();
+
+        // Load labels
+        private label_list_store constraint_label;
 
 
         // Constraint visualization
@@ -59,12 +66,13 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public nodecnst_list_store()
         {
             // (Re)Initialize the data
-            cnstMap = new Dictionary<int, nodecnst_data>();
-            cnst_set_count = 0;
+            ndcnstMap = new Dictionary<int, nodecnst_data>();
+            ndcnst_set_count = 0;
 
             InitializeShader();
             InitializeBuffers();
 
+            constraint_label = new label_list_store();
         }
 
 
@@ -111,7 +119,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
         public void add_nodeconstraint(List<int> constraint_node_ids, List<Vector2> constraint_node_pts,
-            int t_constraint_type, double t_constraint_angle)
+            double field_value, double source_value, bool isField)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_constraintset_ids);
@@ -123,16 +131,17 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             // Add the constraint to the particular node
             nodecnst_data temp_cnst = new nodecnst_data
             {
-                cnst_set_id = unique_constraintset_id,
+                ndcnst_set_id = unique_constraintset_id,
                 constraint_node_pts = nodePtsCopy,
                 constraint_node_ids = idsCopy,
-                constraint_type = t_constraint_type,
-                constraint_angle = t_constraint_angle
+                field_value = isField == true ? field_value : 0.0,
+                source_value = isField == true ? 0.0 : source_value,
+                isField = isField
             };
 
             // Insert the constraint to nodes
-            cnstMap[unique_constraintset_id] = temp_cnst;
-            cnst_set_count++;
+            ndcnstMap[unique_constraintset_id] = temp_cnst;
+            ndcnst_set_count++;
 
             // Update the constraint data visualization
             update_buffer_data();
@@ -148,10 +157,10 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             all_constraintset_ids.Remove(cnst_set_id);
 
             // Remove the constraint data based on the key (constraint set id)
-            cnstMap.Remove(cnst_set_id);
+            ndcnstMap.Remove(cnst_set_id);
 
             // adjust the constraint data count
-            cnst_set_count--;
+            ndcnst_set_count--;
 
             // Update the constraint data visualization
             update_buffer_data();
@@ -162,7 +171,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public void paint_node_constraint()
         {
             // node constraint count check
-            if (cnst_set_count == 0 || gvariables_static.is_paint_constraints == false)
+            if (ndcnst_set_count == 0 || gvariables_static.is_paint_constraints == false)
                 return;
 
             constraintShader.Bind();
@@ -190,7 +199,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public void update_openTK_uniforms(drawing_events graphic_events_control)
         {
-            if (cnst_set_count == 0)
+            if (ndcnst_set_count == 0)
                 return;
 
             Matrix4 uMVP = graphic_events_control.projectionMatrix *
@@ -229,7 +238,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
             int t_id = 0;
 
-            foreach (nodecnst_data cnst_data in cnstMap.Values)
+            foreach (nodecnst_data cnst_data in ndcnstMap.Values)
             {
                 float radians = (((float)cnst_data.constraint_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
                 float cos_theta = (float)Math.Cos(radians);

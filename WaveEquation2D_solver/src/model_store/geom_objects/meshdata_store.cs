@@ -96,6 +96,10 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
         private bool buffersInitialized = false;
 
+
+        // public List<line_store> get_wireframe_lines { get { return this.wireframe_lines; } }
+
+
         public meshdata_store()
         {
             InitializeShader();

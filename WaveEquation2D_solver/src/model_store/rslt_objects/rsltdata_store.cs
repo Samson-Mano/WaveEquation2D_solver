@@ -1,5 +1,4 @@
-﻿using OpenTK;
-// OpenTK library
+﻿// OpenTK library
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
