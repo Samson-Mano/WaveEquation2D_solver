@@ -131,9 +131,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         private Shader rsltmeshShader;
         private Shader rsltmeshwireframeShader;
-        private Shader rsltPSLShader;
+        // private Shader rsltPSLShader;
         // private Shader rsltPSLType2Shader;
-        private Shader rsltPSLType2StreamFunctionShader;
+        // private Shader rsltPSLType2StreamFunctionShader;
 
         // Vertex Buffer object and Vertex Array object 
         private VertexBuffer point_vbo;
@@ -195,21 +195,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             rsltmeshwireframeShader = new Shader(
                 ShaderLibrary.get_vertex_shader(ShaderLibrary.ShaderType.RsltWireframeShader),
                 ShaderLibrary.get_fragment_shader(ShaderLibrary.ShaderType.RsltWireframeShader)
-                );
-
-            rsltPSLShader = new Shader(
-                ShaderLibrary.get_vertex_shader(ShaderLibrary.ShaderType.RsltPSLShader),
-                ShaderLibrary.get_fragment_shader(ShaderLibrary.ShaderType.RsltPSLShader)
-                );
-
-            //rsltPSLType2Shader = new Shader(
-            //    ShaderLibrary.get_vertex_shader(ShaderLibrary.ShaderType.RsltPSLType2Shader),
-            //    ShaderLibrary.get_fragment_shader(ShaderLibrary.ShaderType.RsltPSLType2Shader)
-            //    );
-
-            rsltPSLType2StreamFunctionShader = new Shader(
-                ShaderLibrary.get_vertex_shader(ShaderLibrary.ShaderType.RsltPSLType2StreamFunctionShader),
-                ShaderLibrary.get_fragment_shader(ShaderLibrary.ShaderType.RsltPSLType2StreamFunctionShader)
                 );
 
         }
@@ -394,13 +379,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         public void paint_results()
         {
-            if (gvariables_static.result_option == 9 || gvariables_static.result_option == 10)
-            {
-                // Special case for PSL lines (option = 9 or 10)
-                paint_PSL_lines();
-                return;
-            }
-
 
             paint_result_mesh();
 
@@ -523,71 +501,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 result_point_label.paint_static_labels();
 
             }
-        }
-
-
-        private void paint_PSL_lines()
-        {
-            if (!gvariables_static.is_paint_resultmesh || !buffersInitialized)
-                return;
-
-
-            int option = gvariables_static.result_option;
-
-            if (option == 9)
-            {
-
-                rsltPSLShader.Bind();
-                psl_point_vao.Bind();
-
-                if (triangle_ibo.BufferCount > 0)
-                {
-
-                    // Paint the Result triangle mesh
-                    triangle_ibo.Bind();
-                    GL.DrawElements(PrimitiveType.Triangles, triangle_ibo.BufferCount,
-                        DrawElementsType.UnsignedInt, 0);
-                    triangle_ibo.UnBind();
-                }
-
-                psl_point_vao.UnBind();
-                rsltPSLShader.UnBind();
-
-            }
-            else if (option == 10)
-            {
-
-                //rsltPSLType2Shader.Bind();
-                //psl2_point_vao.Bind();
-                //if (psl2_lines_ibo.BufferCount > 0)
-                //{
-                //    // Paint the Result Stress lines
-                //    psl2_lines_ibo.Bind();
-                //    GL.DrawElements(PrimitiveType.Lines, psl2_lines_ibo.BufferCount,
-                //        DrawElementsType.UnsignedInt, 0);
-                //    psl2_lines_ibo.UnBind();
-                //}
-                //psl2_point_vao.UnBind();
-                //rsltPSLType2Shader.UnBind();
-
-
-                rsltPSLType2StreamFunctionShader.Bind();
-                psl2_streamfunction_point_vao.Bind();
-                if (psl2_streamfunction_tri_ibo.BufferCount > 0)
-                {
-                    // Paint the Result Plane Stress lines triangles
-                    psl2_streamfunction_tri_ibo.Bind();
-                    GL.DrawElements(PrimitiveType.Triangles, psl2_streamfunction_tri_ibo.BufferCount,
-                        DrawElementsType.UnsignedInt, 0);
-                    psl2_streamfunction_tri_ibo.UnBind();
-                }
-                psl2_streamfunction_point_vao.UnBind();
-                rsltPSLType2StreamFunctionShader.UnBind();
-
-
-
-            }
-
         }
 
 
@@ -1374,28 +1287,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             result_point_label.update_openTK_uniforms(uMVP, zoomscale, 1.0f);
 
 
-            //____________________________________________________________________________________________
-            // Update the PSL shader uniforms
-            rsltPSLShader.SetMatrix4("uMVP", uMVP);
-            rsltPSLShader.SetFloat("geomscale", gvariables_static.geom_size);
-
-            rsltPSLShader.SetFloat("modelpercent", model_percent);
-
-            //rsltPSLShader.SetFloat("vertexTransparency", gvariables_static.rslt_transparency);
-
-            // //____________________________________________________________________________________________
-            // // Update the PSL shader uniforms type 2
-            // rsltPSLType2Shader.SetMatrix4("uMVP", uMVP);
-            // rsltPSLType2Shader.SetFloat("geomscale", gvariables_static.geom_size);
-
-            // rsltPSLType2Shader.SetFloat("modelpercent", model_percent);
-
-            // Update the PSL shader uniforms type 2 streamfunction
-            rsltPSLType2StreamFunctionShader.SetMatrix4("uMVP", uMVP);
-            rsltPSLType2StreamFunctionShader.SetFloat("uNumContours", gvariables_static.contourline_level);
-            rsltPSLType2StreamFunctionShader.SetFloat("uLineOpacity", 1.0f);
-            rsltPSLType2StreamFunctionShader.SetFloat("uLineWidth", 1.2f);
-
         }
 
         public void update_animation(float sine_oscillation)
@@ -1410,7 +1301,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 rsltmeshShader.SetFloat("uLineOpacity", 1.0f);
             }
 
-            rsltPSLShader.SetFloat("sinevalue", sine_oscillation);
+            // rsltPSLShader.SetFloat("sinevalue", sine_oscillation);
             // rsltPSLType2Shader.SetFloat("sinevalue", sine_oscillation);
             // rsltPSLShader.SetFloat("uLineOpacity", 1.0f);
 

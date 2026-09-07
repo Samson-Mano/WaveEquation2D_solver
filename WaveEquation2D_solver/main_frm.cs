@@ -39,8 +39,8 @@ namespace WaveEquation2D_solver
         // Forms
         private option_frm option_Form;
         private matprop_frm matprop_Form;
-        //private load_frm load_Form;
-        //private constraint_frm constraint_Form;
+        private edgeconstraint_frm edgeconstraint_Form;
+        private nodalconstraint_frm nodalconstraint_Form;
 
         //private solver_frm solver_Form;
         //private rsltoption_frm rsltoption_Form;
@@ -236,19 +236,18 @@ namespace WaveEquation2D_solver
 
             }
 
-            //// Update the Load Form data
-            //if (modeldata.isLoadUpdateInProgress == true)
-            //{
-            //    load_Form.update_selected_node_list();
+            // Update the Edge Constraint Form data
+            if (modeldata.isEdgeConstraintUpdateInProgress == true)
+            {
+                edgeconstraint_Form.update_selected_edge_list();
+            }
 
-            //}
+            // Update the Nodal Constraint Form data
+            if (modeldata.isNodeConstraintUpdateInProgress == true)
+            {
+                nodalconstraint_Form.update_selected_node_list();
 
-            //// Update the Nodal Constraint Form data
-            //if (modeldata.isConstraintUpdateInProgress == true)
-            //{
-            //    constraint_Form.update_selected_node_list();
-
-            //}
+            }
 
             //// Update the Result Annotation Form data
             //if (modeldata.isAnnotateResultInProgress == true)
@@ -523,13 +522,91 @@ namespace WaveEquation2D_solver
 
         private void addNodalConstraintsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (modeldata.IsModelSet == false)
+                return;
+
+            // Check if nodalconstraint_Form is null or disposed
+            if (nodalconstraint_Form == null || nodalconstraint_Form.IsDisposed)
+            {
+                nodalconstraint_Form = new nodalconstraint_frm(ref modeldata);
+
+                // Make it behave like a tool window
+                nodalconstraint_Form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                nodalconstraint_Form.ShowInTaskbar = false;
+                nodalconstraint_Form.TopLevel = true;
+                nodalconstraint_Form.Owner = this;
+
+
+                // Set the start position to manual so we can control placement
+                nodalconstraint_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(nodalconstraint_Form);
+            }
+
+            // Turn on Flag Nodal Constraint update form is open
+            modeldata.isNodeConstraintUpdateInProgress = true;
+            modeldata.fe_data.clear_selected_nodes();
+
+            // Show the form
+            if (!nodalconstraint_Form.Visible)
+            {
+                nodalconstraint_Form.update_dataGridView();
+                nodalconstraint_Form.update_selected_node_list();
+                nodalconstraint_Form.Show(this);
+            }
+
+            nodalconstraint_Form.BringToFront();
+
+            glControl_main_panel.Invalidate();
 
         }
+
+
 
         private void addEdgeConstraintsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (modeldata.IsModelSet == false)
+                return;
+
+            // Check if edgeconstraint_Form is null or disposed
+            if (edgeconstraint_Form == null || edgeconstraint_Form.IsDisposed)
+            {
+                edgeconstraint_Form = new edgeconstraint_frm(ref modeldata);
+
+                // Make it behave like a tool window
+                edgeconstraint_Form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                edgeconstraint_Form.ShowInTaskbar = false;
+                edgeconstraint_Form.TopLevel = true;
+                edgeconstraint_Form.Owner = this;
+
+
+                // Set the start position to manual so we can control placement
+                edgeconstraint_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(edgeconstraint_Form);
+            }
+
+            // Turn on Flag Edge Constraint update form is open
+            modeldata.isEdgeConstraintUpdateInProgress = true;
+            modeldata.fe_data.clear_selected_edges();
+
+            // Show the form
+            if (!edgeconstraint_Form.Visible)
+            {
+                edgeconstraint_Form.update_dataGridView();
+                edgeconstraint_Form.update_selected_edge_list();
+                edgeconstraint_Form.Show(this);
+            }
+
+            edgeconstraint_Form.BringToFront();
+
+            glControl_main_panel.Invalidate();
 
         }
+
+
 
         private void mediumPropertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {

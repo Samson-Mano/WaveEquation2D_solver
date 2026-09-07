@@ -262,8 +262,9 @@ namespace WaveEquation2D_solver.src.events_handler
                         {
                             int NodeConstraintSetId = int.Parse(splitValues[0]);
                             int nodeId = int.Parse(splitValues[1]);
-                            int NodeConstraintType = int.Parse(splitValues[2]);
-                            double NodeConstraintAngle = double.Parse(splitValues[3]);
+                            double NodeConstraint_fieldvalue = double.Parse(splitValues[2]);
+                            double NodeConstraint_sourcevalue = double.Parse(splitValues[3]);
+                            int NodeConstraint_isField = int.Parse(splitValues[4]);
 
                             if (!NodeConstraintSetData.ContainsKey(NodeConstraintSetId))
                                 NodeConstraintSetData[NodeConstraintSetId] = new nodecnst_data();
@@ -274,8 +275,9 @@ namespace WaveEquation2D_solver.src.events_handler
                             // Add the load amplitude when the first node is added (all the nodes have same load values)
                             if (NodeconstraintEntry.constraint_node_ids.Count == 1)
                             {
-                                NodeconstraintEntry.constraint_type = NodeConstraintType; // Constraint Type = 0, 1
-                                NodeconstraintEntry.constraint_angle = NodeConstraintAngle;  // Constraint Angle
+                                NodeconstraintEntry.field_value = NodeConstraint_fieldvalue; // Field value (Dirichlet boundary condition)
+                                NodeconstraintEntry.source_value = NodeConstraint_sourcevalue; // Source term, Excitation source
+                                NodeconstraintEntry.isField = NodeConstraint_isField == 1 ? true : false;
                             }
                         }
                         catch (Exception ex)
@@ -307,8 +309,8 @@ namespace WaveEquation2D_solver.src.events_handler
 
 
                         // Add the node constraint to the list
-                        fedata.fe_constraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
-                            cnst.constraint_type, cnst.constraint_angle);
+                       fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
+                                            cnst.field_value, cnst.source_value, cnst.isField);
 
                     }
                     // Console.WriteLine($"Constraint data read completed at {stopwatch.Elapsed.TotalSeconds:F2} secs");
@@ -317,41 +319,51 @@ namespace WaveEquation2D_solver.src.events_handler
 
 
 
-                if (line == "*NODE_LOAD_DATA")
+                if (line == "*EDGE_CONSTRAINT_DATA")
                 {
-                    Dictionary<int, nodeload_data> NodeLoadSetData = new Dictionary<int, nodeload_data>();
+                    Dictionary<int, edgecnst_store> EdgeConstraintSetData = new Dictionary<int, edgecnst_store>();
 
                     while (j < dataLines.Length)
                     {
-                        var NodeLoadLine = dataLines[j + 1].Trim();
-                        var splitValues = NodeLoadLine.Split(',');
+                        var EdgeConstraintLine = dataLines[j + 1].Trim();
+                        var splitValues = EdgeConstraintLine.Split(',');
 
-                        if (splitValues.Length != 5)
+                        if (splitValues.Length != 9)
                             break;
 
                         try
                         {
-                            int NodeLoadSetId = int.Parse(splitValues[0]);
-                            int nodeId = int.Parse(splitValues[1]);
-                            double NodeLoad_amplitude = double.Parse(splitValues[2]);
-                            double NodeLoad_angle = double.Parse(splitValues[3]);
+                            int EdgeConstraintSetId = int.Parse(splitValues[0]);
+                            int edgeId = int.Parse(splitValues[1]);
+                            int edgeStartptID = int.Parse(splitValues[2]);
+                            int edgeEndptID = int.Parse(splitValues[3]);
+                            double EdgeConstraint_fieldvalue = double.Parse(splitValues[4]);
+                            double EdgeConstraint_derivfieldvalue = double.Parse(splitValues[5]);
+                            int EdgeConstraint_isFieldValue = int.Parse(splitValues[6]);
+                            int EdgeConstraint_isDerivFieldValue = int.Parse(splitValues[7]);
+                            int EdgeConstraint_isSommerfield = int.Parse(splitValues[8]);
 
-                            if (!NodeLoadSetData.ContainsKey(NodeLoadSetId))
-                                NodeLoadSetData[NodeLoadSetId] = new nodeload_data();
+                            if (!EdgeConstraintSetData.ContainsKey(EdgeConstraintSetId))
+                                EdgeConstraintSetData[EdgeConstraintSetId] = new edgecnst_store();
 
-                            var NodeloadEntry = NodeLoadSetData[NodeLoadSetId];
-                            NodeloadEntry.load_node_ids.Add(nodeId); // Add the multiple nodes where the particular load set is applied
+                            var constraintEntry = EdgeConstraintSetData[EdgeConstraintSetId];
+                            constraintEntry.constraint_edge_ids.Add(edgeId); // Add the multiple nodes where the particular load set is applied
+                            constraintEntry.constraint_edge_startpt_ids.Add(edgeStartptID);
+                            constraintEntry.constraint_edge_endpt_ids.Add(edgeEndptID);
 
-                            // Add the load amplitude when the first node is added (all the nodes have same load values)
-                            if (NodeloadEntry.load_node_ids.Count == 1)
+                            // Add the load amplitude when the first edge is added (all the edges have same load values)
+                            if (constraintEntry.constraint_edge_ids.Count == 1)
                             {
-                                NodeloadEntry.load_amplitude = NodeLoad_amplitude; // Load amplitude
-                                NodeloadEntry.load_angle = NodeLoad_angle;  // Load angle
+                                constraintEntry.field_value = EdgeConstraint_fieldvalue; // Field value (Dirichlet boundary condition)
+                                constraintEntry.normalderivfield_value = EdgeConstraint_derivfieldvalue; // Derivative field value (Neumann boundary condition)
+                                constraintEntry.isfieldvalue = EdgeConstraint_isFieldValue == 1 ? true : false;
+                                constraintEntry.isnormalderivfieldvalue = EdgeConstraint_isDerivFieldValue == 1 ? true : false;
+                                constraintEntry.isSommerfieldBC = EdgeConstraint_isSommerfield == 1 ? true : false;
                             }
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"Error parsing Node Load data: {ex.Message}", "Model Import Error ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show($"Error parsing Edge Boundary Condition data: {ex.Message}", "Model Import Error ", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             // Console.WriteLine($"Error parsing load data: {ex.Message}");
                             break;
                         }
@@ -359,32 +371,49 @@ namespace WaveEquation2D_solver.src.events_handler
                         j++;
                     }
 
-                    // Add to main load storage
-                    foreach (var kvp in NodeLoadSetData)
+                    // Add to main constraint storage
+                    foreach (var kvp in EdgeConstraintSetData)
                     {
-                        var load = kvp.Value;
+                        var cnst = kvp.Value;
 
-                        // Get the point locations
-                        List<Vector2> load_node_pts = new List<Vector2>();
+                        // Get the start and end point locations
+                        List<Vector2> constraint_edge_startpts = new List<Vector2>();
+                        List<Vector2> constraint_edge_endpts = new List<Vector2>();
 
-                        foreach (int ptid in load.load_node_ids)
+                        int i = 0;
+
+                        foreach (int edgeid in cnst.constraint_edge_ids)
                         {
-                            node_store nd = fedata.fe_nodes.nodeMap[ptid];
+                            node_store nd1 = fedata.fe_nodes.nodeMap[cnst.constraint_edge_startpt_ids[i]];
+                            node_store nd2 = fedata.fe_nodes.nodeMap[cnst.constraint_edge_endpt_ids[i]];
 
-                            load_node_pts.Add(new Vector2((float)nd.node_pt_x_coord,
-                                (float)nd.node_pt_y_coord));
+                            constraint_edge_startpts.Add(new Vector2((float)nd1.node_pt_x_coord,
+                                (float)nd1.node_pt_y_coord));
+
+                            constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
+                                (float)nd2.node_pt_y_coord));
+
+                            constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
+                                (float)nd2.node_pt_y_coord));
+
+                            i++;
                         }
 
 
 
-                        // Add the node loads to the list
-                        fedata.fe_loads.add_loads(load.load_node_ids, load_node_pts,
-                            load.load_amplitude, load.load_angle);
+                        // Add the edge constraint to the list
+                       fedata.fe_edgeconstraints.add_edgeconstraint(cnst.constraint_edge_ids,
+                            cnst.constraint_edge_startpt_ids, cnst.constraint_edge_endpt_ids,
+                            cnst.constraint_edge_startpts, cnst.constraint_edge_endpts,
+                            cnst.field_value, cnst.normalderivfield_value,
+                            cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSommerfieldBC);
 
                     }
-                    // Console.WriteLine($"Load data read completed at {stopwatch.Elapsed.TotalSeconds:F2} secs");
+
+                    // Console.WriteLine($"Constraint data read completed at {stopwatch.Elapsed.TotalSeconds:F2} secs");
 
                 }
+
 
 
                 // Iterate to next line
@@ -512,30 +541,38 @@ namespace WaveEquation2D_solver.src.events_handler
                 }
 
                 // Node constraints
-                writer.Write(fedata.fe_constraints.cnstMap.Count);
-                foreach (var cnst in fedata.fe_constraints.cnstMap.Values)
+                writer.Write(fedata.fe_nodeconstraints.ndcnstMap.Count);
+                foreach (var cnst in fedata.fe_nodeconstraints.ndcnstMap.Values)
                 {
-                    writer.Write(cnst.cnst_set_id);
-                    writer.Write(cnst.constraint_type);
-                    writer.Write(cnst.constraint_angle);
+                    writer.Write(cnst.ndcnst_set_id);
+                    writer.Write(cnst.field_value);
+                    writer.Write(cnst.source_value);
+                    writer.Write(cnst.isField);
 
                     writer.Write(cnst.constraint_node_ids.Count);
                     foreach (int nid in cnst.constraint_node_ids)
                         writer.Write(nid);
                 }
 
-
-                // Load constraints
-                writer.Write(fedata.fe_loads.loadMap.Count);
-                foreach (var load in fedata.fe_loads.loadMap.Values)
+                // Edge constraints
+                writer.Write(fedata.fe_edgeconstraints.edgecnstMap.Count);
+                foreach (var cnst in fedata.fe_edgeconstraints.edgecnstMap.Values)
                 {
-                    writer.Write(load.load_set_id);
-                    writer.Write(load.load_amplitude);
-                    writer.Write(load.load_angle);
+                    writer.Write(cnst.edgecnst_set_id);
+                    writer.Write(cnst.field_value);
+                    writer.Write(cnst.normalderivfield_value);
+                    writer.Write(cnst.isfieldvalue);
+                    writer.Write(cnst.isnormalderivfieldvalue);
+                    writer.Write(cnst.isSommerfieldBC);
 
-                    writer.Write(load.load_node_ids.Count);
-                    foreach (int nid in load.load_node_ids)
-                        writer.Write(nid);
+                    writer.Write(cnst.constraint_edge_ids.Count);
+                    for (int i = 0; i < cnst.constraint_edge_ids.Count; i++)
+                    {
+                        writer.Write(cnst.constraint_edge_ids[i]);
+                        writer.Write(cnst.constraint_edge_startpt_ids[i]);
+                        writer.Write(cnst.constraint_edge_endpt_ids[i]);
+                    }
+
                 }
 
             }
@@ -695,9 +732,11 @@ namespace WaveEquation2D_solver.src.events_handler
                 for (int i = 0; i < nodeCnstCount; i++)
                 {
                     nodecnst_data cnst = new nodecnst_data();
-                    cnst.cnst_set_id = reader.ReadInt32();
-                    cnst.constraint_type = reader.ReadInt32();
-                    cnst.constraint_angle = reader.ReadDouble();
+                    cnst.ndcnst_set_id = reader.ReadInt32();
+                    cnst.field_value = reader.ReadDouble();
+                    cnst.source_value = reader.ReadDouble();
+                    cnst.isField = reader.ReadBoolean();
+
 
                     int nidCount = reader.ReadInt32();
                     cnst.constraint_node_ids = new List<int>();
@@ -717,109 +756,76 @@ namespace WaveEquation2D_solver.src.events_handler
 
 
                     // Add the node constraint to the list
-                    fedata.fe_constraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
-                         cnst.constraint_type, cnst.constraint_angle);
+                    fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
+                        cnst.field_value, cnst.source_value, cnst.isField);
 
                 }
 
 
-                // --- NODE LOADS ---
-                int nodeLoadCount = reader.ReadInt32();
-                // fe_nodeconstraints.set_shader();
+                // --- EDGE CONSTRAINTS ---
+                int edgeCnstCount = reader.ReadInt32();
+                // fe_edgeconstraints.set_shader();
 
-                for (int i = 0; i < nodeLoadCount; i++)
+                for (int i = 0; i < edgeCnstCount; i++)
                 {
-                    nodeload_data load = new nodeload_data();
-                    load.load_set_id = reader.ReadInt32();
-                    load.load_amplitude = reader.ReadDouble();
-                    load.load_angle = reader.ReadDouble();
+                    edgecnst_store cnst = new edgecnst_store();
+                    cnst.edgecnst_set_id = reader.ReadInt32();
+                    cnst.field_value = reader.ReadDouble();
+                    cnst.normalderivfield_value = reader.ReadDouble();
+                    cnst.isfieldvalue = reader.ReadBoolean();
+                    cnst.isnormalderivfieldvalue = reader.ReadBoolean();
+                    cnst.isSommerfieldBC = reader.ReadBoolean();
 
+                    int edgeCount = reader.ReadInt32();
+                    cnst.constraint_edge_ids = new List<int>();
+                    cnst.constraint_edge_startpt_ids = new List<int>();
+                    cnst.constraint_edge_endpt_ids = new List<int>();
 
-                    int nidCount = reader.ReadInt32();
-                    load.load_node_ids = new List<int>();
-                    for (int j = 0; j < nidCount; j++)
-                        load.load_node_ids.Add(reader.ReadInt32());
-
-                    // Get the point locations
-                    List<Vector2> load_node_pts = new List<Vector2>();
-
-                    foreach (int ptid in load.load_node_ids)
+                    for (int j = 0; j < edgeCount; j++)
                     {
-                        node_store nd = fedata.fe_nodes.nodeMap[ptid];
+                        cnst.constraint_edge_ids.Add(reader.ReadInt32());
+                        cnst.constraint_edge_startpt_ids.Add(reader.ReadInt32());
+                        cnst.constraint_edge_endpt_ids.Add(reader.ReadInt32());
+                    }
 
-                        load_node_pts.Add(new Vector2((float)nd.node_pt_x_coord,
-                            (float)nd.node_pt_y_coord));
+                    // Get the start and end point locations
+                    List<Vector2> constraint_edge_startpts = new List<Vector2>();
+                    List<Vector2> constraint_edge_endpts = new List<Vector2>();
+
+                    int k = 0;
+
+                    foreach (int edgeid in cnst.constraint_edge_ids)
+                    {
+                        node_store nd1 = fedata.fe_nodes.nodeMap[cnst.constraint_edge_startpt_ids[k]];
+                        node_store nd2 = fedata.fe_nodes.nodeMap[cnst.constraint_edge_endpt_ids[k]];
+
+                        constraint_edge_startpts.Add(new Vector2((float)nd1.node_pt_x_coord,
+                            (float)nd1.node_pt_y_coord));
+
+                        constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
+                            (float)nd2.node_pt_y_coord));
+   
+
+                        constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
+                            (float)nd2.node_pt_y_coord));
+
+                        k++;
                     }
 
 
-                    // Add the node load to the list
-                    fedata.fe_loads.add_loads(load.load_node_ids, load_node_pts,
-                        load.load_amplitude, load.load_angle);
+
+                    // Add the edge constraint to the list
+                   fedata.fe_edgeconstraints.add_edgeconstraint(cnst.constraint_edge_ids,
+                        cnst.constraint_edge_startpt_ids, cnst.constraint_edge_endpt_ids,
+                        constraint_edge_startpts, constraint_edge_endpts,
+                        cnst.field_value, cnst.normalderivfield_value,
+                        cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSommerfieldBC);
+
 
                 }
 
 
 
-
-                //// --- EDGE CONSTRAINTS ---
-                //int edgeCnstCount = reader.ReadInt32();
-                //fe_edgeconstraints.set_shader();
-
-                //for (int i = 0; i < edgeCnstCount; i++)
-                //{
-                //    edgecnst_store cnst = new edgecnst_store();
-                //    cnst.edgecnst_id = reader.ReadInt32();
-                //    cnst.field_value = reader.ReadDouble();
-                //    cnst.normalderivfield_value = reader.ReadDouble();
-                //    cnst.isfieldvalue = reader.ReadBoolean();
-                //    cnst.isnormalderivfieldvalue = reader.ReadBoolean();
-                //    cnst.isSommerfieldBC = reader.ReadBoolean();
-
-                //    int edgeCount = reader.ReadInt32();
-                //    cnst.constraint_edge_ids = new List<int>();
-                //    cnst.constraint_edge_startpt_ids = new List<int>();
-                //    cnst.constraint_edge_endpt_ids = new List<int>();
-
-                //    for (int j = 0; j < edgeCount; j++)
-                //    {
-                //        cnst.constraint_edge_ids.Add(reader.ReadInt32());
-                //        cnst.constraint_edge_startpt_ids.Add(reader.ReadInt32());
-                //        cnst.constraint_edge_endpt_ids.Add(reader.ReadInt32());
-                //    }
-
-                //    // Get the start and end point locations
-                //    List<Vector3> constraint_edge_startpts = new List<Vector3>();
-                //    List<Vector3> constraint_edge_endpts = new List<Vector3>();
-
-                //    int k = 0;
-
-                //    foreach (int edgeid in cnst.constraint_edge_ids)
-                //    {
-                //        node_store nd1 = fe_nodes.nodeMap[cnst.constraint_edge_startpt_ids[k]];
-                //        node_store nd2 = fe_nodes.nodeMap[cnst.constraint_edge_endpt_ids[k]];
-
-                //        constraint_edge_startpts.Add(new Vector3((float)nd1.node_pt_x_coord,
-                //            (float)nd1.node_pt_y_coord,
-                //            (float)nd1.node_pt_z_coord));
-
-                //        constraint_edge_endpts.Add(new Vector3((float)nd2.node_pt_x_coord,
-                //            (float)nd2.node_pt_y_coord,
-                //            (float)nd2.node_pt_z_coord));
-
-                //        k++;
-                //    }
-
-
-
-                //    // Add the edge constraint to the list
-                //    fe_edgeconstraints.add_edgeconstraint(cnst.constraint_edge_ids,
-                //        cnst.constraint_edge_startpt_ids, cnst.constraint_edge_endpt_ids,
-                //        constraint_edge_startpts, constraint_edge_endpts,
-                //        cnst.field_value, cnst.normalderivfield_value,
-                //        cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSommerfieldBC);
-
-
-                //}
 
                 // Check the model
                 if (fedata.fe_nodes.node_count < 2 || (fedata.fe_tris.elementtri_count + fedata.fe_quads.elementquad_count) < 1)

@@ -12,6 +12,7 @@ using WaveEquation2D_solver.src.opentk_control.shader_compiler;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using WaveEquation2D_solver.src.model_store.fe_objects;
 
 
 
@@ -90,6 +91,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         private IndexBuffer point_ibo;
         private IndexBuffer selected_point_ibo;
         private IndexBuffer wireframe_ibo;
+        private IndexBuffer selected_edge_ibo;
 
         // Shrunk mesh data
         private shrunkmeshdata_store shrunk_mesh_data = new shrunkmeshdata_store();
@@ -445,6 +447,32 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         }
 
 
+        public void paint_selected_mesh_edges()
+        {
+            if (selected_edge_ibo.BufferCount > 0)
+            {
+                // Paint the selected edges
+                Vector4 selectedEdgeColor = new Vector4(gvariables_static.ColorUtils.get_SelectionPtColor(),
+                    gvariables_static.geom_transparency);
+
+                meshShader.Bind();
+                meshShader.SetVector4("vertexColor", selectedEdgeColor);
+
+                point_vao.Bind();
+                selected_edge_ibo.Bind();
+
+                GL.LineWidth(3.0f);
+                GL.DrawElements(PrimitiveType.Lines, selected_edge_ibo.BufferCount, DrawElementsType.UnsignedInt, 0);
+                GL.LineWidth(1.0f);
+
+                meshShader.UnBind();
+                point_vao.UnBind();
+
+                selected_edge_ibo.UnBind();
+            }
+        }
+
+
         public void paint_selected_mesh()
         {
             if (!buffersInitialized)
@@ -486,6 +514,39 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         }
 
 
+
+        public void add_selected_edges(List<int> selected_edge_ids)
+        {
+            List<int> selectedEdgeIndexData = new List<int>();
+
+            foreach (int edgeId in selected_edge_ids)
+            {
+                line_store ln = wireframe_lines.FirstOrDefault(l => l.line_id == edgeId);
+
+                if (pointIDToIndex.TryGetValue(ln.line_start_id, out int startIdx) &&
+        pointIDToIndex.TryGetValue(ln.line_end_id, out int endIdx))
+                {
+                    selectedEdgeIndexData.Add(startIdx);
+                    selectedEdgeIndexData.Add(endIdx);
+                }
+
+            }
+
+            // Update the selected edge ibo
+            selected_edge_ibo.ClearIndexBuffer();
+            selected_edge_ibo.AppendIndexBuffer(selectedEdgeIndexData.ToArray());
+
+        }
+
+
+        public void clear_selected_edges()
+        {
+            // Clear the selected edges
+            selected_edge_ibo.ClearIndexBuffer();
+        }
+
+
+
         public void add_selected_mesh(List<int> selected_tri_ids, List<int> selected_quad_ids)
         {
             // Add the selected mesh
@@ -501,7 +562,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         }
 
 
-        public void create_wireframe()
+        public void create_wireframe(ref List<elementedge_store> element_edges)
         {
             // Create the wireframe from the mesh data
             wireframe_lines = new List<line_store>();
@@ -545,6 +606,19 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
             }
 
+            // Update the element edges from the wireframe lines
+            element_edges = new List<elementedge_store>();
+            foreach (line_store ln in wireframe_lines)
+            {
+                element_edges.Add(new elementedge_store()
+                {
+                    edge_id = ln.line_id,
+                    start_nodeid = ln.line_start_id,
+                    end_nodeid = ln.line_end_id
+                });
+            }
+
+
         }
 
 
@@ -578,8 +652,10 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
             point_vao = new VertexArray();
             point_vbo = new VertexBuffer(Math.Max(10, vertexData.Count));
             point_ibo = new IndexBuffer(Math.Max(10, pointIndexData.Count));
-            selected_point_ibo = new IndexBuffer(10); // Added dynamically
 
+            // Initialize the selected point and edge index buffers
+            selected_point_ibo = new IndexBuffer(10); // Added dynamically
+            selected_edge_ibo = new IndexBuffer(10); // Added dynamically
 
             VertexBufferLayout pointLayout = new VertexBufferLayout();
             pointLayout.AddFloat(FLOATS_PER_VERTEX);
@@ -747,6 +823,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
             point_vao?.Dispose();
             point_ibo?.Dispose();
             selected_point_ibo?.Dispose();
+            selected_edge_ibo?.Dispose();
             wireframe_ibo?.Dispose();
             // meshShader?.Dispose();
 

@@ -90,7 +90,7 @@ namespace WaveEquation2D_solver.other_windows
             bool isField = radioButton_dirichlet.Checked;
 
             // Add the constraint
-            model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids, 
+            model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(), 
                 constraint_node_pts, field_value, source_value, isField);
 
             // Clear the selected point ids
@@ -127,12 +127,12 @@ namespace WaveEquation2D_solver.other_windows
 
 
                 // Delete the selected constraint
-                fe_data.fe_nodeconstraints.delete_nodeconstraint(constraint_id);
+                model_data.fe_data.fe_nodeconstraints.delete_nodeconstraint(constraint_id);
 
                 update_dataGridView();
 
                 // Clear the selected point ids
-                fe_data.meshdata.clear_selected_nodes();
+                model_data.fe_data.clear_selected_nodes();
 
                 update_selected_node_list();
 
@@ -154,7 +154,7 @@ namespace WaveEquation2D_solver.other_windows
             dataGridView_ConstraintList.Rows.Clear();
 
 
-            foreach (var cnst_m in fe_data.fe_nodeconstraints.ndcnstMap)
+            foreach (var cnst_m in model_data.fe_data.fe_nodeconstraints.ndcnstMap)
             {
                 nodecnst_data cnst = cnst_m.Value;
 
@@ -171,7 +171,7 @@ namespace WaveEquation2D_solver.other_windows
                 }
 
                 dataGridView_ConstraintList.Rows.Add(
-                    cnst.ndcnst_id,
+                    cnst.ndcnst_set_id,
                     nodeIdsPreview,   // show some of constraint nodes as string here
                     cnst.field_value.ToString("G"),
                     cnst.source_value.ToString("G")
@@ -201,7 +201,7 @@ namespace WaveEquation2D_solver.other_windows
 
             List<int> all_selected_nodes = new List<int>();
 
-            all_selected_nodes.AddRange(model_data.fe_data.selected_point_ids);
+            all_selected_nodes.AddRange(model_data.fe_data.selected_node_ids);
 
             textBox_selectednodes.Text = string.Join(", ", all_selected_nodes);
 
@@ -214,6 +214,7 @@ namespace WaveEquation2D_solver.other_windows
         {
             // Control the flag
             model_data.isNodeConstraintUpdateInProgress = false;
+            model_data.fe_data.clear_selected_nodes();
 
             // Call the main form
             if (this.Owner is main_frm mainForm)

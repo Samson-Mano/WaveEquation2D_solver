@@ -27,6 +27,14 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
     }
 
+    public struct elementedge_store
+    {
+        public int edge_id;
+        public int start_nodeid;
+        public int end_nodeid;
+    }
+
+
     public class fedata_store
     {
 
@@ -34,6 +42,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public int p_order = 4; // higher order p - refinement
 
         public node_list_store fe_nodes;
+        public List<elementedge_store> fe_edges;
+
         public elementtri_list_store fe_tris;
         public elementquad_list_store fe_quads;
 
@@ -106,7 +116,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             }
 
             // Create the mesh boundaries
-            meshdrawingdata.create_wireframe();
+            meshdrawingdata.create_wireframe(ref fe_edges);
 
             number_of_edges = meshdrawingdata.get_wireframe_line_count;
 
@@ -127,8 +137,9 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             meshdrawingdata.paint_mesh_wireframe();
             meshdrawingdata.paint_mesh_points();
 
+            // Paint the selected nodes, edges, and mesh
             meshdrawingdata.paint_selected_mesh_points();
-
+            meshdrawingdata.paint_selected_mesh_edges();
             meshdrawingdata.paint_selected_mesh();
 
             // Paint the constraints
@@ -256,23 +267,27 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             Vector2 modelCorner2 = TransformToModelSpace(corner_pt2, invMVP);
 
             // Loop through all edge in edgeMap
-            foreach (edge_store ed in fe_edges.edgeMap.Values)
+            foreach (elementedge_store ed in fe_edges)
             {
                 //______________________________
-                Vector2 edge_pt = new Vector2((float)ed.edge_pt_x_coord, (float)ed.edge_pt_y_coord);
 
-                // Check whether the point inside a rectangle
-                if (gvariables_static.isPointSelected(modelCorner1, modelCorner2, node_pt) == true)
+                Vector2 edge_startpt = new Vector2((float)fe_nodes.nodeMap[ed.start_nodeid].node_pt_x_coord, 
+                    (float)fe_nodes.nodeMap[ed.start_nodeid].node_pt_y_coord);
+                Vector2 edge_endpt = new Vector2((float)fe_nodes.nodeMap[ed.end_nodeid].node_pt_x_coord, 
+                    (float)fe_nodes.nodeMap[ed.end_nodeid].node_pt_y_coord);
+
+                // Check whether the edge inside a rectangle
+                if (gvariables_static.isEdgeSelected(modelCorner1, modelCorner2, edge_startpt, edge_endpt) == true)
                 {
-                    selected_node_ids.Add(nd.node_id);
+                    selected_edge_ids.Add(ed.edge_id);
 
                 }
 
             }
 
-            if (selected_node_ids.Count > 0)
+            if (selected_edge_ids.Count > 0)
             {
-                add_selected_nodes(selected_node_ids, isRightButton);
+                add_selected_edges(selected_edge_ids, isRightButton);
             }
 
         }

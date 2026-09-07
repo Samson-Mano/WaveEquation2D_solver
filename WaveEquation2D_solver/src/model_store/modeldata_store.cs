@@ -170,7 +170,8 @@ namespace WaveEquation2D_solver.src.model_store
             {
                 fe_data.paint_model();
 
-                if (isMaterialUpdateInProgress == true || isLoadUpdateInProgress == true || isConstraintUpdateInProgress == true)
+                if (isMaterialUpdateInProgress == true || isLoadUpdateInProgress == true || 
+                    isNodeConstraintUpdateInProgress == true || isEdgeConstraintUpdateInProgress == true)
                 {
                     if (gvariables_static.is_RectangleSelection == true)
                     {
@@ -338,17 +339,24 @@ namespace WaveEquation2D_solver.src.model_store
 
             }
 
-            if (isConstraintUpdateInProgress == true)
+            if (isNodeConstraintUpdateInProgress == true)
             {
                 // Select the points for constraint update
                 fe_data.select_nodes(o_pt, c_pt, isRightButton, graphic_events_control);
 
             }
 
+            if (isEdgeConstraintUpdateInProgress == true)
+            {
+                // Select the points for constraint update
+                fe_data.select_edges(o_pt, c_pt, isRightButton, graphic_events_control);
+            }
+
+
             if (isAnnotateResultInProgress == true)
             {
-                // Select the points for result annotation
-                rslt_data.select_result_nodes(o_pt, c_pt, isRightButton, graphic_events_control);
+                // // Select the points for result annotation
+                // rslt_data.select_result_nodes(o_pt, c_pt, isRightButton, graphic_events_control);
             }
 
         }
