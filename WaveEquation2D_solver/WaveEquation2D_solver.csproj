@@ -84,6 +84,12 @@
     <Compile Include="other_windows\option_frm.Designer.cs">
       <DependentUpon>option_frm.cs</DependentUpon>
     </Compile>
+    <Compile Include="other_windows\solver_frm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="other_windows\solver_frm.Designer.cs">
+      <DependentUpon>solver_frm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Resource_pics.Designer.cs">
@@ -117,6 +123,7 @@
     <Compile Include="src\opentk_control\shader_compiler\Shader.cs" />
     <Compile Include="src\opentk_control\shader_compiler\ShaderLibrary.cs" />
     <Compile Include="src\opentk_control\shader_compiler\Texture.cs" />
+    <Compile Include="src\solver\wave2DSolverInterop.cs" />
     <EmbeddedResource Include="main_frm.resx">
       <DependentUpon>main_frm.cs</DependentUpon>
     </EmbeddedResource>
@@ -131,6 +138,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="other_windows\option_frm.resx">
       <DependentUpon>option_frm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="other_windows\solver_frm.resx">
+      <DependentUpon>solver_frm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -170,7 +180,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Example_model\bin_file\" />
-    <Folder Include="src\solver\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

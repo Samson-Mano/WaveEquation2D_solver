@@ -34,6 +34,7 @@ namespace WaveEquation2D_solver.other_windows
             // Initialize selection state from global variable
             SetSelectionMode(gvariables_static.is_RectangleSelection);
 
+            comboBox_sourcetype.SelectedIndex = 0; // Default to "Sine"
         }
 
 
@@ -70,9 +71,10 @@ namespace WaveEquation2D_solver.other_windows
 
             // Test the data
             if (!double.TryParse(textBox_dirichlet.Text, out double field_value) ||
-                !double.TryParse(textBox_source.Text, out double source_value))
+                !double.TryParse(textBox_sourceampl.Text, out double source_value) ||
+                !double.TryParse(textBox_sourcefreq.Text, out double source_frequency))
             {
-                MessageBox.Show("Please enter valid numeric values for field value, and source value.");
+                MessageBox.Show("Please enter valid numeric values for field value, source value, and source frequency.");
                 return;
             }
 
@@ -91,7 +93,7 @@ namespace WaveEquation2D_solver.other_windows
 
             // Add the constraint
             model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(), 
-                constraint_node_pts, field_value, source_value, isField);
+                constraint_node_pts, field_value, source_value, source_frequency, comboBox_sourcetype.SelectedIndex, isField);
 
             // Clear the selected point ids
             model_data.fe_data.clear_selected_nodes();
@@ -174,7 +176,8 @@ namespace WaveEquation2D_solver.other_windows
                     cnst.ndcnst_set_id,
                     nodeIdsPreview,   // show some of constraint nodes as string here
                     cnst.field_value.ToString("G"),
-                    cnst.source_value.ToString("G")
+                    cnst.source_value.ToString("G"),
+                    cnst.source_frequency.ToString("G")
                     );
 
             }
@@ -243,8 +246,12 @@ namespace WaveEquation2D_solver.other_windows
         {
             bool isSourceSelected = radioButton_source.Checked;
 
-            textBox_source.Enabled = isSourceSelected;
+            textBox_sourceampl.Enabled = isSourceSelected;
             label_source.Enabled = isSourceSelected;
+            textBox_sourcefreq.Enabled = isSourceSelected;
+            label_sourcefreq.Enabled = isSourceSelected;
+            comboBox_sourcetype.Enabled = isSourceSelected;
+            label_sourcetype.Enabled = isSourceSelected;
 
             textBox_dirichlet.Enabled = !isSourceSelected;
             label_dirichlet.Enabled = !isSourceSelected;

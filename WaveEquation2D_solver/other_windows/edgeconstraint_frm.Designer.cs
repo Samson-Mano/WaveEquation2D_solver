@@ -117,9 +117,9 @@
             this.label_sommerfield.AutoSize = true;
             this.label_sommerfield.Location = new System.Drawing.Point(37, 222);
             this.label_sommerfield.Name = "label_sommerfield";
-            this.label_sommerfield.Size = new System.Drawing.Size(93, 15);
+            this.label_sommerfield.Size = new System.Drawing.Size(89, 15);
             this.label_sommerfield.TabIndex = 9;
-            this.label_sommerfield.Text = "∂ϕ/∂n - ikϕ = 0";
+            this.label_sommerfield.Text = "∂u/∂n - iku = 0";
             // 
             // radioButton_sommerfield
             // 
@@ -145,9 +145,9 @@
             this.label_neumann.AutoSize = true;
             this.label_neumann.Location = new System.Drawing.Point(37, 142);
             this.label_neumann.Name = "label_neumann";
-            this.label_neumann.Size = new System.Drawing.Size(50, 15);
+            this.label_neumann.Size = new System.Drawing.Size(48, 15);
             this.label_neumann.TabIndex = 4;
-            this.label_neumann.Text = "∂ϕ/∂n=";
+            this.label_neumann.Text = "∂u/∂n=";
             // 
             // textBox_dirichlet
             // 
@@ -162,9 +162,9 @@
             this.label_dirichlet.AutoSize = true;
             this.label_dirichlet.Location = new System.Drawing.Point(61, 88);
             this.label_dirichlet.Name = "label_dirichlet";
-            this.label_dirichlet.Size = new System.Drawing.Size(26, 15);
+            this.label_dirichlet.Size = new System.Drawing.Size(24, 15);
             this.label_dirichlet.TabIndex = 1;
-            this.label_dirichlet.Text = "ϕ =";
+            this.label_dirichlet.Text = "u =";
             // 
             // label3
             // 

@@ -255,7 +255,7 @@ namespace WaveEquation2D_solver.src.events_handler
                         var NodeConstraintLine = dataLines[j + 1].Trim();
                         var splitValues = NodeConstraintLine.Split(',');
 
-                        if (splitValues.Length != 5)
+                        if (splitValues.Length != 7)
                             break;
 
                         try
@@ -264,7 +264,9 @@ namespace WaveEquation2D_solver.src.events_handler
                             int nodeId = int.Parse(splitValues[1]);
                             double NodeConstraint_fieldvalue = double.Parse(splitValues[2]);
                             double NodeConstraint_sourcevalue = double.Parse(splitValues[3]);
-                            int NodeConstraint_isField = int.Parse(splitValues[4]);
+                            double NodeConstraint_sourcefrequency = double.Parse(splitValues[4]);
+                            int NodeConstraint_sourcetype = int.Parse(splitValues[5]);
+                            int NodeConstraint_isField = int.Parse(splitValues[6]);
 
                             if (!NodeConstraintSetData.ContainsKey(NodeConstraintSetId))
                                 NodeConstraintSetData[NodeConstraintSetId] = new nodecnst_data();
@@ -277,6 +279,12 @@ namespace WaveEquation2D_solver.src.events_handler
                             {
                                 NodeconstraintEntry.field_value = NodeConstraint_fieldvalue; // Field value (Dirichlet boundary condition)
                                 NodeconstraintEntry.source_value = NodeConstraint_sourcevalue; // Source term, Excitation source
+                                NodeconstraintEntry.source_frequency = NodeConstraint_sourcefrequency; // Source term frequency
+
+                                // Source type (0: Half sine pulse, 1: Rectangular pulse, 2: Triangle pulse, 3: Step force with finite rise,
+                                // 4. Full sine pulse, 5. Harmonic/ periodic exictation)
+                                NodeconstraintEntry.source_type = NodeConstraint_sourcetype;        
+
                                 NodeconstraintEntry.isField = NodeConstraint_isField == 1 ? true : false;
                             }
                         }
@@ -310,7 +318,7 @@ namespace WaveEquation2D_solver.src.events_handler
 
                         // Add the node constraint to the list
                        fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
-                                            cnst.field_value, cnst.source_value, cnst.isField);
+                                            cnst.field_value, cnst.source_value, cnst.source_frequency, cnst.source_type, cnst.isField);
 
                     }
                     // Console.WriteLine($"Constraint data read completed at {stopwatch.Elapsed.TotalSeconds:F2} secs");
@@ -547,6 +555,8 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(cnst.ndcnst_set_id);
                     writer.Write(cnst.field_value);
                     writer.Write(cnst.source_value);
+                    writer.Write(cnst.source_frequency);
+                    writer.Write(cnst.source_type);
                     writer.Write(cnst.isField);
 
                     writer.Write(cnst.constraint_node_ids.Count);
@@ -735,6 +745,8 @@ namespace WaveEquation2D_solver.src.events_handler
                     cnst.ndcnst_set_id = reader.ReadInt32();
                     cnst.field_value = reader.ReadDouble();
                     cnst.source_value = reader.ReadDouble();
+                    cnst.source_frequency = reader.ReadDouble();
+                    cnst.source_type = reader.ReadInt32();  
                     cnst.isField = reader.ReadBoolean();
 
 
@@ -757,7 +769,7 @@ namespace WaveEquation2D_solver.src.events_handler
 
                     // Add the node constraint to the list
                     fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
-                        cnst.field_value, cnst.source_value, cnst.isField);
+                        cnst.field_value, cnst.source_value, cnst.source_frequency, cnst.source_type, cnst.isField);
 
                 }
 

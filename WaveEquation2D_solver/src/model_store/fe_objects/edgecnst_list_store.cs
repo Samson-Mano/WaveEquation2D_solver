@@ -325,21 +325,21 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 // Add labels
                 int mid_index = edge_count / 2;
 
-                string label_string1 = $"[CSet{cnst_data.edgecnst_set_id}]";
+                string label_string1 = $"[CSet_{cnst_data.edgecnst_set_id}]";
                 Vector3 cnst_color = new Vector3(0);
 
                 if (cnst_data.isfieldvalue || cnst_data.isnormalderivfieldvalue)
                 {
                     if (cnst_data.isfieldvalue == true)
-                        label_string1 += $" Field = {cnst_data.field_value}";
+                        label_string1 += $" u = {cnst_data.field_value}";
                     else
-                        label_string1 += $" Normal Derivative = {cnst_data.normalderivfield_value}";
+                        label_string1 += $" du/dn = {cnst_data.normalderivfield_value}";
 
                     cnst_color = new Vector3(0.5412f, 0.1686f, 0.8863f);
                 }
                 else
                 {
-                    label_string1 += $" Absorption";
+                    label_string1 += $" ABC";
                     cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
                 }
 

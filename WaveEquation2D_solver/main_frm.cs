@@ -42,7 +42,7 @@ namespace WaveEquation2D_solver
         private edgeconstraint_frm edgeconstraint_Form;
         private nodalconstraint_frm nodalconstraint_Form;
 
-        //private solver_frm solver_Form;
+        private solver_frm solver_Form;
         //private rsltoption_frm rsltoption_Form;
         //private annotate_frm annotate_Form;
 
@@ -653,6 +653,46 @@ namespace WaveEquation2D_solver
         #endregion
 
 
+        #region "Solver Menu"
+
+        private void dWaveEquationSolveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (modeldata.IsModelSet == false)
+                return;
+
+            // Check if solver_Form is null or disposed
+            if (solver_Form == null || solver_Form.IsDisposed)
+            {
+                solver_Form = new solver_frm(ref modeldata);
+
+                // Make it behave like a tool window
+                solver_Form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                solver_Form.ShowInTaskbar = false;
+                solver_Form.TopLevel = true;
+                solver_Form.Owner = this;
+
+                // Set the start position to manual so we can control placement
+                solver_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(solver_Form);
+
+            }
+
+            if (!solver_Form.Visible)
+            {
+                solver_Form.Show(this);
+            }
+            solver_Form.BringToFront();
+
+            glControl_main_panel.Invalidate();
+
+
+        }
+
+        #endregion
+
+
         #region "Call from Child Forms"
 
         public void CallFrom_matprop_frm()
@@ -693,10 +733,10 @@ namespace WaveEquation2D_solver
             glControl_main_panel.Invalidate();
         }
 
+
+
+
         #endregion
-
-
-
 
         #endregion
 

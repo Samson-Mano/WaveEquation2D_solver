@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using WaveEquation2D_solver.Properties;
 using WaveEquation2D_solver.src.events_handler;
 using WaveEquation2D_solver.src.global_variables;
@@ -31,6 +32,12 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public double field_value { get; set; } // Dirichlet boundary condition
 
         public double source_value { get; set; } // Source/ External excitation 
+
+        public double source_frequency { get; set; } // Source frequency
+
+        // Source type (0: Half sine pulse, 1: Rectangular pulse, 2: Triangle pulse, 3: Step force with finite rise,
+        // 4. Full sine pulse, 5. Harmonic/ periodic exictation)
+        public int source_type { get; set; } 
 
         public bool isField { get; set; } // is Field value
 
@@ -102,7 +109,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
         public void add_nodeconstraint(List<int> constraint_node_ids, List<Vector2> constraint_node_pts,
-            double field_value, double source_value, bool isField)
+            double field_value, double source_value, double source_frequency, int source_type, bool isField)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_constraintset_ids);
@@ -119,6 +126,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 constraint_node_ids = idsCopy,
                 field_value = isField == true ? field_value : 0.0,
                 source_value = isField == true ? 0.0 : source_value,
+                source_frequency = source_frequency,
+                source_type = source_type,
                 isField = isField
             };
 
@@ -296,17 +305,17 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 // Add labels
                 int mid_index = cnst_data.constraint_node_pts.Count / 2;
 
-                string label_string1 = $"[CSet{cnst_data.ndcnst_set_id}]";
+                string label_string1 = $"[CSet_{cnst_data.ndcnst_set_id}]";
                 Vector3 cnst_color = new Vector3(0);
 
                 if (cnst_data.isField == true)
                 {
-                    label_string1 += $" Field = {cnst_data.field_value}";
+                    label_string1 += $" u = {cnst_data.field_value}";
                     cnst_color = new Vector3(0.5412f, 0.1686f, 0.8863f);
                 }
                 else
                 {
-                    label_string1 += $" Source = {cnst_data.source_value}";
+                    label_string1 += $" f = {cnst_data.source_value}, w_f = {cnst_data.source_frequency}";
                     cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
                 }
 

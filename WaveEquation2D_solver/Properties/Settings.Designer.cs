@@ -58,5 +58,41 @@ namespace WaveEquation2D_solver.Properties {
                 this["Sett_contourlevel_option"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Sett_solver_type {
+            get {
+                return ((int)(this["Sett_solver_type"]));
+            }
+            set {
+                this["Sett_solver_type"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Sett_Hrefine {
+            get {
+                return ((int)(this["Sett_Hrefine"]));
+            }
+            set {
+                this["Sett_Hrefine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Sett_Prefine {
+            get {
+                return ((int)(this["Sett_Prefine"]));
+            }
+            set {
+                this["Sett_Prefine"] = value;
+            }
+        }
     }
 }
