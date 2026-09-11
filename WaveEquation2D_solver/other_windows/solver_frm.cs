@@ -38,11 +38,10 @@ namespace WaveEquation2D_solver.other_windows
         {
             comboBox_solvertype.SelectedIndex = Properties.Settings.Default.Sett_solver_type;
             comboBox_HRefinement.SelectedIndex = Properties.Settings.Default.Sett_Hrefine;
-            comboBox_polynomialrefinement.SelectedIndex = Properties.Settings.Default.Sett_Prefine;
-            comboBox_formulation.SelectedIndex = 0;
+            comboBox_spectralorderN.SelectedIndex = Properties.Settings.Default.Sett_Prefine;
+            // comboBox_formulation.SelectedIndex = 0;
 
             checkBox_extendconstraints.Checked = true;
-            checkBox_extendloads.Checked = true;
             checkBox_saveHrefinedmodel.Checked = false;
 
 

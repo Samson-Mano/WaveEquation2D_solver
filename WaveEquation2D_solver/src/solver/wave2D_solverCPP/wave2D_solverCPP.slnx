@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="wave2D_solverCPP/wave2D_solverCPP.vcxproj" Id="0a066c71-e9fc-48f0-b8b0-0b28b674a879" />
+</Solution>

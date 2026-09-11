@@ -30,13 +30,17 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(nodalconstraint_frm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBox_sourcetype = new System.Windows.Forms.ComboBox();
+            this.label_sourcetype = new System.Windows.Forms.Label();
+            this.textBox_sourcefreq = new System.Windows.Forms.TextBox();
+            this.label_sourcefreq = new System.Windows.Forms.Label();
             this.radioButton_source = new System.Windows.Forms.RadioButton();
             this.radioButton_dirichlet = new System.Windows.Forms.RadioButton();
             this.textBox_sourceampl = new System.Windows.Forms.TextBox();
             this.label_source = new System.Windows.Forms.Label();
             this.textBox_dirichlet = new System.Windows.Forms.TextBox();
             this.label_dirichlet = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label_selectedNodeCount = new System.Windows.Forms.Label();
             this.textBox_selectednodes = new System.Windows.Forms.TextBox();
             this.button_applyconstraint = new System.Windows.Forms.Button();
             this.button_deleteconstraint = new System.Windows.Forms.Button();
@@ -44,15 +48,13 @@
             this.rectangleSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.circleSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridView_ConstraintList = new System.Windows.Forms.DataGridView();
-            this.textBox_sourcefreq = new System.Windows.Forms.TextBox();
-            this.label_sourcefreq = new System.Windows.Forms.Label();
-            this.label_sourcetype = new System.Windows.Forms.Label();
-            this.comboBox_sourcetype = new System.Windows.Forms.ComboBox();
             this.Column1_constraintid = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2_nodeids = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3_fieldvalue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column4_sourcevalue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5_sourcefrequency = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label_sourcestarttime = new System.Windows.Forms.Label();
+            this.textBox_sourcestarttime = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConstraintList)).BeginInit();
@@ -60,6 +62,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.textBox_sourcestarttime);
+            this.groupBox1.Controls.Add(this.label_sourcestarttime);
             this.groupBox1.Controls.Add(this.comboBox_sourcetype);
             this.groupBox1.Controls.Add(this.label_sourcetype);
             this.groupBox1.Controls.Add(this.textBox_sourcefreq);
@@ -72,10 +76,52 @@
             this.groupBox1.Controls.Add(this.label_dirichlet);
             this.groupBox1.Location = new System.Drawing.Point(12, 40);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(277, 259);
+            this.groupBox1.Size = new System.Drawing.Size(277, 359);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Nodal Constraint Data: ";
+            // 
+            // comboBox_sourcetype
+            // 
+            this.comboBox_sourcetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_sourcetype.FormattingEnabled = true;
+            this.comboBox_sourcetype.Items.AddRange(new object[] {
+            "Half sine pulse",
+            "Rectangular pulse",
+            "Triangular pulse",
+            "Step force with finite rise",
+            "Full sine pulse",
+            "Harmonic/ periodic excitation"});
+            this.comboBox_sourcetype.Location = new System.Drawing.Point(115, 205);
+            this.comboBox_sourcetype.Name = "comboBox_sourcetype";
+            this.comboBox_sourcetype.Size = new System.Drawing.Size(133, 23);
+            this.comboBox_sourcetype.TabIndex = 11;
+            // 
+            // label_sourcetype
+            // 
+            this.label_sourcetype.AutoSize = true;
+            this.label_sourcetype.Location = new System.Drawing.Point(64, 208);
+            this.label_sourcetype.Name = "label_sourcetype";
+            this.label_sourcetype.Size = new System.Drawing.Size(48, 15);
+            this.label_sourcetype.TabIndex = 10;
+            this.label_sourcetype.Text = "Type = ";
+            // 
+            // textBox_sourcefreq
+            // 
+            this.textBox_sourcefreq.Location = new System.Drawing.Point(115, 173);
+            this.textBox_sourcefreq.Name = "textBox_sourcefreq";
+            this.textBox_sourcefreq.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourcefreq.TabIndex = 9;
+            this.textBox_sourcefreq.Text = "0";
+            // 
+            // label_sourcefreq
+            // 
+            this.label_sourcefreq.AutoSize = true;
+            this.label_sourcefreq.Location = new System.Drawing.Point(73, 176);
+            this.label_sourcefreq.Name = "label_sourcefreq";
+            this.label_sourcefreq.Size = new System.Drawing.Size(36, 15);
+            this.label_sourcefreq.TabIndex = 8;
+            this.label_sourcefreq.Text = "ω_f =";
             // 
             // radioButton_source
             // 
@@ -104,16 +150,16 @@
             // 
             // textBox_sourceampl
             // 
-            this.textBox_sourceampl.Location = new System.Drawing.Point(93, 144);
+            this.textBox_sourceampl.Location = new System.Drawing.Point(115, 144);
             this.textBox_sourceampl.Name = "textBox_sourceampl";
-            this.textBox_sourceampl.Size = new System.Drawing.Size(100, 23);
+            this.textBox_sourceampl.Size = new System.Drawing.Size(76, 23);
             this.textBox_sourceampl.TabIndex = 5;
             this.textBox_sourceampl.Text = "0";
             // 
             // label_source
             // 
             this.label_source.AutoSize = true;
-            this.label_source.Location = new System.Drawing.Point(40, 147);
+            this.label_source.Location = new System.Drawing.Point(62, 147);
             this.label_source.Name = "label_source";
             this.label_source.Size = new System.Drawing.Size(47, 15);
             this.label_source.TabIndex = 4;
@@ -121,42 +167,42 @@
             // 
             // textBox_dirichlet
             // 
-            this.textBox_dirichlet.Location = new System.Drawing.Point(93, 64);
+            this.textBox_dirichlet.Location = new System.Drawing.Point(115, 64);
             this.textBox_dirichlet.Name = "textBox_dirichlet";
-            this.textBox_dirichlet.Size = new System.Drawing.Size(100, 23);
+            this.textBox_dirichlet.Size = new System.Drawing.Size(76, 23);
             this.textBox_dirichlet.TabIndex = 2;
             this.textBox_dirichlet.Text = "0";
             // 
             // label_dirichlet
             // 
             this.label_dirichlet.AutoSize = true;
-            this.label_dirichlet.Location = new System.Drawing.Point(61, 67);
+            this.label_dirichlet.Location = new System.Drawing.Point(83, 67);
             this.label_dirichlet.Name = "label_dirichlet";
             this.label_dirichlet.Size = new System.Drawing.Size(24, 15);
             this.label_dirichlet.TabIndex = 1;
             this.label_dirichlet.Text = "u =";
             // 
-            // label3
+            // label_selectedNodeCount
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 310);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(96, 15);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "Selected Nodes: ";
+            this.label_selectedNodeCount.AutoSize = true;
+            this.label_selectedNodeCount.Location = new System.Drawing.Point(295, 253);
+            this.label_selectedNodeCount.Name = "label_selectedNodeCount";
+            this.label_selectedNodeCount.Size = new System.Drawing.Size(96, 15);
+            this.label_selectedNodeCount.TabIndex = 1;
+            this.label_selectedNodeCount.Text = "Selected Nodes: ";
             // 
             // textBox_selectednodes
             // 
-            this.textBox_selectednodes.Location = new System.Drawing.Point(12, 328);
+            this.textBox_selectednodes.Location = new System.Drawing.Point(298, 271);
             this.textBox_selectednodes.Multiline = true;
             this.textBox_selectednodes.Name = "textBox_selectednodes";
             this.textBox_selectednodes.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_selectednodes.Size = new System.Drawing.Size(277, 101);
+            this.textBox_selectednodes.Size = new System.Drawing.Size(503, 80);
             this.textBox_selectednodes.TabIndex = 3;
             // 
             // button_applyconstraint
             // 
-            this.button_applyconstraint.Location = new System.Drawing.Point(363, 374);
+            this.button_applyconstraint.Location = new System.Drawing.Point(396, 362);
             this.button_applyconstraint.Name = "button_applyconstraint";
             this.button_applyconstraint.Size = new System.Drawing.Size(134, 35);
             this.button_applyconstraint.TabIndex = 4;
@@ -166,7 +212,7 @@
             // 
             // button_deleteconstraint
             // 
-            this.button_deleteconstraint.Location = new System.Drawing.Point(545, 374);
+            this.button_deleteconstraint.Location = new System.Drawing.Point(578, 362);
             this.button_deleteconstraint.Name = "button_deleteconstraint";
             this.button_deleteconstraint.Size = new System.Drawing.Size(130, 35);
             this.button_deleteconstraint.TabIndex = 5;
@@ -181,7 +227,7 @@
             this.circleSelectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(834, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(814, 24);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -221,50 +267,8 @@
             this.dataGridView_ConstraintList.ReadOnly = true;
             this.dataGridView_ConstraintList.RowHeadersWidth = 62;
             this.dataGridView_ConstraintList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView_ConstraintList.Size = new System.Drawing.Size(525, 312);
+            this.dataGridView_ConstraintList.Size = new System.Drawing.Size(505, 196);
             this.dataGridView_ConstraintList.TabIndex = 7;
-            // 
-            // textBox_sourcefreq
-            // 
-            this.textBox_sourcefreq.Location = new System.Drawing.Point(93, 173);
-            this.textBox_sourcefreq.Name = "textBox_sourcefreq";
-            this.textBox_sourcefreq.Size = new System.Drawing.Size(100, 23);
-            this.textBox_sourcefreq.TabIndex = 9;
-            this.textBox_sourcefreq.Text = "0";
-            // 
-            // label_sourcefreq
-            // 
-            this.label_sourcefreq.AutoSize = true;
-            this.label_sourcefreq.Location = new System.Drawing.Point(51, 176);
-            this.label_sourcefreq.Name = "label_sourcefreq";
-            this.label_sourcefreq.Size = new System.Drawing.Size(36, 15);
-            this.label_sourcefreq.TabIndex = 8;
-            this.label_sourcefreq.Text = "ω_f =";
-            // 
-            // label_sourcetype
-            // 
-            this.label_sourcetype.AutoSize = true;
-            this.label_sourcetype.Location = new System.Drawing.Point(42, 208);
-            this.label_sourcetype.Name = "label_sourcetype";
-            this.label_sourcetype.Size = new System.Drawing.Size(48, 15);
-            this.label_sourcetype.TabIndex = 10;
-            this.label_sourcetype.Text = "Type = ";
-            // 
-            // comboBox_sourcetype
-            // 
-            this.comboBox_sourcetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_sourcetype.FormattingEnabled = true;
-            this.comboBox_sourcetype.Items.AddRange(new object[] {
-            "Half sine pulse",
-            "Rectangular pulse",
-            "Triangular pulse",
-            "Step force with finite rise",
-            "Full sine pulse",
-            "Harmonic/ periodic excitation"});
-            this.comboBox_sourcetype.Location = new System.Drawing.Point(93, 205);
-            this.comboBox_sourcetype.Name = "comboBox_sourcetype";
-            this.comboBox_sourcetype.Size = new System.Drawing.Size(150, 23);
-            this.comboBox_sourcetype.TabIndex = 11;
             // 
             // Column1_constraintid
             // 
@@ -302,27 +306,46 @@
             // 
             // Column5_sourcefrequency
             // 
+            this.Column5_sourcefrequency.FillWeight = 80F;
             this.Column5_sourcefrequency.HeaderText = "Source frequency (ω_f)";
             this.Column5_sourcefrequency.Name = "Column5_sourcefrequency";
             this.Column5_sourcefrequency.ReadOnly = true;
+            this.Column5_sourcefrequency.Width = 80;
+            // 
+            // label_sourcestarttime
+            // 
+            this.label_sourcestarttime.AutoSize = true;
+            this.label_sourcestarttime.Location = new System.Drawing.Point(18, 237);
+            this.label_sourcestarttime.Name = "label_sourcestarttime";
+            this.label_sourcestarttime.Size = new System.Drawing.Size(91, 15);
+            this.label_sourcestarttime.TabIndex = 12;
+            this.label_sourcestarttime.Text = "Start time t_s = ";
+            // 
+            // textBox_sourcestarttime
+            // 
+            this.textBox_sourcestarttime.Location = new System.Drawing.Point(115, 234);
+            this.textBox_sourcestarttime.Name = "textBox_sourcestarttime";
+            this.textBox_sourcestarttime.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourcestarttime.TabIndex = 13;
+            this.textBox_sourcestarttime.Text = "0";
             // 
             // nodalconstraint_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(834, 441);
+            this.ClientSize = new System.Drawing.Size(814, 411);
             this.Controls.Add(this.dataGridView_ConstraintList);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.button_deleteconstraint);
             this.Controls.Add(this.button_applyconstraint);
             this.Controls.Add(this.textBox_selectednodes);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label_selectedNodeCount);
             this.Controls.Add(this.groupBox1);
             this.Font = new System.Drawing.Font("Cambria", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MaximumSize = new System.Drawing.Size(860, 490);
-            this.MinimumSize = new System.Drawing.Size(850, 480);
+            this.MaximumSize = new System.Drawing.Size(860, 450);
+            this.MinimumSize = new System.Drawing.Size(830, 440);
             this.Name = "nodalconstraint_frm";
             this.Opacity = 0.85D;
             this.Text = "Nodal Constraints";
@@ -345,7 +368,7 @@
         private System.Windows.Forms.TextBox textBox_sourceampl;
         private System.Windows.Forms.Label label_source;
         private System.Windows.Forms.TextBox textBox_dirichlet;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_selectedNodeCount;
         private System.Windows.Forms.TextBox textBox_selectednodes;
         private System.Windows.Forms.Button button_applyconstraint;
         private System.Windows.Forms.Button button_deleteconstraint;
@@ -364,5 +387,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3_fieldvalue;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4_sourcevalue;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5_sourcefrequency;
+        private System.Windows.Forms.TextBox textBox_sourcestarttime;
+        private System.Windows.Forms.Label label_sourcestarttime;
     }
 }

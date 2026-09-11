@@ -35,6 +35,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public double source_frequency { get; set; } // Source frequency
 
+        public double source_start_time { get; set; } // Source start time
+
         // Source type (0: Half sine pulse, 1: Rectangular pulse, 2: Triangle pulse, 3: Step force with finite rise,
         // 4. Full sine pulse, 5. Harmonic/ periodic exictation)
         public int source_type { get; set; } 
@@ -109,7 +111,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
         public void add_nodeconstraint(List<int> constraint_node_ids, List<Vector2> constraint_node_pts,
-            double field_value, double source_value, double source_frequency, int source_type, bool isField)
+            double field_value, double source_value, double source_frequency, double source_start_time, int source_type, bool isField)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_constraintset_ids);
@@ -127,6 +129,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 field_value = isField == true ? field_value : 0.0,
                 source_value = isField == true ? 0.0 : source_value,
                 source_frequency = source_frequency,
+                source_start_time = source_start_time,
                 source_type = source_type,
                 isField = isField
             };

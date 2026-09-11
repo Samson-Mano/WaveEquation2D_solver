@@ -34,7 +34,7 @@ namespace WaveEquation2D_solver.other_windows
             // Initialize selection state from global variable
             SetSelectionMode(gvariables_static.is_RectangleSelection);
 
-            comboBox_sourcetype.SelectedIndex = 0; // Default to "Sine"
+            comboBox_sourcetype.SelectedIndex = 0; // Default to "Half Sine Pulse"
         }
 
 
@@ -72,9 +72,10 @@ namespace WaveEquation2D_solver.other_windows
             // Test the data
             if (!double.TryParse(textBox_dirichlet.Text, out double field_value) ||
                 !double.TryParse(textBox_sourceampl.Text, out double source_value) ||
-                !double.TryParse(textBox_sourcefreq.Text, out double source_frequency))
+                !double.TryParse(textBox_sourcefreq.Text, out double source_frequency) ||
+                !double.TryParse(textBox_sourcestarttime.Text, out double source_start_time))
             {
-                MessageBox.Show("Please enter valid numeric values for field value, source value, and source frequency.");
+                MessageBox.Show("Please enter valid numeric values for field value, source value, source frequency, and source start time.");
                 return;
             }
 
@@ -93,7 +94,7 @@ namespace WaveEquation2D_solver.other_windows
 
             // Add the constraint
             model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(), 
-                constraint_node_pts, field_value, source_value, source_frequency, comboBox_sourcetype.SelectedIndex, isField);
+                constraint_node_pts, field_value, source_value, source_frequency, source_start_time, comboBox_sourcetype.SelectedIndex, isField);
 
             // Clear the selected point ids
             model_data.fe_data.clear_selected_nodes();
@@ -202,6 +203,8 @@ namespace WaveEquation2D_solver.other_windows
             // Clear the text box
             textBox_selectednodes.Clear();
 
+            label_selectedNodeCount.Text = $"Selected Nodes: {model_data.fe_data.selected_node_ids.Count}";
+
             List<int> all_selected_nodes = new List<int>();
 
             all_selected_nodes.AddRange(model_data.fe_data.selected_node_ids);
@@ -252,6 +255,8 @@ namespace WaveEquation2D_solver.other_windows
             label_sourcefreq.Enabled = isSourceSelected;
             comboBox_sourcetype.Enabled = isSourceSelected;
             label_sourcetype.Enabled = isSourceSelected;
+            label_sourcestarttime.Enabled = isSourceSelected;
+            textBox_sourcestarttime.Enabled = isSourceSelected;
 
             textBox_dirichlet.Enabled = !isSourceSelected;
             label_dirichlet.Enabled = !isSourceSelected;

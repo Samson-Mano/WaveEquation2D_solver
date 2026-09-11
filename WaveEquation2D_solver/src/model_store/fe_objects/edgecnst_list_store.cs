@@ -30,9 +30,16 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public List<int> constraint_edge_ids { get; set; }
 
+        // Field values for the constraint
         public double field_value { get; set; } // Dirichlet boundary condition
 
         public double normalderivfield_value { get; set; } // neumann boundary condition (normal derivative field value)
+
+        // Source term values for the constraint
+        public double source_value { get; set; } // source term amplitude
+        public double source_frequency { get; set; } // source term frequency
+        public int source_type { get; set; } // source term type
+        public double source_starttime { get; set; } // source term start time
 
 
         public bool isfieldvalue { get; set; } // is prescribed field value
@@ -41,6 +48,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public bool isSommerfieldBC { get; set; } // is Sommerfield absorbing boundary condition
 
+        public bool isSource { get; set; } // is source term
 
 
     }
@@ -114,8 +122,9 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             List<int> constraint_edge_startpt_ids, List<int> constraint_edge_endpt_ids,
             List<Vector2> constraint_edge_startpts, List<Vector2> constraint_edge_endpts,
             double field_value, double normalderivfield_value,
+            double source_value, double source_frequency, int sourcetype, double source_starttime,
             bool isfieldvalue, bool isnormalderivfieldvalue,
-            bool isSommerfieldBC)
+            bool isSommerfieldBC, bool isSource)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_edgeconstraintset_ids);
@@ -139,9 +148,14 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 constraint_edge_ids = idsCopy,
                 field_value = isSommerfieldBC == true ? 0.0 : field_value,
                 normalderivfield_value = isSommerfieldBC == true ? 0.0 : normalderivfield_value,
+                source_value = source_value,
+                source_frequency = source_frequency,
+                source_type = sourcetype,
+                source_starttime = source_starttime,
                 isfieldvalue = isfieldvalue,
                 isnormalderivfieldvalue = isnormalderivfieldvalue,
-                isSommerfieldBC = isSommerfieldBC
+                isSommerfieldBC = isSommerfieldBC,
+                isSource = isSource,
             };
 
             // Insert the constraint to edges
@@ -337,7 +351,12 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
                     cnst_color = new Vector3(0.5412f, 0.1686f, 0.8863f);
                 }
-                else
+                else if (cnst_data.isSource == true)
+                {
+                    label_string1 += $" f = {cnst_data.source_value}, w_f = {cnst_data.source_frequency}";
+                    cnst_color = new Vector3(0.0f, 1.0f, 1.0f);
+                }
+                else if (cnst_data.isSommerfieldBC == true)
                 {
                     label_string1 += $" ABC";
                     cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
