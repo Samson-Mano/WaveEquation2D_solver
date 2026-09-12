@@ -49,7 +49,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public nodecnst_list_store fe_nodeconstraints;
         public edgecnst_list_store fe_edgeconstraints;
-        public nodeload_list_store fe_loads;
 
         public Dictionary<int, material_data> fe_materials;
         public List<int> materialids;
@@ -82,7 +81,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
             fe_nodeconstraints = new nodecnst_list_store();
             fe_edgeconstraints = new edgecnst_list_store();
-            fe_loads = new nodeload_list_store();
 
             fe_materials = new Dictionary<int, material_data>();
             materialids = new List<int>();
@@ -146,8 +144,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             fe_nodeconstraints.paint_node_constraint();
             fe_edgeconstraints.paint_edge_constraint();
 
-            // Paint the loads
-            fe_loads.paint_node_load();
 
         }
 
@@ -161,7 +157,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             meshdrawingdata.update_openTK_uniforms(graphic_events_control);
             fe_nodeconstraints.update_openTK_uniforms(graphic_events_control);
             fe_edgeconstraints.update_openTK_uniforms(graphic_events_control);
-            fe_loads.update_openTK_uniforms(graphic_events_control);
 
         }
 

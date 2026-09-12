@@ -38,14 +38,37 @@ namespace WaveEquation2D_solver.other_windows
         {
             comboBox_solvertype.SelectedIndex = Properties.Settings.Default.Sett_solver_type;
             comboBox_HRefinement.SelectedIndex = Properties.Settings.Default.Sett_Hrefine;
-            comboBox_spectralorderN.SelectedIndex = Properties.Settings.Default.Sett_Prefine;
-            // comboBox_formulation.SelectedIndex = 0;
+            comboBox_spectralorderN.SelectedIndex = Properties.Settings.Default.Sett_Prefine-3;
+            textBox_totalsimulationtime.Text = Properties.Settings.Default.Sett_totalsimulationtime.ToString();
+            textBox_timeinterval.Text = Properties.Settings.Default.Sett_timeinterval.ToString();
+            textBox_numberofmodes.Text = Properties.Settings.Default.Sett_numofmodes.ToString();
 
             checkBox_extendconstraints.Checked = true;
+            checkBox_loadmodalanalysis.Checked = true;
             checkBox_saveHrefinedmodel.Checked = false;
 
+        }
+
+        public void updateTextBox()
+        {
+
+            double x_extent = modeldata.geom_bounds.X;
+            double y_extent = modeldata.geom_bounds.Y;
+
+            // Use general format: no decimals for large values, scientific for small (<1)
+            string formatValue(double v)
+            {
+                if (Math.Abs(v) >= 1.0)
+                    return v.ToString("F0");  // 0 digits after decimal
+                else
+                    return v.ToString("0.####E+0");  // scientific notation, 4 significant digits
+            }
+
+
+            textBox_xyextent.Text = $"[{formatValue(x_extent)}, {formatValue(y_extent)}]";
 
         }
+
 
         private async void button_solve_Click(object sender, EventArgs e)
         {
@@ -53,7 +76,7 @@ namespace WaveEquation2D_solver.other_windows
             try
             {
                 // Check the inputs (Whether the boundary condition is applied or not)
-                if (modeldata.fe_data.fe_nodeconstraints.ndcnst_set_count == 0 )
+                if (modeldata.fe_data.fe_nodeconstraints.ndcnst_set_count + modeldata.fe_data.fe_edgeconstraints.edgecnst_count == 0 )
                 {
 
                     richTextBox_AnalysisUpdate.Clear();
@@ -62,17 +85,6 @@ namespace WaveEquation2D_solver.other_windows
                     return;
                 }
 
-
-
-
-                if (modeldata.fe_data.fe_loads.load_set_count == 0 )
-                {
-
-                    richTextBox_AnalysisUpdate.Clear();
-                    AppendStatus("No loads applied...\n");
-
-                    return;
-                }
 
                 calculate_solver_model_size();
 
@@ -106,7 +118,7 @@ namespace WaveEquation2D_solver.other_windows
 
 
                 // Run the solver
-                AppendStatus("\nStarting stress analysis...\n");
+                AppendStatus("\nStarting wave2D analysis...\n");
                 await RunSolverAsync();
 
             }
@@ -133,8 +145,8 @@ namespace WaveEquation2D_solver.other_windows
             {
 
                 // input files
-                string inputPath = Path.Combine(Application.StartupPath, "stress2d_input.bin");
-                string outputPath = Path.Combine(Application.StartupPath, "stress2d_output.bin");
+                string inputPath = Path.Combine(Application.StartupPath, "wave2d_input.bin");
+                string outputPath = Path.Combine(Application.StartupPath, "wave2d_output.bin");
 
                 //// Delete existing input file if it exists
                 //if (File.Exists(inputPath))
@@ -181,16 +193,33 @@ namespace WaveEquation2D_solver.other_windows
                 // Write the binary file
                 file_events.export_binary_mesh(inputPath, modeldata.fe_data);
 
+                // Test the data
+                if (!double.TryParse(textBox_totalsimulationtime.Text, out double totalsimulationtime) ||
+                    !double.TryParse(textBox_timeinterval.Text, out double timestep))
+                {
+                    AppendStatus("Invalid total simulation time or timestep.\n");
+                    return;
+                }
+
+
+                if (!int.TryParse(textBox_numberofmodes.Text, out int numberofmodes))
+                {
+                    AppendStatus("Invalid number of modes.\n");
+                    return;
+                }
+
         
                 // Write input file
                 wave2DSolverInterop.SolverSettings solver_settings = new wave2DSolverInterop.SolverSettings();
                 solver_settings.SolverType = comboBox_solvertype.SelectedIndex; // 0 = Elimination method, 1 = Lagrange method
                 solver_settings.HRefinement = comboBox_HRefinement.SelectedIndex; // 0, 1, 2
-                solver_settings.PRefinement = comboBox_polynomialrefinement.SelectedIndex; // 0, 1, 2, 3
-                solver_settings.Formulation = comboBox_formulation.SelectedIndex; // 0, 1
-                solver_settings.ExtendConstraints = checkBox_extendconstraints.Checked == false ? 0.0 : 1.0;
-                solver_settings.ExtendLoads = checkBox_extendloads.Checked == false ? 0.0 : 1.0;
-                solver_settings.SaveHRefinedModel = checkBox_saveHrefinedmodel.Checked == false ? 0.0 : 1.0;
+                solver_settings.SpectralOrderN = comboBox_spectralorderN.SelectedIndex + 3; // 3, 4, 5, 6, ...
+                solver_settings.TotalSimulationTime = totalsimulationtime; // 0, 1
+                solver_settings.TimeIncrement = timestep;
+                solver_settings.NumberOfModes = numberofmodes;
+                solver_settings.ExtendConstraints = checkBox_extendconstraints.Checked == false ? 0 : 1;
+                solver_settings.ImportModalAnalysisResults = checkBox_loadmodalanalysis.Checked == false ? 0 : 1;
+                solver_settings.SaveHRefinedModel = checkBox_saveHrefinedmodel.Checked == false ? 0 : 1;
           
 
 
@@ -392,7 +421,7 @@ namespace WaveEquation2D_solver.other_windows
 
             // Get refinement levels (0-based indexing)
             int h_refinement = comboBox_HRefinement.SelectedIndex; // 0, 1, 2
-            int p_refinement = comboBox_polynomialrefinement.SelectedIndex; // 0, 1, 2, 3
+            int p_refinement = comboBox_spectralorderN.SelectedIndex + 3; // 3, 4, 5, 6, ...
 
             // Initialize with original mesh
             int h_refined_nodecount = num_of_nodecount;
@@ -442,36 +471,63 @@ namespace WaveEquation2D_solver.other_windows
             int p_refined_tricount = h_refined_tricount;
             int p_refined_quadcount = h_refined_quadcount;
 
-            if (p_refinement == 0) // p=1 (Linear/Bilinear)
+             if (p_refinement == 3) // p=3 (Spectral order = 3)
             {
-                // No change - T3 + Q4
-            }
-            else if (p_refinement == 1) // p=2 (Quadratic)
-            {
-                // T6: Adds 1 node per edge
-                // Q9: Adds 1 node per edge + 1 center node
-                p_refined_nodecount = h_refined_nodecount
-                                    + h_refined_edgecount          // Edge nodes
-                                    + h_refined_quadcount;        // Quad center nodes
-            }
-            else if (p_refinement == 2) // p=3 (Cubic)
-            {
-                // T10: Adds 2 nodes per edge + 1 internal node
-                // Q16: Adds 2 nodes per edge + 4 internal nodes
                 p_refined_nodecount = h_refined_nodecount
                                     + (h_refined_edgecount * 2)    // Edge nodes (2 per edge)
-                                    + h_refined_tricount          // Triangle internal nodes (1 per tri)
+                                    + (h_refined_tricount * 1)    // Triangle internal nodes (1 per tri)
                                     + (h_refined_quadcount * 4);  // Quad internal nodes (4 per quad)
             }
-            else if (p_refinement == 3) // p=4 (Quartic)
+            else if (p_refinement == 4) // p=4 (Spectral order = 4)
             {
-                // T15: Adds 3 nodes per edge + 3 internal nodes
-                // Q25: Adds 3 nodes per edge + 9 internal nodes
                 p_refined_nodecount = h_refined_nodecount
                                     + (h_refined_edgecount * 3)    // Edge nodes (3 per edge)
                                     + (h_refined_tricount * 3)    // Triangle internal nodes (3 per tri)
                                     + (h_refined_quadcount * 9);  // Quad internal nodes (9 per quad)
             }
+            else if (p_refinement == 5) // p=5 (Spectral order = 5)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 4)    // Edge nodes (4 per edge)
+                                    + (h_refined_tricount * 6)    // Triangle internal nodes (6 per tri)
+                                    + (h_refined_quadcount * 16);  // Quad internal nodes (16 per quad)
+            }
+            else if (p_refinement == 6) // p=6 (Spectral order = 6)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 5)    // Edge nodes (5 per edge)
+                                    + (h_refined_tricount * 10)    // Triangle internal nodes (10 per tri)
+                                    + (h_refined_quadcount * 25);  // Quad internal nodes (25 per quad)
+            }
+            else if (p_refinement == 7) // p=7 (Spectral order = 7)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 6)    // Edge nodes (6 per edge)
+                                    + (h_refined_tricount * 15)    // Triangle internal nodes (15 per tri)
+                                    + (h_refined_quadcount * 36);  // Quad internal nodes (36 per quad)
+            }
+            else if (p_refinement == 8) // p=8 (Spectral order = 8)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 7)    // Edge nodes (7 per edge)
+                                    + (h_refined_tricount * 21)    // Triangle internal nodes (21 per tri)
+                                    + (h_refined_quadcount * 49);  // Quad internal nodes (49 per quad)
+            }
+            else if (p_refinement == 9) // p=9 (Spectral order = 9)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 8)    // Edge nodes (8 per edge)
+                                    + (h_refined_tricount * 28)    // Triangle internal nodes (28 per tri)
+                                    + (h_refined_quadcount * 64);  // Quad internal nodes (64 per quad)
+            }
+            else if (p_refinement == 10) // p=10 (Spectral order = 10)
+            {
+                p_refined_nodecount = h_refined_nodecount
+                                    + (h_refined_edgecount * 9)    // Edge nodes (9 per edge)
+                                    + (h_refined_tricount * 36)    // Triangle internal nodes (36 per tri)
+                                    + (h_refined_quadcount * 81);  // Quad internal nodes (81 per quad)
+            }
+
 
             // Store results
             this.refined_nodecount = p_refined_nodecount;
@@ -485,8 +541,11 @@ namespace WaveEquation2D_solver.other_windows
         {
             Properties.Settings.Default.Sett_solver_type = comboBox_solvertype.SelectedIndex;
             Properties.Settings.Default.Sett_Hrefine = comboBox_HRefinement.SelectedIndex;
-            Properties.Settings.Default.Sett_Prefine = comboBox_polynomialrefinement.SelectedIndex;
-
+            Properties.Settings.Default.Sett_Prefine = comboBox_spectralorderN.SelectedIndex + 3;
+            Properties.Settings.Default.Sett_totalsimulationtime = double.Parse(textBox_totalsimulationtime.Text);
+            Properties.Settings.Default.Sett_timeinterval = double.Parse(textBox_timeinterval.Text);
+            Properties.Settings.Default.Sett_numofmodes = int.Parse(textBox_numberofmodes.Text);
+            
             Properties.Settings.Default.Save();
         }
 

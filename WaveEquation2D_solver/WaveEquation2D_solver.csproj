@@ -105,7 +105,6 @@
     <Compile Include="src\model_store\fe_objects\elementtri_list_store.cs" />
     <Compile Include="src\model_store\fe_objects\fedata_store.cs" />
     <Compile Include="src\model_store\fe_objects\nodecnst_list_store.cs" />
-    <Compile Include="src\model_store\fe_objects\nodeload_list_store.cs" />
     <Compile Include="src\model_store\fe_objects\node_list_store.cs" />
     <Compile Include="src\model_store\geom_objects\axisdata_store.cs" />
     <Compile Include="src\model_store\geom_objects\label_list_store.cs" />

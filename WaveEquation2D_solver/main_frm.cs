@@ -683,6 +683,7 @@ namespace WaveEquation2D_solver
             {
                 solver_Form.Show(this);
             }
+            solver_Form.updateTextBox();
             solver_Form.BringToFront();
 
             glControl_main_panel.Invalidate();

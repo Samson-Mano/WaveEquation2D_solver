@@ -404,9 +404,6 @@ namespace WaveEquation2D_solver.src.events_handler
                             constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
                                 (float)nd2.node_pt_y_coord));
 
-                            constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
-                                (float)nd2.node_pt_y_coord));
-
                             i++;
                         }
 
@@ -831,10 +828,6 @@ namespace WaveEquation2D_solver.src.events_handler
 
                         constraint_edge_startpts.Add(new Vector2((float)nd1.node_pt_x_coord,
                             (float)nd1.node_pt_y_coord));
-
-                        constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
-                            (float)nd2.node_pt_y_coord));
-   
 
                         constraint_edge_endpts.Add(new Vector2((float)nd2.node_pt_x_coord,
                             (float)nd2.node_pt_y_coord));

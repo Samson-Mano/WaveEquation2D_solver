@@ -15,11 +15,14 @@ namespace WaveEquation2D_solver.src.solver
         {
             public int SolverType;           // 0 = Elimination, 1 = Lagrange
             public int HRefinement;          // 0, 1, 2
-            public int PRefinement;          // 0, 1, 2, 3
-            public int Formulation;          // 0, 1
-            public double ExtendConstraints; // 0.0 or 1.0
-            public double ExtendLoads;       // 0.0 or 1.0
-            public double SaveHRefinedModel; // 0.0 or 1.0
+            public int SpectralOrderN;          //  3, 4, 5, 6, 7, 8, 9, 10
+            public double TotalSimulationTime; // Total simulation time
+            public double TimeIncrement;         // Time increment for the simulation
+            public int NumberOfModes;          // Number of modes to consider in the analysis
+
+            public int ExtendConstraints; // 0 or 1
+            public int ImportModalAnalysisResults; // 0 or 1
+            public int SaveHRefinedModel; // 0 or 1
         }
 
 

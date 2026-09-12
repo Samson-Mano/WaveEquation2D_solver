@@ -16,19 +16,39 @@
 #pragma pack(push, 1)
 struct SolverSettings
 {
-	int solverType;
-	int hRefinement;
-	int pRefinement;
-	int formulation;
-	double extendConstraints;
-	double extendLoads;
-	double saveHRefinedModel;
+	int SolverType;
+	int HRefinement; // 0, 1, 2
+	int SpectralOrderN; // 3, 4, 5, 6, 7, 8, 9, 10
+
+	double TotalSimulationTime; // Total simulation time
+	double TimeIncrement;         // Time increment for the simulation
+	int NumberOfModes;          // Number of modes to consider in the analysis
+
+	int ExtendConstraints; // 0 or 1
+	int ImportModalAnalysisResults; // 0 or 1
+	int SaveHRefinedModel; // 0 or 1
 
 };
 #pragma pack(pop)
 
 
 
+// Function to solve the system setting from C# or Python
+extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_file,
+	const char* output_file,
+	SolverSettings* settings,
+	bool* isAnalysisSuccess,
+	void(*callback)(const char*))
+{
+
+
+	if (callback) callback("Initializing solver...");
+	(*isAnalysisSuccess) = false;
+
+
+
+
+}
 
 
 
