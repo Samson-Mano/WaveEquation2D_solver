@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include <unordered_map>
 #include <unordered_set>
-#include "../system_store/helmholtz_system_store.h"
+#include "../system_store/wave2d_system_store.h"
 #include "unique_id_control.h"
 #include "spectral_lib/gll_utility.h"
 
@@ -44,9 +44,14 @@ struct spectral_node_store
 	double y_coord = 0.0;
 
 	bool isboundarynode = false;
+
 	bool isFieldBC = false;
 	double fieldvalue = 0.0; // Field value in the node
+
 	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 
@@ -64,11 +69,19 @@ struct spectral_edge_store
 	int rightfaceid = -1; // The face on the right side of the edge (when looking from start node to end node)
 
 	bool isboundaryedge = false;
+
 	bool isSommerfieldBC = false;
 	bool isFieldBC = false;
 	bool isDerivFieldBC = false;
-	double fieldvalue = 0.0; // Dirichlet boundary condition
-	double normalderivfieldvalue = 0.0; // Neumann boundary condition
+	bool isSource = false;
+
+	double fieldvalue = 0.0;
+	double normalderivfieldvalue = 0.0;
+
+	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 
@@ -208,12 +221,12 @@ public:
 	~spectral_mesh2d() = default;
 
 
-	void generate_spectral_mesh(const helmholtz_system_store& linear_mesh);
+	void generate_spectral_mesh(const wave2d_system_store& linear_mesh);
 
 
 
 private:
-	helmholtz_system_store linear_mesh;
+	wave2d_system_store linear_mesh;
 
 
 	void create_spectral_nodes(int node_id,

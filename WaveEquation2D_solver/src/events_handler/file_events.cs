@@ -557,8 +557,8 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(cnst.field_value);
                     writer.Write(cnst.source_value);
                     writer.Write(cnst.source_frequency);
-                    writer.Write(cnst.source_start_time);
                     writer.Write(cnst.source_type);
+                    writer.Write(cnst.source_start_time);
                     writer.Write(cnst.isField);
 
                     writer.Write(cnst.constraint_node_ids.Count);
@@ -753,8 +753,8 @@ namespace WaveEquation2D_solver.src.events_handler
                     cnst.field_value = reader.ReadDouble();
                     cnst.source_value = reader.ReadDouble();
                     cnst.source_frequency = reader.ReadDouble();
+                    cnst.source_type = reader.ReadInt32();
                     cnst.source_start_time = reader.ReadDouble();
-                    cnst.source_type = reader.ReadInt32();  
                     cnst.isField = reader.ReadBoolean();
 
 

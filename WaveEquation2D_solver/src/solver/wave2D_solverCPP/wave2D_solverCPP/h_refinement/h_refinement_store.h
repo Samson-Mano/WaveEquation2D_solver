@@ -20,8 +20,8 @@ public:
 	std::unordered_map<int, quadelement_store> quadelement_list;
 	std::unordered_map<int, material_store> material_list;
 
-	std::unordered_map<int, constraint_store> constraint_list;
-	std::unordered_map<int, load_store> load_list;
+	std::unordered_map<int, node_constraint_store> node_constraint_list;
+	std::unordered_map<int, edge_constraint_store> edge_constraint_list;
 
 	std::unordered_map<int, std::vector<int>> node_edge_map;
 
@@ -56,24 +56,37 @@ public:
 		const double& matdensity,
 		const double& poissonsratio,
 		const double& yieldpoint, 
-		const double& thickness,
-		int formulation);
+		const double& thickness);
 
 
-	void add_nodeconstraint(const int& constraint_set_id,
-		const int& constrainttype,  // 0 = Pinned, 1 = Roller
-		const double& constraintangle,
-		std::vector<int>& node_ids);
+	void add_nodeconstraint(const int& node_constraint_set_id,
+		std::vector<int>& node_ids,
+		const bool& isFieldBC,
+		const double& fieldvalue,
+		const double& sourcevalue,
+		const double& sourcefrequency,
+		const int& sourcetype,
+		const double& sourcestarttime);
 
 
-	void add_nodeload(const int& load_set_id,
-		const double& loadamplitude,
-		const double& loadangle,
-		std::vector<int>& node_ids);
+	void add_edgeconstraint(const int& edge_constraint_set_id,
+		std::vector<int>& constraint_edge_startpt_ids,
+		std::vector<int>& constraint_edge_endpt_ids,
+		std::vector<int>& constraint_edge_ids,
+		const bool& isSommerfieldBC,
+		const bool& isFieldBC,
+		const bool& isDerivFieldBC,
+		const bool& isSource,
+		const double& fieldvalue,
+		const double& normalderivfieldvalue,
+		const double& sourcevalue,
+		const double& sourcefrequency,
+		const int& sourcetype,
+		const double& sourcestarttime);
+
 
 
 	void perform_refinement(int h_refinement, bool isConstraintExtend,
-		bool isLoadExtend,
 		stopwatch_events* stopwatch,
 		void(*callback)(const char*));
 
@@ -83,7 +96,6 @@ public:
 private:
 
 	bool isConstraintExtend = false;
-	bool isLoadExtend = false;
 
 	stopwatch_events* m_stopwatch;
 
@@ -96,9 +108,8 @@ private:
 
 	void refine_elements();
 
-	void extend_constraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids);
+	void extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids);
 
-	void extend_loads_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids);
 
 	void recreate_edges();
 

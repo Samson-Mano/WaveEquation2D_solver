@@ -123,11 +123,10 @@ void h_refinement_store::add_quadelement(const int& quad_id,
 
 void h_refinement_store::add_material(const int& materialid,
 	const double& youngsmodulus, const double& matdensity, const double& poissonsratio,
-	const double& yieldpoint, const double& thickness,
-	int formulation)
+	const double& yieldpoint, const double& thickness)
 {
-	// Material addition
-	material_store temp_material(materialid, youngsmodulus, matdensity, poissonsratio, yieldpoint, thickness, formulation);
+	// Material additio
+	material_store temp_material(materialid, youngsmodulus, matdensity, poissonsratio, yieldpoint, thickness);
 
 	// Insert to the material list
 	material_list.insert({ materialid, temp_material });
@@ -136,39 +135,72 @@ void h_refinement_store::add_material(const int& materialid,
 
 
 
-void h_refinement_store::add_nodeconstraint(const int& constraint_set_id,
-	const int& constrainttype,  // 0 = Pinned, 1 = Roller
-	const double& constraintangle, std::vector<int>& node_ids)
+void h_refinement_store::add_nodeconstraint(const int& node_constraint_set_id,
+	std::vector<int>& node_ids,
+	const bool& isFieldBC,
+	const double& fieldvalue,
+	const double& sourcevalue,
+	const double& sourcefrequency,
+	const int& sourcetype,
+	const double& sourcestarttime)
 {
 	// Constraint addition
-	constraint_store temp_constraint;
-	temp_constraint.constraint_set_id = constraint_set_id;
-	temp_constraint.constrainttype = constrainttype;
-	temp_constraint.constraintangle = constraintangle;
+	node_constraint_store temp_node_constraint;
+	temp_node_constraint.node_constraint_set_id = node_constraint_set_id;
+	temp_node_constraint.isFieldBC = isFieldBC;
+	temp_node_constraint.fieldvalue = fieldvalue;
+	temp_node_constraint.sourcevalue = sourcevalue;
+	temp_node_constraint.sourcefrequency = sourcefrequency;
+	temp_node_constraint.sourcetype = sourcetype;
+	temp_node_constraint.sourcestarttime = sourcestarttime;
 
-	temp_constraint.node_ids = std::move(node_ids);
+	temp_node_constraint.constraint_node_ids = std::move(node_ids);
 
 	// Insert to the constraint list
-	constraint_list.insert({ constraint_set_id, temp_constraint });
+	node_constraint_list.insert({ node_constraint_set_id, temp_node_constraint });
 
 }
 
 
 
-void h_refinement_store::add_nodeload(const int& load_set_id,
-	const double& loadamplitude,
-	const double& loadangle, std::vector<int>& node_ids)
+void h_refinement_store::add_edgeconstraint(const int& edge_constraint_set_id,
+	std::vector<int>& constraint_edge_startpt_ids,
+	std::vector<int>& constraint_edge_endpt_ids,
+	std::vector<int>& constraint_edge_ids,
+	const bool& isSommerfieldBC,
+	const bool& isFieldBC,
+	const bool& isDerivFieldBC,
+	const bool& isSource,
+	const double& fieldvalue,
+	const double& normalderivfieldvalue,
+	const double& sourcevalue,
+	const double& sourcefrequency,
+	const int& sourcetype,
+	const double& sourcestarttime)
 {
-	// Load addition
-	load_store temp_load;
-	temp_load.load_set_id = load_set_id;
-	temp_load.loadamplitude = loadamplitude;
-	temp_load.loadangle = loadangle;
+	// Edge constraint addition
+	edge_constraint_store temp_edge_constraint;
+	temp_edge_constraint.edge_constraint_set_id = edge_constraint_set_id;
 
-	temp_load.node_ids = std::move(node_ids);
+	temp_edge_constraint.isSommerfieldBC = isSommerfieldBC;
+	temp_edge_constraint.isFieldBC = isFieldBC;
+	temp_edge_constraint.isDerivFieldBC = isDerivFieldBC;
+	temp_edge_constraint.isSource = isSource;
 
-	// Insert to the load list
-	load_list.insert({ load_set_id, temp_load });
+	temp_edge_constraint.fieldvalue = fieldvalue;
+	temp_edge_constraint.normalderivfieldvalue = normalderivfieldvalue;
+
+	temp_edge_constraint.sourcevalue = sourcevalue;
+	temp_edge_constraint.sourcefrequency = sourcefrequency;
+	temp_edge_constraint.sourcetype = sourcetype;
+	temp_edge_constraint.sourcestarttime = sourcestarttime;
+
+	temp_edge_constraint.constraint_edge_startpt_ids = std::move(constraint_edge_startpt_ids);
+	temp_edge_constraint.constraint_edge_endpt_ids = std::move(constraint_edge_endpt_ids);
+	temp_edge_constraint.constraint_edge_ids = std::move(constraint_edge_ids);
+
+	// Insert to the edge constraint list
+	edge_constraint_list.insert({ edge_constraint_set_id, temp_edge_constraint });
 
 }
 
@@ -185,8 +217,8 @@ void h_refinement_store::renumber_model()
 	std::unordered_map<int, trielement_store> temp_trielement_list;
 	std::unordered_map<int, quadelement_store> temp_quadelement_list;
 
-	std::unordered_map<int, constraint_store> temp_constraint_list;
-	std::unordered_map<int, load_store> temp_load_list;
+	std::unordered_map<int, node_constraint_store> temp_node_constraint_list;
+	std::unordered_map<int, edge_constraint_store> temp_edge_constraint_list;
 
 	// Reserve space to prevent rehashing
 	temp_node_list.reserve(node_list.size());
@@ -194,8 +226,8 @@ void h_refinement_store::renumber_model()
 	temp_trielement_list.reserve(trielement_list.size());
 	temp_quadelement_list.reserve(quadelement_list.size());
 
-	temp_constraint_list.reserve(constraint_list.size());
-	temp_load_list.reserve(load_list.size());
+	temp_node_constraint_list.reserve(node_constraint_list.size());
+	temp_edge_constraint_list.reserve(edge_constraint_list.size());
 
 
 	// Create the node map
@@ -305,55 +337,88 @@ void h_refinement_store::renumber_model()
 	}
 
 
-	// Constraint list
-	int constraint_set_id = 0;
+	// Node Constraint list
+	int node_constraint_set_id = 0;
 
-	for (const auto& cnst : constraint_list)
+	for (const auto& node_cnstr : node_constraint_list)
 	{
-		constraint_store temp_constraint;
-		temp_constraint.constraint_set_id = constraint_set_id;
-		temp_constraint.constrainttype = cnst.second.constrainttype;
-		temp_constraint.constraintangle = cnst.second.constraintangle;
+		node_constraint_store temp_node_constraint;
+		temp_node_constraint.node_constraint_set_id = node_constraint_set_id;
+		temp_node_constraint.isFieldBC = node_cnstr.second.isFieldBC;
+		temp_node_constraint.fieldvalue = node_cnstr.second.fieldvalue;
+		temp_node_constraint.sourcevalue = node_cnstr.second.sourcevalue;
+		temp_node_constraint.sourcefrequency = node_cnstr.second.sourcefrequency;	
+		temp_node_constraint.sourcetype = node_cnstr.second.sourcetype;
+		temp_node_constraint.sourcestarttime = node_cnstr.second.sourcestarttime;
 
 		std::vector<int> new_node_ids;
 
-		for (const int& nd_id : cnst.second.node_ids)
+		for (const int& nd_id : node_cnstr.second.constraint_node_ids)
 		{
 			new_node_ids.push_back(nodeid_map[nd_id]);
 		}
 
-		temp_constraint.node_ids = std::move(new_node_ids);
+		temp_node_constraint.constraint_node_ids = std::move(new_node_ids);
 
 		// Add to the list
-		temp_constraint_list.emplace(constraint_set_id, std::move(temp_constraint));
+		temp_node_constraint_list.emplace(node_constraint_set_id, std::move(temp_node_constraint));
 
-		constraint_set_id++;
+		node_constraint_set_id++;
 
 	}
 
-	// Load list
-	int load_set_id = 0;
 
-	for (const auto& load : load_list)
+	// Edge Constraint list
+	int edge_constraint_set_id = 0;
+
+	for (const auto& edge_cnstr : edge_constraint_list)
 	{
-		load_store temp_load;
-		temp_load.load_set_id = load_set_id;
-		temp_load.loadamplitude = load.second.loadamplitude;
-		temp_load.loadangle = load.second.loadangle;
+		edge_constraint_store temp_edge_constraint;
+		temp_edge_constraint.edge_constraint_set_id = edge_constraint_set_id;
+		temp_edge_constraint.isSommerfieldBC = edge_cnstr.second.isSommerfieldBC;
+		temp_edge_constraint.isFieldBC = edge_cnstr.second.isFieldBC;
+		temp_edge_constraint.isDerivFieldBC = edge_cnstr.second.isDerivFieldBC;
+		temp_edge_constraint.isSource = edge_cnstr.second.isSource;
 
-		std::vector<int> new_node_ids;
+		temp_edge_constraint.fieldvalue = edge_cnstr.second.fieldvalue;
+		temp_edge_constraint.normalderivfieldvalue = edge_cnstr.second.normalderivfieldvalue;
 
-		for (const int& nd_id : load.second.node_ids)
+		temp_edge_constraint.sourcevalue = edge_cnstr.second.sourcevalue; // Source value in the node
+		temp_edge_constraint.sourcefrequency = edge_cnstr.second.sourcefrequency; // Source frequency in the node
+		temp_edge_constraint.sourcetype = edge_cnstr.second.sourcetype; // Source type in the node
+		temp_edge_constraint.sourcestarttime = edge_cnstr.second.sourcestarttime; // Source start time in the node	
+
+
+		std::vector<int> new_edge_startpt_ids;
+		std::vector<int> new_edge_endpt_ids;
+
+		for (const int& startnd_id : edge_cnstr.second.constraint_edge_startpt_ids)
 		{
-			new_node_ids.push_back(nodeid_map[nd_id]);
+			new_edge_startpt_ids.push_back(nodeid_map[startnd_id]);
 		}
 
-		temp_load.node_ids = std::move(new_node_ids);
+		for (const int& endnd_id : edge_cnstr.second.constraint_edge_endpt_ids)
+		{
+			new_edge_endpt_ids.push_back(nodeid_map[endnd_id]);
+		}
+
+
+		std::vector<int> new_edge_ids;
+
+		for (const int& edge_id : edge_cnstr.second.constraint_edge_ids)
+		{
+			new_edge_ids.push_back(edge_id); // Edge IDs remain the same
+		}	
+
+		temp_edge_constraint.constraint_edge_startpt_ids = std::move(new_edge_startpt_ids);
+		temp_edge_constraint.constraint_edge_endpt_ids = std::move(new_edge_endpt_ids);
+		temp_edge_constraint.constraint_edge_ids = std::move(new_edge_ids);
 
 		// Add to the list
-		temp_load_list.emplace(load_set_id, std::move(temp_load));
+		temp_edge_constraint_list.emplace(edge_constraint_set_id, std::move(temp_edge_constraint));
 
-		load_set_id++;
+
+		edge_constraint_set_id++;
 
 	}
 
@@ -364,9 +429,9 @@ void h_refinement_store::renumber_model()
 	trielement_list = std::move(temp_trielement_list);
 	quadelement_list = std::move(temp_quadelement_list);
 
-	constraint_list = std::move(temp_constraint_list);
-	load_list = std::move(temp_load_list);
-
+	node_constraint_list = std::move(temp_node_constraint_list);
+	edge_constraint_list = std::move(temp_edge_constraint_list);
+	
 	node_edge_map = std::move(temp_node_edge_map);
 
 
@@ -613,15 +678,8 @@ void h_refinement_store::refine_elements()
 	// Extend the loads and constraints to the newly created midnodes
 	if (this->isConstraintExtend == true)
 	{
-		extend_constraints_to_midnodes(edge_to_node_ids);
+		extend_nodeconstraints_to_midnodes(edge_to_node_ids);
 	}
-	
-	if (this->isLoadExtend == true)
-	{
-		extend_loads_to_midnodes(edge_to_node_ids);
-	}
-	
-
 
 	// Recreate edges
 	recreate_edges();
@@ -629,20 +687,20 @@ void h_refinement_store::refine_elements()
 
 
 
-void h_refinement_store::extend_constraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids)
+void h_refinement_store::extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids)
 {
 	// Pre-allocate for performance
-	std::unordered_map<int, std::unordered_set<int>> constraint_node_sets;
-	constraint_node_sets.reserve(constraint_list.size());
+	std::unordered_map<int, std::unordered_set<int>> nodeconstraint_node_sets;
+	nodeconstraint_node_sets.reserve(node_constraint_list.size());
 
 	// Build a set for each constraint for faster lookup
-	for (const auto& constraint_pair : constraint_list)
+	for (const auto& node_constraint_pair : node_constraint_list)
 	{
-		const constraint_store& constraint = constraint_pair.second;
+		const node_constraint_store& node_constraint = node_constraint_pair.second;
 		std::unordered_set<int> node_set;
-		node_set.reserve(constraint.node_ids.size());
-		node_set.insert(constraint.node_ids.begin(), constraint.node_ids.end());
-		constraint_node_sets.emplace(constraint_pair.first, std::move(node_set));
+		node_set.reserve(node_constraint.constraint_node_ids.size());
+		node_set.insert(node_constraint.constraint_node_ids.begin(), node_constraint.constraint_node_ids.end());
+		nodeconstraint_node_sets.emplace(node_constraint_pair.first, std::move(node_set));
 	}
 
 	// Loop through all new nodes
@@ -661,90 +719,28 @@ void h_refinement_store::extend_constraints_to_midnodes(const std::unordered_map
 		int endnodeid = edge.endnodeid;
 
 		// Find which constraints contain both nodes
-		for (auto& constraint_pair : constraint_list)
+		for (auto& node_constraint_pair : node_constraint_list)
 		{
-			int constraint_id = constraint_pair.first;
-			constraint_store& constraint = constraint_pair.second;
+			int node_constraint_id = node_constraint_pair.first;
+			node_constraint_store& node_constraint = node_constraint_pair.second;
 
 			// pre-built set for fast lookup
-			const auto& node_set = constraint_node_sets[constraint_id];
+			const auto& node_set = nodeconstraint_node_sets[node_constraint_id];
 
 			if (node_set.find(startnodeid) != node_set.end() &&
 				node_set.find(endnodeid) != node_set.end())
 			{
 				// Both nodes are in this constraint
 				// Check if new node is already in constraint
-				auto it = std::find(constraint.node_ids.begin(),
-					constraint.node_ids.end(),
+				auto it = std::find(node_constraint.constraint_node_ids.begin(),
+					node_constraint.constraint_node_ids.end(),
 					new_node_id);
 
-				if (it == constraint.node_ids.end())
+				if (it == node_constraint.constraint_node_ids.end())
 				{
-					constraint.node_ids.push_back(new_node_id);
+					node_constraint.constraint_node_ids.push_back(new_node_id);
 					// Update the set as well
-					constraint_node_sets[constraint_id].insert(new_node_id);
-				}
-			}
-		}
-	}
-	//
-}
-
-
-void h_refinement_store::extend_loads_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids)
-{
-	// Pre-allocate for performance
-	std::unordered_map<int, std::unordered_set<int>> load_node_sets;
-	load_node_sets.reserve(load_list.size());
-
-	// Build a set for each load for faster lookup
-	for (const auto& load_pair : load_list)
-	{
-		const load_store& load = load_pair.second;
-		std::unordered_set<int> node_set;
-		node_set.reserve(load.node_ids.size());
-		node_set.insert(load.node_ids.begin(), load.node_ids.end());
-		load_node_sets.emplace(load_pair.first, std::move(node_set));
-	}
-
-	// Loop through all new nodes
-	for (const auto& edge_node_pair : edge_to_node_ids)
-	{
-		int edge_id = edge_node_pair.first;
-		int new_node_id = edge_node_pair.second;
-
-		// Get the edge
-		auto edge_it = edge_list.find(edge_id);
-		if (edge_it == edge_list.end())
-			continue;
-
-		const edge_store& edge = edge_it->second;
-		int startnodeid = edge.startnodeid;
-		int endnodeid = edge.endnodeid;
-
-		// Find which load contain both nodes
-		for (auto& load_pair : load_list)
-		{
-			int load_id = load_pair.first;
-			load_store& load = load_pair.second;
-
-			// pre-built set for fast lookup
-			const auto& node_set = load_node_sets[load_id];
-
-			if (node_set.find(startnodeid) != node_set.end() &&
-				node_set.find(endnodeid) != node_set.end())
-			{
-				// Both nodes are in this load
-				// Check if new node is already in load
-				auto it = std::find(load.node_ids.begin(),
-					load.node_ids.end(),
-					new_node_id);
-
-				if (it == load.node_ids.end())
-				{
-					load.node_ids.push_back(new_node_id);
-					// Update the set as well
-					load_node_sets[load_id].insert(new_node_id);
+					nodeconstraint_node_sets[node_constraint_id].insert(new_node_id);
 				}
 			}
 		}
@@ -861,7 +857,7 @@ void h_refinement_store::recreate_edges()
 
 
 void h_refinement_store::perform_refinement(int h_refinement, bool isConstraintExtend,
-	bool isLoadExtend, stopwatch_events* stopwatch,
+	stopwatch_events* stopwatch,
 	void(*callback)(const char*))
 {
 
@@ -872,7 +868,7 @@ void h_refinement_store::perform_refinement(int h_refinement, bool isConstraintE
 	this->m_callback = callback;
 
 	this->isConstraintExtend = isConstraintExtend;
-	this->isLoadExtend = isLoadExtend;
+
 
 	// Renumber the nodes and elements
 	renumber_model();
@@ -969,13 +965,15 @@ void h_refinement_store::save_hrefined_model()
 	bin_file.write(reinterpret_cast<const char*>(&node_points_count), sizeof(int32_t));
 
 	// Write the nodes
-	for (const auto& node : node_list)
+	for (const auto& nd_m : node_list)
 	{
-		int32_t nodeid = static_cast<int32_t>(node.second.node_id);
+		const node_store& nd = nd_m.second;
+
+		int32_t nodeid = static_cast<int32_t>(nd.node_id);
 
 		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&node.second.x_coord), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&node.second.y_coord), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&nd.x_coord), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&nd.y_coord), sizeof(double));
 	}
 
 	report("H Refined: Nodes written");
@@ -984,13 +982,16 @@ void h_refinement_store::save_hrefined_model()
 	int32_t tri_elements_count = static_cast<int32_t>(trielement_list.size());
 	bin_file.write(reinterpret_cast<const char*>(&tri_elements_count), sizeof(int32_t));
 
-	for (const auto& tri : trielement_list)
+	for (const auto& tri_m : trielement_list)
 	{
-		int32_t triid = static_cast<int32_t>(tri.second.tri_id);
-		int32_t n1 = static_cast<int32_t>(tri.second.nodeid1);
-		int32_t n2 = static_cast<int32_t>(tri.second.nodeid2);
-		int32_t n3 = static_cast<int32_t>(tri.second.nodeid3);
-		int32_t matid = static_cast<int32_t>(tri.second.materialid);
+		const trielement_store& tri = tri_m.second;
+
+
+		int32_t triid = static_cast<int32_t>(tri.tri_id);
+		int32_t n1 = static_cast<int32_t>(tri.nodeid1);
+		int32_t n2 = static_cast<int32_t>(tri.nodeid2);
+		int32_t n3 = static_cast<int32_t>(tri.nodeid3);
+		int32_t matid = static_cast<int32_t>(tri.materialid);
 
 
 		bin_file.write(reinterpret_cast<const char*>(&triid), sizeof(int32_t));
@@ -1007,14 +1008,16 @@ void h_refinement_store::save_hrefined_model()
 	int32_t quad_elements_count = static_cast<int32_t>(quadelement_list.size());
 	bin_file.write(reinterpret_cast<const char*>(&quad_elements_count), sizeof(int32_t));
 
-	for (const auto& quad : quadelement_list)
+	for (const auto& quad_m : quadelement_list)
 	{
-		int32_t quadid = static_cast<int32_t>(quad.second.quad_id);
-		int32_t n1 = static_cast<int32_t>(quad.second.nodeid1);
-		int32_t n2 = static_cast<int32_t>(quad.second.nodeid2);
-		int32_t n3 = static_cast<int32_t>(quad.second.nodeid3);
-		int32_t n4 = static_cast<int32_t>(quad.second.nodeid4);
-		int32_t matid = static_cast<int32_t>(quad.second.materialid);
+		const quadelement_store& quad = quad_m.second;
+
+		int32_t quadid = static_cast<int32_t>(quad.quad_id);
+		int32_t n1 = static_cast<int32_t>(quad.nodeid1);
+		int32_t n2 = static_cast<int32_t>(quad.nodeid2);
+		int32_t n3 = static_cast<int32_t>(quad.nodeid3);
+		int32_t n4 = static_cast<int32_t>(quad.nodeid4);
+		int32_t matid = static_cast<int32_t>(quad.materialid);
 
 
 		bin_file.write(reinterpret_cast<const char*>(&quadid), sizeof(int32_t));
@@ -1033,9 +1036,12 @@ void h_refinement_store::save_hrefined_model()
 	int32_t materials_count = static_cast<int32_t>(material_list.size());
 	bin_file.write(reinterpret_cast<const char*>(&materials_count), sizeof(int32_t));
 
-	for (const auto& mat : material_list)
+	for (const auto& mat_m : material_list)
 	{
-		int32_t matid = static_cast<int32_t>(mat.second.materialid);
+
+		const material_store& mat = mat_m.second;
+
+		int32_t matid = static_cast<int32_t>(mat.materialid);
 		bin_file.write(reinterpret_cast<const char*>(&matid), sizeof(int32_t));
 
 
@@ -1048,11 +1054,11 @@ void h_refinement_store::save_hrefined_model()
 		// Write the raw bytes
 		bin_file.write(mat_name.c_str(), length);
 
-		bin_file.write(reinterpret_cast<const char*>(&mat.second.matdensity), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.second.youngsmodulus), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.second.poissonsratio), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.second.yieldpoint), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.second.thickness), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.matdensity), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.youngsmodulus), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.poissonsratio), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.yieldpoint), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.thickness), sizeof(double));
 
 	}
 
@@ -1060,25 +1066,33 @@ void h_refinement_store::save_hrefined_model()
 
 
 	// Write the node constraints
-	int32_t constraints_count = static_cast<int32_t>(constraint_list.size());
-	bin_file.write(reinterpret_cast<const char*>(&constraints_count), sizeof(int32_t));
+	int32_t node_constraints_count = static_cast<int32_t>(node_constraint_list.size());
+	bin_file.write(reinterpret_cast<const char*>(&node_constraints_count), sizeof(int32_t));
 
-	for (const auto& cnstr : constraint_list)
+	for (const auto& node_cnstr_m : node_constraint_list)
 	{
-		int32_t cnstrsetid = static_cast<int32_t>(cnstr.second.constraint_set_id);
-		bin_file.write(reinterpret_cast<const char*>(&cnstrsetid), sizeof(int32_t));
+		const node_constraint_store& node_cnstr = node_cnstr_m.second;
 
-		int32_t cnstrtype = static_cast<int32_t>(cnstr.second.constrainttype);
-		bin_file.write(reinterpret_cast<const char*>(&cnstrtype), sizeof(int32_t));
+		int32_t node_cnstr_setid = static_cast<int32_t>(node_cnstr.node_constraint_set_id);
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr_setid), sizeof(int32_t));
 
-		bin_file.write(reinterpret_cast<const char*>(&cnstr.second.constraintangle), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr.fieldvalue), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr.sourcevalue), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr.sourcefrequency), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr.sourcestarttime), sizeof(double));
 
-		int32_t node_ids_count = static_cast<int32_t>(cnstr.second.node_ids.size());
+		int32_t node_cnstr_sourcetype = static_cast<int32_t>(node_cnstr.sourcetype);
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr_sourcetype), sizeof(int32_t));
+
+		bin_file.write(reinterpret_cast<const char*>(&node_cnstr.isFieldBC), sizeof(bool));
+
+
+		int32_t node_ids_count = static_cast<int32_t>(node_cnstr.constraint_node_ids.size());
 		bin_file.write(reinterpret_cast<const char*>(&node_ids_count), sizeof(int32_t));
 
-		for (const auto& nd_id1 : cnstr.second.node_ids)
+		for (const auto& nd_idint : node_cnstr.constraint_node_ids)
 		{
-			int32_t nd_id = static_cast<int32_t>(nd_id1);
+			int32_t nd_id = static_cast<int32_t>(nd_idint);
 			bin_file.write(reinterpret_cast<const char*>(&nd_id), sizeof(int32_t));
 		}
 	}
@@ -1087,29 +1101,52 @@ void h_refinement_store::save_hrefined_model()
 
 
 
-	// Write the node loads
-	int32_t loads_count = static_cast<int32_t>(load_list.size());
-	bin_file.write(reinterpret_cast<const char*>(&loads_count), sizeof(int32_t));
+	// Write the edge constraints
+	int32_t edge_constraints_count = static_cast<int32_t>(edge_constraint_list.size());
+	bin_file.write(reinterpret_cast<const char*>(&edge_constraints_count), sizeof(int32_t));
 
-	for (const auto& load : load_list)
+	for (const auto& edge_cnstr_m : edge_constraint_list)
 	{
-		int32_t loadsetid = static_cast<int32_t>(load.second.load_set_id);
-		bin_file.write(reinterpret_cast<const char*>(&loadsetid), sizeof(int32_t));
 
-		bin_file.write(reinterpret_cast<const char*>(&load.second.loadamplitude), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&load.second.loadangle), sizeof(double));
+		const edge_constraint_store& edge_cnstr = edge_cnstr_m.second;
 
-		int32_t node_ids_count = static_cast<int32_t>(load.second.node_ids.size());
-		bin_file.write(reinterpret_cast<const char*>(&node_ids_count), sizeof(int32_t));
+		int32_t edge_cnstr_setid = static_cast<int32_t>(edge_cnstr.edge_constraint_set_id);
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr_setid), sizeof(int32_t));
 
-		for (const auto& nd_id1 : load.second.node_ids)
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.fieldvalue), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.normalderivfieldvalue), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.sourcevalue), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.sourcefrequency), sizeof(double));
+
+		int32_t edge_cnstr_sourcetype = static_cast<int32_t>(edge_cnstr.sourcetype);
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr_sourcetype), sizeof(int32_t));
+
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.sourcestarttime), sizeof(double));
+
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isFieldBC), sizeof(bool));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isDerivFieldBC), sizeof(bool));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isSommerfieldBC), sizeof(bool));
+		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isSource), sizeof(bool));
+
+
+		int32_t edge_ids_count = static_cast<int32_t>(edge_cnstr.constraint_edge_ids.size());
+		bin_file.write(reinterpret_cast<const char*>(&edge_ids_count), sizeof(int32_t));
+
+		for (int j = 0; j < edge_ids_count; j++)
 		{
-			int32_t nd_id = static_cast<int32_t>(nd_id1);
-			bin_file.write(reinterpret_cast<const char*>(&nd_id), sizeof(int32_t));
+			int32_t edge_id = static_cast<int32_t>(edge_cnstr.constraint_edge_ids[j]);
+			bin_file.write(reinterpret_cast<const char*>(&edge_id), sizeof(int32_t));
+
+			int32_t startnodeid = static_cast<int32_t>(edge_cnstr.constraint_edge_startpt_ids[j]);
+			bin_file.write(reinterpret_cast<const char*>(&startnodeid), sizeof(int32_t));
+
+			int32_t endnodeid = static_cast<int32_t>(edge_cnstr.constraint_edge_endpt_ids[j]);
+			bin_file.write(reinterpret_cast<const char*>(&endnodeid), sizeof(int32_t));
+
 		}
 	}
 
-	report("H Refined: Nodal loads written");
+	report("H Refined: Edge constraints written");
 
 	bin_file.flush();
 

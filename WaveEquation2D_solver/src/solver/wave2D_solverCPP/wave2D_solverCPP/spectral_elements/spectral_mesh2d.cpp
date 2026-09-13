@@ -7,7 +7,7 @@ spectral_mesh2d::spectral_mesh2d()
 
 
 
-void spectral_mesh2d::generate_spectral_mesh(const helmholtz_system_store& linear_mesh)
+void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_mesh)
 {
 	// Copy to local variable
 	this->linear_mesh = linear_mesh;

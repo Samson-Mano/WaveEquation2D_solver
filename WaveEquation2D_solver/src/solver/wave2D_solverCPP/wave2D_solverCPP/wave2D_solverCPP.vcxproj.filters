@@ -48,6 +48,12 @@
     <ClCompile Include="solve_2DwaveanalysisCPP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modal_analysis_solver\MinvKOp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modal_analysis_solver\modal_spectral_solver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h_refinement\h_refinement_store.h">
@@ -75,6 +81,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system_store\wave2d_system_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system_store\hash_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modal_analysis_solver\MinvKOp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modal_analysis_solver\modal_spectral_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -143,6 +143,8 @@
   <ItemGroup>
     <ClCompile Include="h_refinement\h_refinement_store.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="modal_analysis_solver\MinvKOp.cpp" />
+    <ClCompile Include="modal_analysis_solver\modal_spectral_solver.cpp" />
     <ClCompile Include="spectral_elements\spectral_lib\gll_utility.cpp" />
     <ClCompile Include="spectral_elements\spectral_lib\spectral_quad_element.cpp" />
     <ClCompile Include="spectral_elements\spectral_lib\spectral_tri_element.cpp" />
@@ -155,12 +157,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h_refinement\h_refinement_store.h" />
+    <ClInclude Include="modal_analysis_solver\MinvKOp.h" />
+    <ClInclude Include="modal_analysis_solver\modal_spectral_solver.h" />
     <ClInclude Include="spectral_elements\spectral_lib\gll_utility.h" />
     <ClInclude Include="spectral_elements\spectral_lib\spectral_quad_element.h" />
     <ClInclude Include="spectral_elements\spectral_lib\spectral_tri_element.h" />
     <ClInclude Include="spectral_elements\spectral_mesh2d.h" />
     <ClInclude Include="spectral_elements\triangle_duvant_rule\triangle_dunavant_rule.hpp" />
     <ClInclude Include="spectral_elements\unique_id_control.h" />
+    <ClInclude Include="system_store\hash_utils.h" />
     <ClInclude Include="system_store\stopwatch_events.h" />
     <ClInclude Include="system_store\wave2d_system_store.h" />
   </ItemGroup>
