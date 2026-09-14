@@ -235,7 +235,10 @@ private:
 		bool isboundarynode,
 		bool isFieldBC,
 		double fieldvalue,
-		double sourcevalue);
+		double sourcevalue,
+		double sourcefrequency,
+		int sourcetype,
+		double sourcestarttime);
 
 
 	void create_spectral_edges(edge_store edge,

@@ -155,35 +155,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 
 			std::vector<int> edge_internal_node_ids; // To store internal node IDs for this edge
 
-			bool edge_isboundarynode = false;
-			bool edge_isFieldBC = false;
-			double edge_startnode_fieldvalue = 0.0;
-			double edge_endnode_fieldvalue = 0.0;
-
-			double edge_startnode_sourcevalue = 0.0;
-			double edge_endnode_sourcevalue = 0.0;
-
-			if (start_node.isboundarynode == true && end_node.isboundarynode == true)
-			{
-				edge_isboundarynode = true;
-
-				// If both start and end nodes are boundary nodes 
-				// then distribute the boundary condition to the edge nodes
-				if (start_node.isFieldBC == true && end_node.isFieldBC == true)
-				{
-					edge_isFieldBC = true;
-
-					// Get the field value
-					edge_startnode_fieldvalue = start_node.fieldvalue;
-					edge_endnode_fieldvalue = end_node.fieldvalue;
-				}
-
-				// Get the source value
-				edge_startnode_sourcevalue = start_node.sourcevalue;
-				edge_endnode_sourcevalue = end_node.sourcevalue;
-			}
-
-
+		
 			// Create edge nodes based on the spectral order
 			for (int j = 1; j < spectral_order; j++)
 			{
@@ -197,27 +169,8 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 				double y = 0.5 * ((1 - xi) * start_node.y_coord +
 					(1 + xi) * end_node.y_coord);
 
-				// Linear interpolation for field value (if edge has field BC)
-				double edge_node_fieldvalue = 0.0;
-				double edge_node_sourcevalue = 0.0;
 
-				if (edge_isboundarynode == true)
-				{
-					if (edge_isFieldBC == true)
-					{
-						// Linear interpolation between start and end field values
-						edge_node_fieldvalue = 0.5 * ((1 - xi) * edge_startnode_fieldvalue +
-							(1 + xi) * edge_endnode_fieldvalue);
-					}
-
-					// Linear interpolation for source value
-					edge_node_sourcevalue = 0.5 * ((1 - xi) * edge_startnode_sourcevalue +
-						(1 + xi) * edge_endnode_sourcevalue);
-				}
-
-
-				create_spectral_nodes(node_id,
-					x, y, edge_isboundarynode, edge_isFieldBC, edge_node_fieldvalue, edge_node_sourcevalue); // Create edge node and store it
+				create_spectral_nodes(node_id, x, y, false, false, 0.0, 0.0, 0.0, -1, 0.0); // Create edge node and store it
 
 				edge_internal_node_ids.push_back(node_id); // Add to this edge's internal node IDs
 				edge_node_ids[i].push_back(node_id); // Add to edge node IDs
@@ -242,7 +195,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n1.node_id,
 				n1.x_coord, n1.y_coord, n1.isboundarynode, n1.isFieldBC,
-				n1.fieldvalue, n1.sourcevalue); // Create corner node and store it
+				n1.fieldvalue, n1.sourcevalue, n1.sourcefrequency, n1.sourcetype, n1.sourcestarttime); // Create corner node and store it
 		}
 		//
 
@@ -256,7 +209,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n2.node_id,
 				n2.x_coord, n2.y_coord, n2.isboundarynode, n2.isFieldBC,
-				n2.fieldvalue, n2.sourcevalue); // Create corner node and store it
+				n2.fieldvalue, n2.sourcevalue, n2.sourcefrequency, n2.sourcetype, n2.sourcestarttime); // Create corner node and store it
 
 		}
 		//
@@ -271,7 +224,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n3.node_id,
 				n3.x_coord, n3.y_coord, n3.isboundarynode, n3.isFieldBC,
-				n3.fieldvalue, n3.sourcevalue); // Create corner node and store it
+				n3.fieldvalue, n3.sourcevalue, n3.sourcefrequency, n3.sourcetype, n3.sourcestarttime); // Create corner node and store it
 		}
 		//
 
@@ -284,7 +237,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n4.node_id,
 				n4.x_coord, n4.y_coord, n4.isboundarynode, n4.isFieldBC,
-				n4.fieldvalue, n4.sourcevalue); // Create corner node and store it
+				n4.fieldvalue, n4.sourcevalue, n4.sourcefrequency, n4.sourcetype, n4.sourcestarttime); // Create corner node and store it
 		}
 		//
 
@@ -317,7 +270,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 				// Create spectral internal node and store it
 				int node_id = node_id_control.get_unique_id(); // Get a unique node ID
 				create_spectral_nodes(node_id,
-					x, y, false, false, 0.0, 0.0); // Create internal node and store it
+					x, y, false, false, 0.0, 0.0, 0.0, -1, 0.0); // Create internal node and store it
 
 				internal_node_ids.push_back(node_id); // Add to internal node ID
 
@@ -451,35 +404,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 
 			std::vector<int> edge_internal_node_ids; // To store internal node IDs for this edge
 
-			bool edge_isboundarynode = false;
-			bool edge_isFieldBC = false;
-			double edge_startnode_fieldvalue = 0.0;
-			double edge_endnode_fieldvalue = 0.0;
-
-			double edge_startnode_sourcevalue = 0.0;
-			double edge_endnode_sourcevalue = 0.0;
-
-			if (start_node.isboundarynode == true && end_node.isboundarynode == true)
-			{
-				edge_isboundarynode = true;
-
-				// If both start and end nodes are boundary nodes 
-				// then distribute the boundary condition to the edge nodes
-				if (start_node.isFieldBC == true && end_node.isFieldBC == true)
-				{
-					edge_isFieldBC = true;
-
-					// Get the field value
-					edge_startnode_fieldvalue = start_node.fieldvalue;
-					edge_endnode_fieldvalue = end_node.fieldvalue;
-				}
-
-				// Get the source value
-				edge_startnode_sourcevalue = start_node.sourcevalue;
-				edge_endnode_sourcevalue = end_node.sourcevalue;
-			}
-
-
+		
 			// Create edge nodes based on the spectral order
 			for (int j = 1; j < spectral_order; j++)
 			{
@@ -493,27 +418,9 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 				double y = 0.5 * ((1 - xi) * start_node.y_coord +
 					(1 + xi) * end_node.y_coord);
 
-				// Linear interpolation for field value (if edge has field BC)
-				double edge_node_fieldvalue = 0.0;
-				double edge_node_sourcevalue = 0.0;
-
-				if (edge_isboundarynode == true)
-				{
-					if (edge_isFieldBC == true)
-					{
-						// Linear interpolation between start and end field values
-						edge_node_fieldvalue = 0.5 * ((1 - xi) * edge_startnode_fieldvalue +
-							(1 + xi) * edge_endnode_fieldvalue);
-					}
-
-					// Linear interpolation for source value
-					edge_node_sourcevalue = 0.5 * ((1 - xi) * edge_startnode_sourcevalue +
-						(1 + xi) * edge_endnode_sourcevalue);
-				}
-
-
+				
 				create_spectral_nodes(node_id,
-					x, y, edge_isboundarynode, edge_isFieldBC, edge_node_fieldvalue, edge_node_sourcevalue); // Create edge node and store it
+					x, y, false, false, 0.0, 0.0, 0.0, -1, 0.0); // Create edge node and store it
 
 				edge_internal_node_ids.push_back(node_id); // Add to this edge's internal node IDs
 				edge_node_ids[i].push_back(node_id); // Add to edge node IDs
@@ -538,7 +445,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n1.node_id,
 				n1.x_coord, n1.y_coord, n1.isboundarynode, n1.isFieldBC,
-				n1.fieldvalue, n1.sourcevalue); // Create corner node and store it
+				n1.fieldvalue, n1.sourcevalue, n1.sourcefrequency, n1.sourcetype, n1.sourcestarttime); // Create corner node and store it
 		}
 		//
 		//_____________________________________________________________________________
@@ -551,7 +458,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n2.node_id,
 				n2.x_coord, n2.y_coord, n2.isboundarynode, n2.isFieldBC,
-				n2.fieldvalue, n2.sourcevalue); // Create corner node and store it
+				n2.fieldvalue, n2.sourcevalue, n2.sourcefrequency, n2.sourcetype, n2.sourcestarttime); // Create corner node and store it
 
 		}
 		//
@@ -565,7 +472,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 			// If the spectral node does not exists, create it and store it
 			create_spectral_nodes(n3.node_id,
 				n3.x_coord, n3.y_coord, n3.isboundarynode, n3.isFieldBC,
-				n3.fieldvalue, n3.sourcevalue); // Create corner node and store it
+				n3.fieldvalue, n3.sourcevalue, n3.sourcefrequency, n3.sourcetype, n3.sourcestarttime); // Create corner node and store it
 		}
 		//
 
@@ -601,7 +508,7 @@ void spectral_mesh2d::generate_spectral_mesh(const wave2d_system_store& linear_m
 				double x = l1 * n1.x_coord + l2 * n2.x_coord + l3 * n3.x_coord;
 				double y = l1 * n1.y_coord + l2 * n2.y_coord + l3 * n3.y_coord;
 
-				create_spectral_nodes(node_id, x, y, false, false, 0.0, 0.0);
+				create_spectral_nodes(node_id, x, y, false, false, 0.0, 0.0, 0.0, -1, 0.0);
 
 				internal_node_ids.push_back(node_id);
 				//
@@ -679,7 +586,10 @@ void spectral_mesh2d::create_spectral_nodes(int node_id,
 	bool isboundarynode,
 	bool isFieldBC,
 	double fieldvalue,
-	double sourcevalue)
+	double sourcevalue,
+	double sourcefrequency,
+	int sourcetype,
+	double sourcestarttime)
 {
 
 	// Create spectral node and store it
@@ -689,9 +599,13 @@ void spectral_mesh2d::create_spectral_nodes(int node_id,
 	spec_node.y_coord = y_coord;
 
 	spec_node.isboundarynode = isboundarynode;
+
 	spec_node.isFieldBC = isFieldBC;
 	spec_node.fieldvalue = fieldvalue;
 	spec_node.sourcevalue = sourcevalue;
+	spec_node.sourcefrequency = sourcefrequency;
+	spec_node.sourcetype = sourcetype;
+	spec_node.sourcestarttime = sourcestarttime;
 
 	spectral_node_list[spec_node.node_id] = spec_node; // Store the node
 	//
@@ -719,11 +633,20 @@ void spectral_mesh2d::create_spectral_edges(edge_store edge,
 	spec_edge.rightfaceid = rightfaceid;
 
 	spec_edge.isboundaryedge = edge.isboundaryedge;
+	
 	spec_edge.isSommerfieldBC = edge.isSommerfieldBC;
 	spec_edge.isFieldBC = edge.isFieldBC;
 	spec_edge.isDerivFieldBC = edge.isDerivFieldBC;
+	spec_edge.isSource = edge.isSource;
+
 	spec_edge.fieldvalue = edge.fieldvalue;
 	spec_edge.normalderivfieldvalue = edge.normalderivfieldvalue;
+
+	spec_edge.sourcevalue = edge.sourcevalue;
+	spec_edge.sourcefrequency = edge.sourcefrequency;
+	spec_edge.sourcetype = edge.sourcetype;
+	spec_edge.sourcestarttime = edge.sourcestarttime;
+
 
 	spectral_edge_list[spec_edge.edge_id] = spec_edge; // Store the edge
 	//

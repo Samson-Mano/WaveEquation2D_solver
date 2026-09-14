@@ -72,6 +72,29 @@ using namespace Spectra;
 
 
 
+struct BinaryFileHeader
+{
+	uint32_t num_modes;   // Number of modes
+	uint32_t num_nodes;   // Number of nodes
+	uint32_t num_edges;      // Number of edges
+	uint32_t num_triangles; // Number of triangles
+	uint64_t mode_data_offset;  // File position where mode data starts
+	uint64_t mode_index_offset; // File position where mode index table starts
+};
+
+
+
+struct ModeIndexEntry
+{
+	uint32_t mode_id;           // Mode number (0-based)
+	double frequency;           // Natural frequency
+	uint64_t file_offset;       // Position in file where mode data starts
+	uint64_t data_size;         // Size of mode data in bytes
+};
+
+
+
+
 
 class modal_spectral_solver
 {

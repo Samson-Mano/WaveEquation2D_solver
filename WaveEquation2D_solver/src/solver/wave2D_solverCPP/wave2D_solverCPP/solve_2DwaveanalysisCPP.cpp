@@ -75,7 +75,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	int ImportModalAnalysisResults = settings->ImportModalAnalysisResults; // 0 or 1
 	int SaveHRefinedModel = settings->SaveHRefinedModel; // 0 or 1
 
-	msg = ", H_refinement order = " + std::to_string(HRefinement) + ", Spectral order = " +
+	msg = "H Refinement order = " + std::to_string(HRefinement) + ", Spectral order = " +
 		std::to_string(SpectralOrderN);
 
 	if (callback) callback(msg.c_str());
@@ -310,8 +310,8 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		infile.read(reinterpret_cast<char*>(&sourcetype), 4);
 		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
 		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
-		infile.read(reinterpret_cast<char*>(&isSommerfieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isDerivFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isSommerfieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isSource), 1);
 
 		int32_t edgeidCount;
@@ -339,7 +339,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 
 		// Add edge constraints to the H Refinement system store
-		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_id_list, edge_startpt_id_list, edge_endpt_id_list, 
+		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_startpt_id_list, edge_endpt_id_list, edge_id_list,
 			isSommerfieldBC, isFieldBC, isDerivFieldBC, isSource,
 			fieldvalue, normalderivfieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
@@ -362,7 +362,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 
 	// Print the H Refined binary file for testing
-	if (SaveHRefinedModel == true && HRefinement > 0)
+	if (SaveHRefinedModel == 1 && HRefinement > 0)
 	{
 		h_refinement_model.save_hrefined_model();
 	}
@@ -403,6 +403,12 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 
 
+	(*isAnalysisSuccess) = false;
+
+	//_________________________________________________________
+	// Close the files
+	infile.close();
+	outfile.close();
 
 }
 

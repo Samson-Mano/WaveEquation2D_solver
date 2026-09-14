@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 #include <unordered_map>
 #include <unordered_set>
+#include <tuple>
 
 #include <fstream>
 
@@ -99,7 +100,7 @@ private:
 
 	stopwatch_events* m_stopwatch;
 
-
+	
 	void set_edge_faceid(const int& startnodeid, const int& endnodeid, const int& face_id);
 
 	int get_edge_id(const int& startnodeid, const int& endnodeid);
@@ -108,10 +109,12 @@ private:
 
 	void refine_elements();
 
-	void extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids);
+	void extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edgeid_to_midnodeid);
 
 
-	void recreate_edges();
+	void map_constraints_to_nodes_and_edges();
+
+	void recreate_edges(const std::unordered_map<int, std::tuple<int, int, int>>& edge_3nodemap, bool UpdateConstraints);
 
 	void(*m_callback)(const char*) = nullptr;
 

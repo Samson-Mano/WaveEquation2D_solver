@@ -113,6 +113,20 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
             }
 
+            //if (IsBinaryImport == true)
+            //{
+            //    meshdrawingdata.create_wireframe(ref fe_edges);
+            //    number_of_edges = meshdrawingdata.get_wireframe_line_count;
+            //}
+            //else
+            //{
+            //    // Create the mesh edges
+            //    fe_edges = new List<elementedge_store>();
+            //    fe_edges = gvariables_static.create_mesh_edges(fe_nodes, fe_tris, fe_quads);
+            //    number_of_edges = fe_edges.Count;
+            //}
+
+
             // Create the mesh boundaries
             meshdrawingdata.create_wireframe(ref fe_edges);
 

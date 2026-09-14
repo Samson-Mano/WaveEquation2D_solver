@@ -1148,8 +1148,6 @@ void modal_spectral_solver::store_results_with_index()
 
 	// Write header
 	BinaryFileHeader header;
-	std::memcpy(header.magic, "SEMF", 4);
-	header.version = 2;
 	header.num_modes = num_modes;
 	header.num_nodes = num_nodes;
 	header.num_edges = num_edges;

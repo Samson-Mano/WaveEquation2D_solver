@@ -23,13 +23,14 @@ struct node_store
 
 	bool isboundarynode = false;
 
-	//bool isFieldBC = false;
-	//double fieldvalue = 0.0; // Field value in the node
-	//
-	//double sourcevalue = 0.0; // Source value in the node
-	//double sourcefrequency = 0.0; // Source frequency in the node
-	//int sourcetype = -1; // Source type in the node
-	//double sourcestarttime = 0.0; // Source start time in the node	
+	//_____________________________________________________________________
+	bool isFieldBC = false;
+	double fieldvalue = 0.0; // Field value in the node
+	
+	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 
@@ -45,18 +46,20 @@ struct edge_store
 	int rightfaceid = -1; // The face on the right side of the edge (when looking from start node to end node)
 
 	bool isboundaryedge = false;
-	//bool isSommerfieldBC = false;
-	//bool isFieldBC = false;
-	//bool isDerivFieldBC = false;
-	//bool isSource = false;
 
-	//double fieldvalue = 0.0;
-	//double normalderivfieldvalue = 0.0;
+	//_____________________________________________________________________
+	bool isSommerfieldBC = false;
+	bool isFieldBC = false;
+	bool isDerivFieldBC = false;
+	bool isSource = false;
 
-	//double sourcevalue = 0.0; // Source value in the node
-	//double sourcefrequency = 0.0; // Source frequency in the node
-	//int sourcetype = -1; // Source type in the node
-	//double sourcestarttime = 0.0; // Source start time in the node	
+	double fieldvalue = 0.0;
+	double normalderivfieldvalue = 0.0;
+
+	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 

@@ -16,6 +16,7 @@ namespace WaveEquation2D_solver.src.solver
             public int SolverType;           // 0 = Elimination, 1 = Lagrange
             public int HRefinement;          // 0, 1, 2
             public int SpectralOrderN;          //  3, 4, 5, 6, 7, 8, 9, 10
+
             public double TotalSimulationTime; // Total simulation time
             public double TimeIncrement;         // Time increment for the simulation
             public int NumberOfModes;          // Number of modes to consider in the analysis

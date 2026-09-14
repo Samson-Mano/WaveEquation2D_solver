@@ -507,6 +507,17 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(node.node_pt_y_coord);
                 }
 
+                //// Edges
+                //writer.Write(fedata.fe_edges.Count);
+
+                //foreach (var edge in fedata.fe_edges)
+                //{
+                //    writer.Write(edge.edge_id);
+                //    writer.Write(edge.start_nodeid);
+                //    writer.Write(edge.end_nodeid);
+                //}
+
+
                 // Tri elements
                 writer.Write(fedata.fe_tris.elementtriMap.Count);
                 foreach (var tri in fedata.fe_tris.elementtriMap.Values)

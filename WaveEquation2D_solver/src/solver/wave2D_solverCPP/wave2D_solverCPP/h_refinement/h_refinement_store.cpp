@@ -25,7 +25,8 @@ void h_refinement_store::add_node(const int& node_id, const double& x_coord, con
 void h_refinement_store::create_edge_wireframe()
 {
 	// Create the edges wire frame
-	recreate_edges();
+	std::unordered_map<int, std::tuple<int, int, int>> edge_3nodemap; // NULL
+	recreate_edges(edge_3nodemap, false);
 
 }
 
@@ -235,16 +236,18 @@ void h_refinement_store::renumber_model()
 	nodeid_map.reserve(node_list.size());
 
 	int nd_id_t = 0;
-	for (const auto& nd : node_list)
+	for (const auto& nd_m : node_list)
 	{
+		const node_store& nd = nd_m.second;
+
 		// Node addition with move semantics
 		node_store temp_node;
 		temp_node.node_id = nd_id_t;
-		temp_node.x_coord = nd.second.x_coord;
-		temp_node.y_coord = nd.second.y_coord;
+		temp_node.x_coord = nd.x_coord;
+		temp_node.y_coord = nd.y_coord;
 
 		temp_node_list.emplace(nd_id_t, std::move(temp_node));
-		nodeid_map.emplace(nd.second.node_id, nd_id_t);
+		nodeid_map.emplace(nd.node_id, nd_id_t);
 		nd_id_t++;
 	}
 
@@ -255,76 +258,70 @@ void h_refinement_store::renumber_model()
 	int elem_id_t = 0;
 
 	// Process triangles
-	for (const auto& tri : trielement_list)
+	for (const auto& tri_m : trielement_list)
 	{
+		const trielement_store& tri = tri_m.second;
+
 		trielement_store temp_trielement;
 		temp_trielement.tri_id = elem_id_t;
-		temp_trielement.nodeid1 = nodeid_map[tri.second.nodeid1];
-		temp_trielement.nodeid2 = nodeid_map[tri.second.nodeid2];
-		temp_trielement.nodeid3 = nodeid_map[tri.second.nodeid3];
-		temp_trielement.materialid = tri.second.materialid;
+		temp_trielement.nodeid1 = nodeid_map[tri.nodeid1];
+		temp_trielement.nodeid2 = nodeid_map[tri.nodeid2];
+		temp_trielement.nodeid3 = nodeid_map[tri.nodeid3];
+		temp_trielement.materialid = tri.materialid;
 
 		temp_trielement_list.emplace(elem_id_t, std::move(temp_trielement));
-		elemid_map.emplace(tri.second.tri_id, elem_id_t);
+		elemid_map.emplace(tri.tri_id, elem_id_t);
 		elem_id_t++;
 	}
 
 	// Process quads
-	for (const auto& quad : quadelement_list)
+	for (const auto& quad_m : quadelement_list)
 	{
+		const quadelement_store& quad = quad_m.second;
+
 		quadelement_store temp_quadelement;
 		temp_quadelement.quad_id = elem_id_t;
-		temp_quadelement.nodeid1 = nodeid_map[quad.second.nodeid1];
-		temp_quadelement.nodeid2 = nodeid_map[quad.second.nodeid2];
-		temp_quadelement.nodeid3 = nodeid_map[quad.second.nodeid3];
-		temp_quadelement.nodeid4 = nodeid_map[quad.second.nodeid4];
-		temp_quadelement.materialid = quad.second.materialid;
+		temp_quadelement.nodeid1 = nodeid_map[quad.nodeid1];
+		temp_quadelement.nodeid2 = nodeid_map[quad.nodeid2];
+		temp_quadelement.nodeid3 = nodeid_map[quad.nodeid3];
+		temp_quadelement.nodeid4 = nodeid_map[quad.nodeid4];
+		temp_quadelement.materialid = quad.materialid;
 
 		temp_quadelement_list.emplace(elem_id_t, std::move(temp_quadelement));
-		elemid_map.emplace(quad.second.quad_id, elem_id_t);
+		elemid_map.emplace(quad.quad_id, elem_id_t);
 		elem_id_t++;
 	}
 
 	// Create the edge id map
-	// std::unordered_map<int, int> edgeid_map;
-	// edgeid_map.reserve(edge_list.size());
+	//std::unordered_map<int, int> edgeid_map;
+	//edgeid_map.reserve(edge_list.size());
 
 	std::unordered_map<int, std::vector<int>> temp_node_edge_map;
 
 	int edge_id_t = 0;
-	for (const auto& edge : edge_list)
+	for (const auto& edge_m : edge_list)
 	{
+		const edge_store& edge = edge_m.second;
+
 		edge_store temp_edge;
 		temp_edge.edge_id = edge_id_t;
-		temp_edge.startnodeid = nodeid_map[edge.second.startnodeid];
-		temp_edge.endnodeid = nodeid_map[edge.second.endnodeid];
+		temp_edge.startnodeid = nodeid_map[edge.startnodeid];
+		temp_edge.endnodeid = nodeid_map[edge.endnodeid];
 
 		// Handle face IDs 
 		temp_edge.leftfaceid = -1;
 		temp_edge.rightfaceid = -1;
 
-		//auto left_it = elemid_map.find(edge.second.leftfaceid);
-		//if (left_it != elemid_map.end())
-		//{
-		//	temp_edge.leftfaceid = left_it->second;
-		//}
 
-		//auto right_it = elemid_map.find(edge.second.rightfaceid);
-		//if (right_it != elemid_map.end())
-		//{
-		//	temp_edge.rightfaceid = right_it->second;
-		//}
-
-		if (edge.second.leftfaceid != -1)
+		if (edge.leftfaceid != -1)
 		{
-			temp_edge.leftfaceid = elemid_map[edge.second.leftfaceid];
+			temp_edge.leftfaceid = elemid_map[edge.leftfaceid];
 		}
 
-		if (edge.second.rightfaceid != -1)
+		if (edge.rightfaceid != -1)
 		{
-			temp_edge.rightfaceid = elemid_map[edge.second.rightfaceid];
+			temp_edge.rightfaceid = elemid_map[edge.rightfaceid];
 		}
-
 
 		// Add edge to node-to-edge map for both start and end nodes
 		temp_node_edge_map[temp_edge.startnodeid].push_back(edge_id_t);
@@ -332,28 +329,33 @@ void h_refinement_store::renumber_model()
 
 		temp_edge_list.emplace(edge_id_t, std::move(temp_edge));
 
-		// edgeid_map.emplace(edge.second.edge_id, edge_id_t);
 		edge_id_t++;
 	}
+
+	edge_list = std::move(temp_edge_list);
+	node_edge_map = std::move(temp_node_edge_map);
+	//________________________________________________________________
 
 
 	// Node Constraint list
 	int node_constraint_set_id = 0;
 
-	for (const auto& node_cnstr : node_constraint_list)
+	for (const auto& node_cnstr_m : node_constraint_list)
 	{
+		const node_constraint_store& node_cnstr = node_cnstr_m.second;
+
 		node_constraint_store temp_node_constraint;
 		temp_node_constraint.node_constraint_set_id = node_constraint_set_id;
-		temp_node_constraint.isFieldBC = node_cnstr.second.isFieldBC;
-		temp_node_constraint.fieldvalue = node_cnstr.second.fieldvalue;
-		temp_node_constraint.sourcevalue = node_cnstr.second.sourcevalue;
-		temp_node_constraint.sourcefrequency = node_cnstr.second.sourcefrequency;	
-		temp_node_constraint.sourcetype = node_cnstr.second.sourcetype;
-		temp_node_constraint.sourcestarttime = node_cnstr.second.sourcestarttime;
+		temp_node_constraint.isFieldBC = node_cnstr.isFieldBC;
+		temp_node_constraint.fieldvalue = node_cnstr.fieldvalue;
+		temp_node_constraint.sourcevalue = node_cnstr.sourcevalue;
+		temp_node_constraint.sourcefrequency = node_cnstr.sourcefrequency;
+		temp_node_constraint.sourcetype = node_cnstr.sourcetype;
+		temp_node_constraint.sourcestarttime = node_cnstr.sourcestarttime;
 
 		std::vector<int> new_node_ids;
 
-		for (const int& nd_id : node_cnstr.second.constraint_node_ids)
+		for (const int& nd_id : node_cnstr.constraint_node_ids)
 		{
 			new_node_ids.push_back(nodeid_map[nd_id]);
 		}
@@ -371,44 +373,55 @@ void h_refinement_store::renumber_model()
 	// Edge Constraint list
 	int edge_constraint_set_id = 0;
 
-	for (const auto& edge_cnstr : edge_constraint_list)
+	for (const auto& edge_cnstr_m : edge_constraint_list)
 	{
+		const edge_constraint_store& edge_cnstr = edge_cnstr_m.second;
+
 		edge_constraint_store temp_edge_constraint;
 		temp_edge_constraint.edge_constraint_set_id = edge_constraint_set_id;
-		temp_edge_constraint.isSommerfieldBC = edge_cnstr.second.isSommerfieldBC;
-		temp_edge_constraint.isFieldBC = edge_cnstr.second.isFieldBC;
-		temp_edge_constraint.isDerivFieldBC = edge_cnstr.second.isDerivFieldBC;
-		temp_edge_constraint.isSource = edge_cnstr.second.isSource;
+		temp_edge_constraint.isSommerfieldBC = edge_cnstr.isSommerfieldBC;
+		temp_edge_constraint.isFieldBC = edge_cnstr.isFieldBC;
+		temp_edge_constraint.isDerivFieldBC = edge_cnstr.isDerivFieldBC;
+		temp_edge_constraint.isSource = edge_cnstr.isSource;
 
-		temp_edge_constraint.fieldvalue = edge_cnstr.second.fieldvalue;
-		temp_edge_constraint.normalderivfieldvalue = edge_cnstr.second.normalderivfieldvalue;
+		temp_edge_constraint.fieldvalue = edge_cnstr.fieldvalue;
+		temp_edge_constraint.normalderivfieldvalue = edge_cnstr.normalderivfieldvalue;
 
-		temp_edge_constraint.sourcevalue = edge_cnstr.second.sourcevalue; // Source value in the node
-		temp_edge_constraint.sourcefrequency = edge_cnstr.second.sourcefrequency; // Source frequency in the node
-		temp_edge_constraint.sourcetype = edge_cnstr.second.sourcetype; // Source type in the node
-		temp_edge_constraint.sourcestarttime = edge_cnstr.second.sourcestarttime; // Source start time in the node	
+		temp_edge_constraint.sourcevalue = edge_cnstr.sourcevalue; // Source value in the node
+		temp_edge_constraint.sourcefrequency = edge_cnstr.sourcefrequency; // Source frequency in the node
+		temp_edge_constraint.sourcetype = edge_cnstr.sourcetype; // Source type in the node
+		temp_edge_constraint.sourcestarttime = edge_cnstr.sourcestarttime; // Source start time in the node	
 
 
 		std::vector<int> new_edge_startpt_ids;
 		std::vector<int> new_edge_endpt_ids;
 
-		for (const int& startnd_id : edge_cnstr.second.constraint_edge_startpt_ids)
+		for (const int& startnd_id : edge_cnstr.constraint_edge_startpt_ids)
 		{
 			new_edge_startpt_ids.push_back(nodeid_map[startnd_id]);
 		}
 
-		for (const int& endnd_id : edge_cnstr.second.constraint_edge_endpt_ids)
+		for (const int& endnd_id : edge_cnstr.constraint_edge_endpt_ids)
 		{
 			new_edge_endpt_ids.push_back(nodeid_map[endnd_id]);
 		}
 
+		int edge_count = static_cast<int>(edge_cnstr.constraint_edge_startpt_ids.size());
 
 		std::vector<int> new_edge_ids;
 
-		for (const int& edge_id : edge_cnstr.second.constraint_edge_ids)
+		for (int j = 0; j < edge_count; j++)
 		{
+			int startnd_id = new_edge_startpt_ids[j];
+			int endnd_id = new_edge_endpt_ids[j];
+
+			// Get the edge ID using the new node IDs
+			int edge_id = get_edge_id(startnd_id, endnd_id);
+
 			new_edge_ids.push_back(edge_id); // Edge IDs remain the same
-		}	
+
+		}
+
 
 		temp_edge_constraint.constraint_edge_startpt_ids = std::move(new_edge_startpt_ids);
 		temp_edge_constraint.constraint_edge_endpt_ids = std::move(new_edge_endpt_ids);
@@ -423,17 +436,14 @@ void h_refinement_store::renumber_model()
 	}
 
 
+
 	// Move to original (more efficient than clear + insert)
 	node_list = std::move(temp_node_list);
-	edge_list = std::move(temp_edge_list);
 	trielement_list = std::move(temp_trielement_list);
 	quadelement_list = std::move(temp_quadelement_list);
 
 	node_constraint_list = std::move(temp_node_constraint_list);
 	edge_constraint_list = std::move(temp_edge_constraint_list);
-	
-	node_edge_map = std::move(temp_node_edge_map);
-
 
 	report("Mesh renumbered for solver");
 
@@ -442,8 +452,11 @@ void h_refinement_store::renumber_model()
 
 void h_refinement_store::refine_elements()
 {
-	std::unordered_map<int, int> edge_to_node_ids;
-	edge_to_node_ids.reserve(edge_list.size());  // Reserve space for performance
+	std::unordered_map<int, int> edgeid_to_midnodeid;  // Map to store mid-node IDs for each edge
+	edgeid_to_midnodeid.reserve(edge_list.size());  // Reserve space for performance
+
+	std::unordered_map<int, std::tuple<int, int, int>> edge_3nodemap;  // Clear the edge to 3-node map for new refinement
+	edge_3nodemap.reserve(edge_list.size());  // Reserve space for performance
 
 	// Get the current node count (will be updated as we add nodes)
 	int node_id = static_cast<int>(node_list.size());
@@ -505,6 +518,17 @@ void h_refinement_store::refine_elements()
 			elem_id++;
 		};
 
+	// Lamda to store edge triplet for triangle element (captures by reference)
+	auto store_trielement_edge_triplets = [&](int nd1, int nd2, int nd3, int midnd1, int midnd2, int midnd3,
+		int edge1_id, int edge2_id, int edge3_id) -> void
+		{
+			// Get the edge ids
+			edge_3nodemap.emplace(edge1_id, std::make_tuple(nd1, midnd1, nd2));
+			edge_3nodemap.emplace(edge2_id, std::make_tuple(nd2, midnd2, nd3));
+			edge_3nodemap.emplace(edge3_id, std::make_tuple(nd3, midnd3, nd1));
+		};
+
+
 	// Process triangles
 	for (const auto& tri : trielement_list)
 	{
@@ -525,37 +549,37 @@ void h_refinement_store::refine_elements()
 		int mid_node3 = -1;
 
 		// Create three mid nodes (with edge sharing)
-		auto edge1_it = edge_to_node_ids.find(edge1_id);
-		if (edge1_it != edge_to_node_ids.end())
+		auto edge1_it = edgeid_to_midnodeid.find(edge1_id);
+		if (edge1_it != edgeid_to_midnodeid.end())
 		{
 			mid_node1 = edge1_it->second;
 		}
 		else
 		{
 			mid_node1 = create_midnode(nd1, nd2);
-			edge_to_node_ids.emplace(edge1_id, mid_node1);
+			edgeid_to_midnodeid.emplace(edge1_id, mid_node1);
 		}
 
-		auto edge2_it = edge_to_node_ids.find(edge2_id);
-		if (edge2_it != edge_to_node_ids.end())
+		auto edge2_it = edgeid_to_midnodeid.find(edge2_id);
+		if (edge2_it != edgeid_to_midnodeid.end())
 		{
 			mid_node2 = edge2_it->second;
 		}
 		else
 		{
 			mid_node2 = create_midnode(nd2, nd3);
-			edge_to_node_ids.emplace(edge2_id, mid_node2);
+			edgeid_to_midnodeid.emplace(edge2_id, mid_node2);
 		}
 
-		auto edge3_it = edge_to_node_ids.find(edge3_id);
-		if (edge3_it != edge_to_node_ids.end())
+		auto edge3_it = edgeid_to_midnodeid.find(edge3_id);
+		if (edge3_it != edgeid_to_midnodeid.end())
 		{
 			mid_node3 = edge3_it->second;
 		}
 		else
 		{
 			mid_node3 = create_midnode(nd3, nd1);
-			edge_to_node_ids.emplace(edge3_id, mid_node3);
+			edgeid_to_midnodeid.emplace(edge3_id, mid_node3);
 		}
 
 		// Create 4 triangle elements
@@ -565,6 +589,11 @@ void h_refinement_store::refine_elements()
 		create_trielement(nd3, mid_node3, mid_node2, trielement.materialid);
 		// Center triangle
 		create_trielement(mid_node1, mid_node2, mid_node3, trielement.materialid);
+
+		// Store edge triplets for the new triangles
+		store_trielement_edge_triplets(nd1, nd2, nd3, 
+			mid_node1, mid_node2, mid_node3,
+			edge1_id, edge2_id, edge3_id);
 	}
 
 	// Process quads (if you have them)
@@ -581,6 +610,19 @@ void h_refinement_store::refine_elements()
 			refined_quadelement_list.emplace(elem_id, std::move(quad));
 			elem_id++;
 		};
+
+	// Lamda to store edge triplet for quadrilateral element (captures by reference)
+	auto store_quadelement_edge_triplets = [&](int nd1, int nd2, int nd3, int nd4, int midnd1, int midnd2, int midnd3, int midnd4,
+		int edge1_id, int edge2_id, int edge3_id, int edge4_id) -> void
+		{
+			// Get the edge ids
+			edge_3nodemap.emplace(edge1_id, std::make_tuple(nd1, midnd1, nd2));
+			edge_3nodemap.emplace(edge2_id, std::make_tuple(nd2, midnd2, nd3));
+			edge_3nodemap.emplace(edge3_id, std::make_tuple(nd3, midnd3, nd4));
+			edge_3nodemap.emplace(edge4_id, std::make_tuple(nd4, midnd4, nd1));
+		};
+
+
 
 	for (const auto& quad : quadelement_list)
 	{
@@ -601,43 +643,43 @@ void h_refinement_store::refine_elements()
 		int mid_node1 = -1, mid_node2 = -1, mid_node3 = -1, mid_node4 = -1;
 
 		// Edge 1 (nd1-nd2)
-		auto it = edge_to_node_ids.find(edge1_id);
-		if (it != edge_to_node_ids.end())
+		auto it = edgeid_to_midnodeid.find(edge1_id);
+		if (it != edgeid_to_midnodeid.end())
 			mid_node1 = it->second;
 		else
 		{
 			mid_node1 = create_midnode(nd1, nd2);
-			edge_to_node_ids.emplace(edge1_id, mid_node1);
+			edgeid_to_midnodeid.emplace(edge1_id, mid_node1);
 		}
 
 		// Edge 2 (nd2-nd3)
-		it = edge_to_node_ids.find(edge2_id);
-		if (it != edge_to_node_ids.end())
+		it = edgeid_to_midnodeid.find(edge2_id);
+		if (it != edgeid_to_midnodeid.end())
 			mid_node2 = it->second;
 		else
 		{
 			mid_node2 = create_midnode(nd2, nd3);
-			edge_to_node_ids.emplace(edge2_id, mid_node2);
+			edgeid_to_midnodeid.emplace(edge2_id, mid_node2);
 		}
 
 		// Edge 3 (nd3-nd4)
-		it = edge_to_node_ids.find(edge3_id);
-		if (it != edge_to_node_ids.end())
+		it = edgeid_to_midnodeid.find(edge3_id);
+		if (it != edgeid_to_midnodeid.end())
 			mid_node3 = it->second;
 		else
 		{
 			mid_node3 = create_midnode(nd3, nd4);
-			edge_to_node_ids.emplace(edge3_id, mid_node3);
+			edgeid_to_midnodeid.emplace(edge3_id, mid_node3);
 		}
 
 		// Edge 4 (nd4-nd1)
-		it = edge_to_node_ids.find(edge4_id);
-		if (it != edge_to_node_ids.end())
+		it = edgeid_to_midnodeid.find(edge4_id);
+		if (it != edgeid_to_midnodeid.end())
 			mid_node4 = it->second;
 		else
 		{
 			mid_node4 = create_midnode(nd4, nd1);
-			edge_to_node_ids.emplace(edge4_id, mid_node4);
+			edgeid_to_midnodeid.emplace(edge4_id, mid_node4);
 		}
 
 		// Create center node
@@ -668,6 +710,11 @@ void h_refinement_store::refine_elements()
 			create_quadelement(mid_node1, nd2, mid_node2, center_node_id, quadelement.materialid);
 			create_quadelement(center_node_id, mid_node2, nd3, mid_node3, quadelement.materialid);
 			create_quadelement(mid_node4, center_node_id, mid_node3, nd4, quadelement.materialid);
+
+			// Store edge triplets for the new quads
+			store_quadelement_edge_triplets(nd1, nd2, nd3, nd4, 
+				mid_node1, mid_node2, mid_node3, mid_node4,
+				edge1_id, edge2_id, edge3_id, edge4_id);
 		}
 	}
 
@@ -678,16 +725,26 @@ void h_refinement_store::refine_elements()
 	// Extend the loads and constraints to the newly created midnodes
 	if (this->isConstraintExtend == true)
 	{
-		extend_nodeconstraints_to_midnodes(edge_to_node_ids);
+		extend_nodeconstraints_to_midnodes(edgeid_to_midnodeid);
 	}
 
+
+	//// Create a reverse mapping from mid-node IDs to edge IDs for use in edge recreation
+	//std::unordered_map<int, int> midnodeid_to_edgeid;
+
+	//for (const auto& [edge_id, mid_node_id] : edgeid_to_midnodeid)
+	//{
+	//	midnodeid_to_edgeid.emplace(mid_node_id, edge_id);
+	//}
+
+
 	// Recreate edges
-	recreate_edges();
+	recreate_edges(edge_3nodemap, true);
 }
 
 
 
-void h_refinement_store::extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edge_to_node_ids)
+void h_refinement_store::extend_nodeconstraints_to_midnodes(const std::unordered_map<int, int>& edgeid_to_midnodeid)
 {
 	// Pre-allocate for performance
 	std::unordered_map<int, std::unordered_set<int>> nodeconstraint_node_sets;
@@ -704,7 +761,7 @@ void h_refinement_store::extend_nodeconstraints_to_midnodes(const std::unordered
 	}
 
 	// Loop through all new nodes
-	for (const auto& edge_node_pair : edge_to_node_ids)
+	for (const auto& edge_node_pair : edgeid_to_midnodeid)
 	{
 		int edge_id = edge_node_pair.first;
 		int new_node_id = edge_node_pair.second;
@@ -749,7 +806,7 @@ void h_refinement_store::extend_nodeconstraints_to_midnodes(const std::unordered
 }
 
 
-void h_refinement_store::recreate_edges()
+void h_refinement_store::recreate_edges(const std::unordered_map<int, std::tuple<int, int, int>>& edge_3nodemap, bool UpdateConstraints)
 {
 	// Use a set of encoded edge IDs for faster lookup
 	std::unordered_set<uint64_t> edge_set;
@@ -850,9 +907,135 @@ void h_refinement_store::recreate_edges()
 
 	}
 
+	if (UpdateConstraints == true)
+	{
+		//____________________________________________________________________________________
+		// Update the edge constraints to the new edges
+		std::unordered_map<int, edge_constraint_store> temp_edge_constraint_list;
 
-	//
+		for (const auto& edge_cnstr_m : edge_constraint_list)
+		{
+			const edge_constraint_store& edge_cnstr = edge_cnstr_m.second;
+
+			edge_constraint_store temp_edge_constraint;
+			temp_edge_constraint.edge_constraint_set_id = edge_cnstr.edge_constraint_set_id;
+			temp_edge_constraint.isSommerfieldBC = edge_cnstr.isSommerfieldBC;
+			temp_edge_constraint.isFieldBC = edge_cnstr.isFieldBC;
+			temp_edge_constraint.isDerivFieldBC = edge_cnstr.isDerivFieldBC;
+			temp_edge_constraint.isSource = edge_cnstr.isSource;
+
+			temp_edge_constraint.fieldvalue = edge_cnstr.fieldvalue;
+			temp_edge_constraint.normalderivfieldvalue = edge_cnstr.normalderivfieldvalue;
+
+			temp_edge_constraint.sourcevalue = edge_cnstr.sourcevalue; // Source value in the node
+			temp_edge_constraint.sourcefrequency = edge_cnstr.sourcefrequency; // Source frequency in the node
+			temp_edge_constraint.sourcetype = edge_cnstr.sourcetype; // Source type in the node
+			temp_edge_constraint.sourcestarttime = edge_cnstr.sourcestarttime; // Source start time in the node	
+
+
+			std::vector<int> new_edge_startpt_ids;
+			std::vector<int> new_edge_endpt_ids;
+			std::vector<int> new_edge_ids;
+
+			for (const int& edge_id : edge_cnstr.constraint_edge_ids)
+			{
+				// Get the triple of nodes for this edge  (start, mid, end) triple for the original edge
+				std::tuple<int, int, int> edge_nodes = edge_3nodemap.at(edge_id);
+
+				const int start_id = std::get<0>(edge_nodes);
+				const int mid_id = std::get<1>(edge_nodes);
+				const int end_id = std::get<2>(edge_nodes);
+
+
+				// Get the edge 1 id (startnodeid, midnodeid) and edge 2 id (midnodeid, endnodeid)
+				const int edge1_id = get_edge_id(start_id, mid_id);
+				const int edge2_id = get_edge_id(mid_id, end_id);
+
+				// Edge 1: (start, mid)
+				new_edge_startpt_ids.push_back(start_id);
+				new_edge_endpt_ids.push_back(mid_id);
+				new_edge_ids.push_back(edge1_id);
+
+				// Edge 2: (mid, end)
+				new_edge_startpt_ids.push_back(mid_id);
+				new_edge_endpt_ids.push_back(end_id);
+				new_edge_ids.push_back(edge2_id);
+			}
+
+
+			temp_edge_constraint.constraint_edge_startpt_ids = std::move(new_edge_startpt_ids);
+			temp_edge_constraint.constraint_edge_endpt_ids = std::move(new_edge_endpt_ids);
+			temp_edge_constraint.constraint_edge_ids = std::move(new_edge_ids);
+
+			// Add to the list
+			temp_edge_constraint_list.emplace(temp_edge_constraint.edge_constraint_set_id, std::move(temp_edge_constraint));
+
+		}
+
+		// Replace the old edge constraint list with the updated one
+		edge_constraint_list = std::move(temp_edge_constraint_list);	
+
+	}
+
 }
+
+
+void h_refinement_store::map_constraints_to_nodes_and_edges()
+{
+
+	//________________________________________________________________
+	// Map the node constraints to the node list
+	for (const auto& node_cnstr_m : node_constraint_list)
+	{
+		const node_constraint_store& node_cnstr = node_cnstr_m.second;
+
+		for (const int& nd_id : node_cnstr.constraint_node_ids)
+		{
+			node_list[nd_id].isboundarynode = true;
+
+			//_____________________________________________________________________
+			node_list[nd_id].isFieldBC = node_cnstr.isFieldBC;
+			node_list[nd_id].fieldvalue = node_cnstr.fieldvalue; // Field value in the node
+
+			node_list[nd_id].sourcevalue = node_cnstr.sourcevalue; // Source value in the node
+			node_list[nd_id].sourcefrequency = node_cnstr.sourcefrequency; // Source frequency in the node
+			node_list[nd_id].sourcetype = node_cnstr.sourcetype; // Source type in the node
+			node_list[nd_id].sourcestarttime = node_cnstr.sourcestarttime; // Source start time in the node	
+
+		}
+
+	}
+
+
+	// Map the edge constraints to the edge list
+	for (const auto& edge_cnstr_m : edge_constraint_list)
+	{
+		const edge_constraint_store& edge_cnstr = edge_cnstr_m.second;
+
+		for (const int& edge_id : edge_cnstr.constraint_edge_ids)
+		{
+			edge_list[edge_id].isboundaryedge = true;
+
+			//_____________________________________________________________________
+			edge_list[edge_id].isSommerfieldBC = edge_cnstr.isSommerfieldBC;
+			edge_list[edge_id].isFieldBC = edge_cnstr.isFieldBC;
+			edge_list[edge_id].isDerivFieldBC = edge_cnstr.isDerivFieldBC;
+			edge_list[edge_id].isSource = edge_cnstr.isSource;
+
+			edge_list[edge_id].fieldvalue = edge_cnstr.fieldvalue;
+			edge_list[edge_id].normalderivfieldvalue = edge_cnstr.normalderivfieldvalue;
+
+			edge_list[edge_id].sourcevalue = edge_cnstr.sourcevalue; // Source value in the node
+			edge_list[edge_id].sourcefrequency = edge_cnstr.sourcefrequency; // Source frequency in the node
+			edge_list[edge_id].sourcetype = edge_cnstr.sourcetype; // Source type in the node
+			edge_list[edge_id].sourcestarttime = edge_cnstr.sourcestarttime; // Source start time in the node	
+
+		}
+
+	}
+
+}
+
 
 
 
@@ -885,6 +1068,11 @@ void h_refinement_store::perform_refinement(int h_refinement, bool isConstraintE
 
 		refine_elements();
 	}
+
+
+	// Map the constraints to the new nodes and edges
+	map_constraints_to_nodes_and_edges();
+
 
 }
 

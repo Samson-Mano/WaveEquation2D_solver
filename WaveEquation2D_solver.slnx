@@ -1,3 +1,9 @@
 <Solution>
-  <Project Path="WaveEquation2D_solver/WaveEquation2D_solver.csproj" Id="22ccdfd2-a111-4d16-89fc-1b245ca851af" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="WaveEquation2D_solver/WaveEquation2D_solver.csproj" Id="22ccdfd2-a111-4d16-89fc-1b245ca851af">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>

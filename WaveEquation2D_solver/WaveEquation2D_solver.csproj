@@ -32,6 +32,26 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTK, Version=3.3.3.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.3.3\lib\net20\OpenTK.dll</HintPath>
@@ -166,6 +186,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.exp" />
+    <None Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -174,6 +196,10 @@
     <Content Include="Example_model\txt_file\circle_158_quad.txt" />
     <Content Include="Example_model\txt_file\grid_50x50_quad.txt" />
     <Content Include="logo_ico_png.ico" />
+    <Content Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.pdb" />
     <None Include="Resources\pic_roller_support.png" />
     <None Include="Resources\pic_pin_support.png" />
   </ItemGroup>
@@ -181,4 +207,8 @@
     <Folder Include="Example_model\bin_file\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
