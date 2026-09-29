@@ -308,7 +308,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 // Add labels
                 int mid_index = cnst_data.constraint_node_pts.Count / 2;
 
-                string label_string1 = $"[CSet_{cnst_data.ndcnst_set_id}]";
+                string label_string1 = $"[CSet_{cnst_data.ndcnst_set_id}]\n";
                 Vector3 cnst_color = new Vector3(0);
 
                 if (cnst_data.isField == true)

@@ -46,6 +46,12 @@ namespace WaveEquation2D_solver
         //private rsltoption_frm rsltoption_Form;
         //private annotate_frm annotate_Form;
 
+
+        private helper_frm helper_Form;
+
+        private about_frm about_Form;
+
+
         // Drawing area Axis data store
         public axisdata_store axisdata;
 
@@ -739,7 +745,76 @@ namespace WaveEquation2D_solver
 
         #endregion
 
+
+        #region "Help Menu"
+
+
+        private void generalInstructionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Check if helper_Form is null or disposed
+            if (helper_Form == null || helper_Form.IsDisposed)
+            {
+                helper_Form = new helper_frm();
+
+                // Make it behave like a tool window
+                helper_Form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                helper_Form.ShowInTaskbar = false;
+                helper_Form.TopLevel = true;
+                // helper_Form.MdiParent = this;
+                helper_Form.Owner = this;
+
+
+                // Set the start position to manual so we can control placement
+                helper_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(helper_Form);
+
+            }
+
+            // Only show if not already visible; otherwise just bring to front
+            if (!helper_Form.Visible)
+            {
+                // Show the form
+                helper_Form.Show(this);
+            }
+
+            helper_Form.BringToFront();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Check if about_Form is null or disposed
+            if (about_Form == null || about_Form.IsDisposed)
+            {
+                about_Form = new about_frm();
+
+                // Do NOT override FormBorderStyle — about_frm sets its own to FixedDialog
+                // Do NOT override TopLevel, Owner, etc. unless you have a specific reason
+                about_Form.ShowInTaskbar = false;
+                about_Form.Owner = this;
+
+                // Set the start position to manual so we can control placement
+                about_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(about_Form);
+            }
+
+            if (!about_Form.Visible)
+            {
+                about_Form.Show(this);
+            }
+
+            about_Form.BringToFront();
+            about_Form.Activate();
+        }
+
         #endregion
+
+        #endregion
+
+
 
     }
 }

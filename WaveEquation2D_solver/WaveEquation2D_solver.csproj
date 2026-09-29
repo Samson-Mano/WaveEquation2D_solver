@@ -80,11 +80,23 @@
     <Compile Include="main_frm.Designer.cs">
       <DependentUpon>main_frm.cs</DependentUpon>
     </Compile>
+    <Compile Include="other_windows\about_frm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="other_windows\about_frm.Designer.cs">
+      <DependentUpon>about_frm.cs</DependentUpon>
+    </Compile>
     <Compile Include="other_windows\edgeconstraint_frm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="other_windows\edgeconstraint_frm.Designer.cs">
       <DependentUpon>edgeconstraint_frm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="other_windows\helper_frm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="other_windows\helper_frm.Designer.cs">
+      <DependentUpon>helper_frm.cs</DependentUpon>
     </Compile>
     <Compile Include="other_windows\matprop_frm.cs">
       <SubType>Form</SubType>
@@ -146,8 +158,14 @@
     <EmbeddedResource Include="main_frm.resx">
       <DependentUpon>main_frm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="other_windows\about_frm.resx">
+      <DependentUpon>about_frm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="other_windows\edgeconstraint_frm.resx">
       <DependentUpon>edgeconstraint_frm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="other_windows\helper_frm.resx">
+      <DependentUpon>helper_frm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="other_windows\matprop_frm.resx">
       <DependentUpon>matprop_frm.cs</DependentUpon>

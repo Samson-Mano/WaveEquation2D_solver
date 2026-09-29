@@ -63,6 +63,16 @@ namespace WaveEquation2D_solver.Resources {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Nova_Propulsion_logo_main2 {
+            get {
+                object obj = ResourceManager.GetObject("Nova_Propulsion_logo_main2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap pic_pin_support {
             get {
                 object obj = ResourceManager.GetObject("pic_pin_support", resourceCulture);

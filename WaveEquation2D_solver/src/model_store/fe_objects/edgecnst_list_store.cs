@@ -354,12 +354,12 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 else if (cnst_data.isSource == true)
                 {
                     label_string1 += $" f = {cnst_data.source_value}, w_f = {cnst_data.source_frequency}";
-                    cnst_color = new Vector3(0.0f, 1.0f, 1.0f);
+                    cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
                 }
                 else if (cnst_data.isSommerfieldBC == true)
                 {
                     label_string1 += $" ABC";
-                    cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
+                    cnst_color = new Vector3(0.0f, 1.0f, 1.0f);
                 }
 
 
