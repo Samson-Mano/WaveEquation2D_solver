@@ -325,8 +325,8 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
             mat_shrunkmesh_data.Remove(mat_id);
 
             // Assign default material to the element tris and quads
-            mat_shrunkmesh_data[0].shrunk_tri_ids.UnionWith(materialchanged_element_tris);
-            mat_shrunkmesh_data[0].shrunk_quad_ids.UnionWith(materialchanged_element_quads);
+            mat_shrunkmesh_data[1].shrunk_tri_ids.UnionWith(materialchanged_element_tris);
+            mat_shrunkmesh_data[1].shrunk_quad_ids.UnionWith(materialchanged_element_quads);
 
             reset_shrunk_matmesh_buffer();
         }

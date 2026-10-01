@@ -74,7 +74,7 @@ namespace WaveEquation2D_solver.other_windows
 
 
                 // Check if the selected row is the first row (index 0)
-                if (selectedRow.Index == 0)
+                if (selectedRow.Index == 0 || selectedRow.Index == 1)
                 {
                     // First row update and delete not allowed
                     button_update.Enabled = false;

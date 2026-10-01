@@ -73,7 +73,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             {
                 if (elementquadMap[quad_id].material_id == del_material_id)
                 {
-                    elementquadMap[quad_id].material_id = 0;
+                    elementquadMap[quad_id].material_id = 1; // 1st material is the default material (0 is PML)
                 }
 
             }

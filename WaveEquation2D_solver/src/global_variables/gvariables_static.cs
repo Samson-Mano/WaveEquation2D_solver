@@ -46,8 +46,8 @@ namespace WaveEquation2D_solver.src.global_variables
 
             static ColorUtils()
             {
-                // Shuffle with fixed seed for deterministic results
-                Random rng = new Random(42);
+                // Shuffle with fixed seed for deterministic results [42 is used in other tools]
+                Random rng = new Random(12);
                 ShuffledColors = new List<Color>(StandardColors);
 
                 for (int i = ShuffledColors.Count - 1; i > 0; i--)

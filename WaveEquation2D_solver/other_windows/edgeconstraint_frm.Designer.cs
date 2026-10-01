@@ -99,7 +99,7 @@
             // 
             this.textBox_sourcestarttime.Location = new System.Drawing.Point(117, 410);
             this.textBox_sourcestarttime.Name = "textBox_sourcestarttime";
-            this.textBox_sourcestarttime.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourcestarttime.Size = new System.Drawing.Size(76, 27);
             this.textBox_sourcestarttime.TabIndex = 21;
             this.textBox_sourcestarttime.Text = "0";
             // 
@@ -108,7 +108,7 @@
             this.label_sourcestarttime.AutoSize = true;
             this.label_sourcestarttime.Location = new System.Drawing.Point(23, 413);
             this.label_sourcestarttime.Name = "label_sourcestarttime";
-            this.label_sourcestarttime.Size = new System.Drawing.Size(91, 15);
+            this.label_sourcestarttime.Size = new System.Drawing.Size(121, 20);
             this.label_sourcestarttime.TabIndex = 20;
             this.label_sourcestarttime.Text = "Start time t_s = ";
             // 
@@ -125,7 +125,7 @@
             "Harmonic/ periodic excitation"});
             this.comboBox_sourcetype.Location = new System.Drawing.Point(117, 381);
             this.comboBox_sourcetype.Name = "comboBox_sourcetype";
-            this.comboBox_sourcetype.Size = new System.Drawing.Size(133, 23);
+            this.comboBox_sourcetype.Size = new System.Drawing.Size(133, 27);
             this.comboBox_sourcetype.TabIndex = 19;
             // 
             // label_sourcetype
@@ -133,7 +133,7 @@
             this.label_sourcetype.AutoSize = true;
             this.label_sourcetype.Location = new System.Drawing.Point(66, 384);
             this.label_sourcetype.Name = "label_sourcetype";
-            this.label_sourcetype.Size = new System.Drawing.Size(48, 15);
+            this.label_sourcetype.Size = new System.Drawing.Size(62, 20);
             this.label_sourcetype.TabIndex = 18;
             this.label_sourcetype.Text = "Type = ";
             // 
@@ -141,7 +141,7 @@
             // 
             this.textBox_sourcefreq.Location = new System.Drawing.Point(117, 349);
             this.textBox_sourcefreq.Name = "textBox_sourcefreq";
-            this.textBox_sourcefreq.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourcefreq.Size = new System.Drawing.Size(76, 27);
             this.textBox_sourcefreq.TabIndex = 17;
             this.textBox_sourcefreq.Text = "0";
             // 
@@ -150,7 +150,7 @@
             this.label_sourcefreq.AutoSize = true;
             this.label_sourcefreq.Location = new System.Drawing.Point(75, 352);
             this.label_sourcefreq.Name = "label_sourcefreq";
-            this.label_sourcefreq.Size = new System.Drawing.Size(36, 15);
+            this.label_sourcefreq.Size = new System.Drawing.Size(46, 20);
             this.label_sourcefreq.TabIndex = 16;
             this.label_sourcefreq.Text = "ω_f =";
             // 
@@ -159,7 +159,7 @@
             this.radioButton_source.AutoSize = true;
             this.radioButton_source.Location = new System.Drawing.Point(11, 295);
             this.radioButton_source.Name = "radioButton_source";
-            this.radioButton_source.Size = new System.Drawing.Size(180, 19);
+            this.radioButton_source.Size = new System.Drawing.Size(238, 24);
             this.radioButton_source.TabIndex = 15;
             this.radioButton_source.TabStop = true;
             this.radioButton_source.Text = "Source/ External Excitation: ";
@@ -170,7 +170,7 @@
             // 
             this.textBox_sourceampl.Location = new System.Drawing.Point(117, 320);
             this.textBox_sourceampl.Name = "textBox_sourceampl";
-            this.textBox_sourceampl.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourceampl.Size = new System.Drawing.Size(76, 27);
             this.textBox_sourceampl.TabIndex = 14;
             this.textBox_sourceampl.Text = "0";
             // 
@@ -179,7 +179,7 @@
             this.label_source.AutoSize = true;
             this.label_source.Location = new System.Drawing.Point(64, 323);
             this.label_source.Name = "label_source";
-            this.label_source.Size = new System.Drawing.Size(47, 15);
+            this.label_source.Size = new System.Drawing.Size(59, 20);
             this.label_source.TabIndex = 13;
             this.label_source.Text = "f(x,y) =";
             // 
@@ -188,7 +188,7 @@
             this.checkBox_neumann.AutoSize = true;
             this.checkBox_neumann.Location = new System.Drawing.Point(29, 123);
             this.checkBox_neumann.Name = "checkBox_neumann";
-            this.checkBox_neumann.Size = new System.Drawing.Size(261, 19);
+            this.checkBox_neumann.Size = new System.Drawing.Size(340, 24);
             this.checkBox_neumann.TabIndex = 12;
             this.checkBox_neumann.Text = "Natural or Newmann Boundary Condition: ";
             this.checkBox_neumann.UseVisualStyleBackColor = true;
@@ -201,7 +201,7 @@
             this.checkBox_dirichlet.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_dirichlet.Location = new System.Drawing.Point(29, 69);
             this.checkBox_dirichlet.Name = "checkBox_dirichlet";
-            this.checkBox_dirichlet.Size = new System.Drawing.Size(263, 19);
+            this.checkBox_dirichlet.Size = new System.Drawing.Size(341, 24);
             this.checkBox_dirichlet.TabIndex = 11;
             this.checkBox_dirichlet.Text = "Essential or Dirichlet Boundary Condition: ";
             this.checkBox_dirichlet.UseVisualStyleBackColor = true;
@@ -213,7 +213,7 @@
             this.radioButton_boundaryconditions.Checked = true;
             this.radioButton_boundaryconditions.Location = new System.Drawing.Point(11, 44);
             this.radioButton_boundaryconditions.Name = "radioButton_boundaryconditions";
-            this.radioButton_boundaryconditions.Size = new System.Drawing.Size(145, 19);
+            this.radioButton_boundaryconditions.Size = new System.Drawing.Size(186, 24);
             this.radioButton_boundaryconditions.TabIndex = 10;
             this.radioButton_boundaryconditions.TabStop = true;
             this.radioButton_boundaryconditions.Text = "Boundary Conditions:";
@@ -223,18 +223,20 @@
             // label_sommerfield
             // 
             this.label_sommerfield.AutoSize = true;
+            this.label_sommerfield.Enabled = false;
             this.label_sommerfield.Location = new System.Drawing.Point(75, 247);
             this.label_sommerfield.Name = "label_sommerfield";
-            this.label_sommerfield.Size = new System.Drawing.Size(89, 15);
+            this.label_sommerfield.Size = new System.Drawing.Size(116, 20);
             this.label_sommerfield.TabIndex = 9;
             this.label_sommerfield.Text = "∂u/∂n - iku = 0";
             // 
             // radioButton_sommerfield
             // 
             this.radioButton_sommerfield.AutoSize = true;
+            this.radioButton_sommerfield.Enabled = false;
             this.radioButton_sommerfield.Location = new System.Drawing.Point(11, 214);
             this.radioButton_sommerfield.Name = "radioButton_sommerfield";
-            this.radioButton_sommerfield.Size = new System.Drawing.Size(256, 19);
+            this.radioButton_sommerfield.Size = new System.Drawing.Size(334, 24);
             this.radioButton_sommerfield.TabIndex = 8;
             this.radioButton_sommerfield.Text = "ABC or Sommerfield Radiation Condition: ";
             this.radioButton_sommerfield.UseVisualStyleBackColor = true;
@@ -244,7 +246,7 @@
             // 
             this.textBox_neumann.Location = new System.Drawing.Point(117, 148);
             this.textBox_neumann.Name = "textBox_neumann";
-            this.textBox_neumann.Size = new System.Drawing.Size(76, 23);
+            this.textBox_neumann.Size = new System.Drawing.Size(76, 27);
             this.textBox_neumann.TabIndex = 5;
             this.textBox_neumann.Text = "0";
             // 
@@ -253,7 +255,7 @@
             this.label_neumann.AutoSize = true;
             this.label_neumann.Location = new System.Drawing.Point(61, 151);
             this.label_neumann.Name = "label_neumann";
-            this.label_neumann.Size = new System.Drawing.Size(48, 15);
+            this.label_neumann.Size = new System.Drawing.Size(62, 20);
             this.label_neumann.TabIndex = 4;
             this.label_neumann.Text = "∂u/∂n=";
             // 
@@ -261,7 +263,7 @@
             // 
             this.textBox_dirichlet.Location = new System.Drawing.Point(117, 94);
             this.textBox_dirichlet.Name = "textBox_dirichlet";
-            this.textBox_dirichlet.Size = new System.Drawing.Size(76, 23);
+            this.textBox_dirichlet.Size = new System.Drawing.Size(76, 27);
             this.textBox_dirichlet.TabIndex = 2;
             this.textBox_dirichlet.Text = "0";
             // 
@@ -270,7 +272,7 @@
             this.label_dirichlet.AutoSize = true;
             this.label_dirichlet.Location = new System.Drawing.Point(85, 97);
             this.label_dirichlet.Name = "label_dirichlet";
-            this.label_dirichlet.Size = new System.Drawing.Size(24, 15);
+            this.label_dirichlet.Size = new System.Drawing.Size(31, 20);
             this.label_dirichlet.TabIndex = 1;
             this.label_dirichlet.Text = "u =";
             // 
@@ -279,7 +281,7 @@
             this.label_selectedEdgeCount.AutoSize = true;
             this.label_selectedEdgeCount.Location = new System.Drawing.Point(313, 337);
             this.label_selectedEdgeCount.Name = "label_selectedEdgeCount";
-            this.label_selectedEdgeCount.Size = new System.Drawing.Size(93, 15);
+            this.label_selectedEdgeCount.Size = new System.Drawing.Size(123, 20);
             this.label_selectedEdgeCount.TabIndex = 1;
             this.label_selectedEdgeCount.Text = "Selected Edges: ";
             // 
@@ -320,7 +322,7 @@
             this.circleSelectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(974, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(972, 28);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -329,14 +331,14 @@
             this.rectangleSelectionToolStripMenuItem.Checked = true;
             this.rectangleSelectionToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rectangleSelectionToolStripMenuItem.Name = "rectangleSelectionToolStripMenuItem";
-            this.rectangleSelectionToolStripMenuItem.Size = new System.Drawing.Size(122, 20);
+            this.rectangleSelectionToolStripMenuItem.Size = new System.Drawing.Size(154, 24);
             this.rectangleSelectionToolStripMenuItem.Text = "Rectangle Selection";
             this.rectangleSelectionToolStripMenuItem.Click += new System.EventHandler(this.rectangleSelectionToolStripMenuItem_Click);
             // 
             // circleSelectionToolStripMenuItem
             // 
             this.circleSelectionToolStripMenuItem.Name = "circleSelectionToolStripMenuItem";
-            this.circleSelectionToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.circleSelectionToolStripMenuItem.Size = new System.Drawing.Size(125, 24);
             this.circleSelectionToolStripMenuItem.Text = "Circle Selection";
             this.circleSelectionToolStripMenuItem.Click += new System.EventHandler(this.circleSelectionToolStripMenuItem_Click);
             // 
@@ -380,6 +382,7 @@
             this.Column2_nodeids.MinimumWidth = 8;
             this.Column2_nodeids.Name = "Column2_nodeids";
             this.Column2_nodeids.ReadOnly = true;
+            this.Column2_nodeids.Width = 125;
             // 
             // Column3_fieldvalue
             // 
@@ -414,6 +417,7 @@
             // 
             this.Column6_sourcevalue.FillWeight = 80F;
             this.Column6_sourcevalue.HeaderText = "Source (f)";
+            this.Column6_sourcevalue.MinimumWidth = 6;
             this.Column6_sourcevalue.Name = "Column6_sourcevalue";
             this.Column6_sourcevalue.ReadOnly = true;
             this.Column6_sourcevalue.Width = 80;
@@ -422,15 +426,16 @@
             // 
             this.Column7_sourcefrequency.FillWeight = 80F;
             this.Column7_sourcefrequency.HeaderText = "Source frequency (ω_f)";
+            this.Column7_sourcefrequency.MinimumWidth = 6;
             this.Column7_sourcefrequency.Name = "Column7_sourcefrequency";
             this.Column7_sourcefrequency.ReadOnly = true;
             this.Column7_sourcefrequency.Width = 80;
             // 
             // edgeconstraint_frm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(974, 531);
+            this.ClientSize = new System.Drawing.Size(972, 523);
             this.Controls.Add(this.dataGridView_ConstraintList);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.button_deleteconstraint);

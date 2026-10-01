@@ -443,9 +443,29 @@ namespace WaveEquation2D_solver.src.events_handler
             // No material is assigned in the model (Add a default material)
             if (is_material_inpt_exists == false || fedata.fe_materials.Count == 0)
             {
-                var tempMaterial = new material_data
+                // Add to the material list
+                fedata.fe_materials.Clear();
+                fedata.materialids.Clear();
+
+                var tempMaterial1 = new material_data
                 {
                     material_id = 0, // material id
+                    material_name = "PML Sponge", // Default material name
+                    material_density = 0.0, // Density
+                    youngs_modulus = 0.0, // Youngs modulus
+                    poissons_ratio = 0.0,
+                    yield_point = 0.0,
+                    thickness = 0.0,
+                };
+
+
+                fedata.fe_materials[tempMaterial1.material_id] = tempMaterial1; // Add the material to the list
+                fedata.materialids.Add(tempMaterial1.material_id); // Add the material id to the list
+
+
+                var tempMaterial2 = new material_data
+                {
+                    material_id = 1, // material id
                     material_name = "Aluminum", // Default material name
                     material_density = 2.9e-9, // Density
                     youngs_modulus = 69.5e+5, // Youngs modulus
@@ -454,12 +474,8 @@ namespace WaveEquation2D_solver.src.events_handler
                     thickness = 10.0,
                 };
 
-                // Add to the material list
-                fedata.fe_materials.Clear();
-                fedata.materialids.Clear();
-
-                fedata.fe_materials[tempMaterial.material_id] = tempMaterial; // Add the material to the list
-                fedata.materialids.Add(tempMaterial.material_id); // Add the material id to the list
+                fedata.fe_materials[tempMaterial2.material_id] = tempMaterial2; // Add the material to the list
+                fedata.materialids.Add(tempMaterial2.material_id); // Add the material id to the list
 
                 // Add default material id to all the elements
                 List<int> selected_tri_elm_ids = new List<int>();
@@ -471,7 +487,7 @@ namespace WaveEquation2D_solver.src.events_handler
                 }
 
                 // Add default material to triangle mesh
-                fedata.fe_tris.update_material(selected_tri_elm_ids, tempMaterial.material_id);
+                fedata.fe_tris.update_material(selected_tri_elm_ids, tempMaterial2.material_id);
 
 
                 foreach (var quad in fedata.fe_quads.elementquadMap)
@@ -480,7 +496,7 @@ namespace WaveEquation2D_solver.src.events_handler
                 }
 
                 // Add default material to quadrilateral mesh
-                fedata.fe_quads.update_material(selected_quad_elm_ids, tempMaterial.material_id);
+                fedata.fe_quads.update_material(selected_quad_elm_ids, tempMaterial2.material_id);
 
             }
 
