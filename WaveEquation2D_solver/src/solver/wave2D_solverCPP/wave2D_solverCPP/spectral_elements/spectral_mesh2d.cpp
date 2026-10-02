@@ -634,7 +634,6 @@ void spectral_mesh2d::create_spectral_edges(edge_store edge,
 
 	spec_edge.isboundaryedge = edge.isboundaryedge;
 	
-	spec_edge.isSommerfieldBC = edge.isSommerfieldBC;
 	spec_edge.isFieldBC = edge.isFieldBC;
 	spec_edge.isDerivFieldBC = edge.isDerivFieldBC;
 	spec_edge.isSource = edge.isSource;

@@ -47,8 +47,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.textBox_timeinterval = new System.Windows.Forms.TextBox();
             this.textBox_numberofmodes = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.checkBox_loadmodalanalysis = new System.Windows.Forms.CheckBox();
+            this.label_numofmodes = new System.Windows.Forms.Label();
+            this.label_pml = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // richTextBox_AnalysisUpdate
@@ -63,7 +63,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(234, 297);
+            this.label9.Location = new System.Drawing.Point(167, 297);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(99, 17);
             this.label9.TabIndex = 17;
@@ -74,17 +74,18 @@
             this.comboBox_solvertype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_solvertype.FormattingEnabled = true;
             this.comboBox_solvertype.Items.AddRange(new object[] {
-            "Elimination method",
-            "Lagrange Augmentation method"});
-            this.comboBox_solvertype.Location = new System.Drawing.Point(341, 294);
+            "Direct Time Integration",
+            "Modal Superposition"});
+            this.comboBox_solvertype.Location = new System.Drawing.Point(274, 294);
             this.comboBox_solvertype.Name = "comboBox_solvertype";
             this.comboBox_solvertype.Size = new System.Drawing.Size(322, 25);
             this.comboBox_solvertype.TabIndex = 16;
+            this.comboBox_solvertype.SelectedIndexChanged += new System.EventHandler(this.comboBox_solvertype_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(210, 328);
+            this.label1.Location = new System.Drawing.Point(143, 328);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(125, 17);
             this.label1.TabIndex = 18;
@@ -98,14 +99,14 @@
             "1 (Orignal mesh)",
             "4 (Split each element into 4)",
             "16 (Split each element into 16)"});
-            this.comboBox_HRefinement.Location = new System.Drawing.Point(341, 325);
+            this.comboBox_HRefinement.Location = new System.Drawing.Point(274, 325);
             this.comboBox_HRefinement.Name = "comboBox_HRefinement";
             this.comboBox_HRefinement.Size = new System.Drawing.Size(273, 25);
             this.comboBox_HRefinement.TabIndex = 19;
             // 
             // button_solve
             // 
-            this.button_solve.Location = new System.Drawing.Point(571, 489);
+            this.button_solve.Location = new System.Drawing.Point(504, 489);
             this.button_solve.Name = "button_solve";
             this.button_solve.Size = new System.Drawing.Size(161, 71);
             this.button_solve.TabIndex = 22;
@@ -116,7 +117,7 @@
             // checkBox_extendconstraints
             // 
             this.checkBox_extendconstraints.AutoSize = true;
-            this.checkBox_extendconstraints.Location = new System.Drawing.Point(194, 537);
+            this.checkBox_extendconstraints.Location = new System.Drawing.Point(127, 547);
             this.checkBox_extendconstraints.Name = "checkBox_extendconstraints";
             this.checkBox_extendconstraints.Size = new System.Drawing.Size(318, 21);
             this.checkBox_extendconstraints.TabIndex = 25;
@@ -126,7 +127,7 @@
             // checkBox_saveHrefinedmodel
             // 
             this.checkBox_saveHrefinedmodel.AutoSize = true;
-            this.checkBox_saveHrefinedmodel.Location = new System.Drawing.Point(195, 591);
+            this.checkBox_saveHrefinedmodel.Location = new System.Drawing.Point(128, 574);
             this.checkBox_saveHrefinedmodel.Name = "checkBox_saveHrefinedmodel";
             this.checkBox_saveHrefinedmodel.Size = new System.Drawing.Size(179, 21);
             this.checkBox_saveHrefinedmodel.TabIndex = 27;
@@ -146,7 +147,7 @@
             "8",
             "9",
             "10"});
-            this.comboBox_spectralorderN.Location = new System.Drawing.Point(341, 356);
+            this.comboBox_spectralorderN.Location = new System.Drawing.Point(274, 356);
             this.comboBox_spectralorderN.Name = "comboBox_spectralorderN";
             this.comboBox_spectralorderN.Size = new System.Drawing.Size(92, 25);
             this.comboBox_spectralorderN.TabIndex = 29;
@@ -154,7 +155,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(189, 359);
+            this.label10.Location = new System.Drawing.Point(122, 359);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(146, 17);
             this.label10.TabIndex = 28;
@@ -163,7 +164,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(447, 501);
+            this.label8.Location = new System.Drawing.Point(380, 511);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(43, 17);
             this.label8.TabIndex = 35;
@@ -172,7 +173,7 @@
             // textBox_xyextent
             // 
             this.textBox_xyextent.Enabled = false;
-            this.textBox_xyextent.Location = new System.Drawing.Point(341, 498);
+            this.textBox_xyextent.Location = new System.Drawing.Point(274, 508);
             this.textBox_xyextent.Name = "textBox_xyextent";
             this.textBox_xyextent.Size = new System.Drawing.Size(100, 24);
             this.textBox_xyextent.TabIndex = 33;
@@ -180,7 +181,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(191, 501);
+            this.label4.Location = new System.Drawing.Point(124, 511);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(144, 17);
             this.label4.TabIndex = 32;
@@ -189,7 +190,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(172, 390);
+            this.label3.Location = new System.Drawing.Point(105, 390);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(163, 17);
             this.label3.TabIndex = 36;
@@ -197,7 +198,7 @@
             // 
             // textBox_totalsimulationtime
             // 
-            this.textBox_totalsimulationtime.Location = new System.Drawing.Point(341, 387);
+            this.textBox_totalsimulationtime.Location = new System.Drawing.Point(274, 387);
             this.textBox_totalsimulationtime.Name = "textBox_totalsimulationtime";
             this.textBox_totalsimulationtime.Size = new System.Drawing.Size(117, 24);
             this.textBox_totalsimulationtime.TabIndex = 37;
@@ -205,7 +206,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(227, 420);
+            this.label5.Location = new System.Drawing.Point(160, 420);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(108, 17);
             this.label5.TabIndex = 38;
@@ -213,45 +214,44 @@
             // 
             // textBox_timeinterval
             // 
-            this.textBox_timeinterval.Location = new System.Drawing.Point(341, 417);
+            this.textBox_timeinterval.Location = new System.Drawing.Point(274, 417);
             this.textBox_timeinterval.Name = "textBox_timeinterval";
             this.textBox_timeinterval.Size = new System.Drawing.Size(117, 24);
             this.textBox_timeinterval.TabIndex = 39;
             // 
             // textBox_numberofmodes
             // 
-            this.textBox_numberofmodes.Location = new System.Drawing.Point(341, 447);
+            this.textBox_numberofmodes.Location = new System.Drawing.Point(274, 447);
             this.textBox_numberofmodes.Name = "textBox_numberofmodes";
             this.textBox_numberofmodes.Size = new System.Drawing.Size(117, 24);
             this.textBox_numberofmodes.TabIndex = 41;
             // 
-            // label6
+            // label_numofmodes
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(192, 450);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(143, 17);
-            this.label6.TabIndex = 40;
-            this.label6.Text = "Number of Modes: ";
+            this.label_numofmodes.AutoSize = true;
+            this.label_numofmodes.Location = new System.Drawing.Point(125, 450);
+            this.label_numofmodes.Name = "label_numofmodes";
+            this.label_numofmodes.Size = new System.Drawing.Size(143, 17);
+            this.label_numofmodes.TabIndex = 40;
+            this.label_numofmodes.Text = "Number of Modes: ";
             // 
-            // checkBox_loadmodalanalysis
+            // label_pml
             // 
-            this.checkBox_loadmodalanalysis.AutoSize = true;
-            this.checkBox_loadmodalanalysis.Location = new System.Drawing.Point(195, 564);
-            this.checkBox_loadmodalanalysis.Name = "checkBox_loadmodalanalysis";
-            this.checkBox_loadmodalanalysis.Size = new System.Drawing.Size(295, 21);
-            this.checkBox_loadmodalanalysis.TabIndex = 42;
-            this.checkBox_loadmodalanalysis.Text = "Import existing modal analysis results";
-            this.checkBox_loadmodalanalysis.UseVisualStyleBackColor = true;
+            this.label_pml.AutoSize = true;
+            this.label_pml.Location = new System.Drawing.Point(414, 450);
+            this.label_pml.Name = "label_pml";
+            this.label_pml.Size = new System.Drawing.Size(313, 17);
+            this.label_pml.TabIndex = 43;
+            this.label_pml.Text = "PML elements will revert to default material.";
             // 
             // solver_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 631);
-            this.Controls.Add(this.checkBox_loadmodalanalysis);
+            this.Controls.Add(this.label_pml);
             this.Controls.Add(this.textBox_numberofmodes);
-            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label_numofmodes);
             this.Controls.Add(this.textBox_timeinterval);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBox_totalsimulationtime);
@@ -303,7 +303,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox_timeinterval;
         private System.Windows.Forms.TextBox textBox_numberofmodes;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox checkBox_loadmodalanalysis;
+        private System.Windows.Forms.Label label_numofmodes;
+        private System.Windows.Forms.Label label_pml;
     }
 }

@@ -50,7 +50,6 @@ int main()
 	int NumberOfModes = 100;          // Number of modes to consider in the analysis
 
 	int ExtendConstraints = 0; // 0 or 1
-	int ImportModalAnalysisResults = 0; // 0 or 1
 	// int SaveHRefinedModel = 0; // 0 or 1
 
 	stopwatch.start();
@@ -235,7 +234,7 @@ int main()
 		double fieldvalue = 0.0, normalderivfieldvalue = 0.0;
 		double sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
 		int32_t sourcetype = -1;
-		bool isFieldBC = false, isSommerfieldBC = false, isDerivFieldBC = false, isSource = false;
+		bool isFieldBC = false, isDerivFieldBC = false, isSource = false;
 
 		infile.read(reinterpret_cast<char*>(&edgeConstraintsetid), 4);
 		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
@@ -246,7 +245,6 @@ int main()
 		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
 		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isDerivFieldBC), 1);
-		infile.read(reinterpret_cast<char*>(&isSommerfieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isSource), 1);
 
 		int32_t edgeidCount;
@@ -275,7 +273,7 @@ int main()
 
 		// Add edge constraints to the H Refinement system store
 		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_startpt_id_list, edge_endpt_id_list, edge_id_list,
-			isSommerfieldBC, isFieldBC, isDerivFieldBC, isSource,
+			isFieldBC, isDerivFieldBC, isSource,
 			fieldvalue, normalderivfieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
 	}
@@ -326,18 +324,9 @@ int main()
 
 
 
-	if (ImportModalAnalysisResults == 0)
-	{
 		// Perform modal analysis
 
 
-	}
-	else
-	{
-		// Read modal analysis results from file
-
-
-	}
 
 
 

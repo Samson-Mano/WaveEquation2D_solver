@@ -352,7 +352,6 @@ namespace WaveEquation2D_solver.src.events_handler
                             double EdgeConstraint_derivfieldvalue = double.Parse(splitValues[5]);
                             int EdgeConstraint_isFieldValue = int.Parse(splitValues[6]);
                             int EdgeConstraint_isDerivFieldValue = int.Parse(splitValues[7]);
-                            int EdgeConstraint_isSommerfield = int.Parse(splitValues[8]);
 
                             if (!EdgeConstraintSetData.ContainsKey(EdgeConstraintSetId))
                                 EdgeConstraintSetData[EdgeConstraintSetId] = new edgecnst_store();
@@ -369,7 +368,6 @@ namespace WaveEquation2D_solver.src.events_handler
                                 constraintEntry.normalderivfield_value = EdgeConstraint_derivfieldvalue; // Derivative field value (Neumann boundary condition)
                                 constraintEntry.isfieldvalue = EdgeConstraint_isFieldValue == 1 ? true : false;
                                 constraintEntry.isnormalderivfieldvalue = EdgeConstraint_isDerivFieldValue == 1 ? true : false;
-                                constraintEntry.isSommerfieldBC = EdgeConstraint_isSommerfield == 1 ? true : false;
                             }
                         }
                         catch (Exception ex)
@@ -415,7 +413,7 @@ namespace WaveEquation2D_solver.src.events_handler
                             cnst.constraint_edge_startpts, cnst.constraint_edge_endpts,
                             cnst.field_value, cnst.normalderivfield_value,
                             cnst.source_value, cnst.source_frequency, cnst.source_type, cnst.source_starttime,
-                            cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSommerfieldBC, cnst.isSource);
+                            cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSource);
 
                     }
 
@@ -606,7 +604,6 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(cnst.source_starttime);
                     writer.Write(cnst.isfieldvalue);
                     writer.Write(cnst.isnormalderivfieldvalue);
-                    writer.Write(cnst.isSommerfieldBC);
                     writer.Write(cnst.isSource);
 
                     writer.Write(cnst.constraint_edge_ids.Count);
@@ -826,7 +823,6 @@ namespace WaveEquation2D_solver.src.events_handler
                     cnst.source_starttime = reader.ReadDouble();
                     cnst.isfieldvalue = reader.ReadBoolean();
                     cnst.isnormalderivfieldvalue = reader.ReadBoolean();
-                    cnst.isSommerfieldBC = reader.ReadBoolean();
                     cnst.isSource = reader.ReadBoolean();
 
 
@@ -870,7 +866,7 @@ namespace WaveEquation2D_solver.src.events_handler
                         constraint_edge_startpts, constraint_edge_endpts,
                         cnst.field_value, cnst.normalderivfield_value,
                         cnst.source_value, cnst.source_frequency, cnst.source_type, cnst.source_starttime,
-                        cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSommerfieldBC, cnst.isSource);
+                        cnst.isfieldvalue, cnst.isnormalderivfieldvalue, cnst.isSource);
 
 
                 }

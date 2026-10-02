@@ -46,8 +46,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public bool isnormalderivfieldvalue { get; set; } // is prescribed normal derivative field value
 
-        public bool isSommerfieldBC { get; set; } // is Sommerfield absorbing boundary condition
-
         public bool isSource { get; set; } // is source term
 
 
@@ -123,8 +121,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             List<Vector2> constraint_edge_startpts, List<Vector2> constraint_edge_endpts,
             double field_value, double normalderivfield_value,
             double source_value, double source_frequency, int sourcetype, double source_starttime,
-            bool isfieldvalue, bool isnormalderivfieldvalue,
-            bool isSommerfieldBC, bool isSource)
+            bool isfieldvalue, bool isnormalderivfieldvalue, bool isSource)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_edgeconstraintset_ids);
@@ -146,15 +143,14 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 constraint_edge_startpts = startnodePtsCopy,
                 constraint_edge_endpts = endnodePtsCopy,
                 constraint_edge_ids = idsCopy,
-                field_value = isSommerfieldBC == true ? 0.0 : field_value,
-                normalderivfield_value = isSommerfieldBC == true ? 0.0 : normalderivfield_value,
+                field_value = field_value,
+                normalderivfield_value = normalderivfield_value,
                 source_value = source_value,
                 source_frequency = source_frequency,
                 source_type = sourcetype,
                 source_starttime = source_starttime,
                 isfieldvalue = isfieldvalue,
                 isnormalderivfieldvalue = isnormalderivfieldvalue,
-                isSommerfieldBC = isSommerfieldBC,
                 isSource = isSource,
             };
 
@@ -356,12 +352,6 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                     label_string1 += $" f = {cnst_data.source_value}, w_f = {cnst_data.source_frequency}";
                     cnst_color = new Vector3(1.0f, 0.0f, 1.0f);
                 }
-                else if (cnst_data.isSommerfieldBC == true)
-                {
-                    label_string1 += $" ABC";
-                    cnst_color = new Vector3(0.0f, 1.0f, 1.0f);
-                }
-
 
                 // string label_string2 = $"Amplitude = {load_data.load_amplitude}";
 

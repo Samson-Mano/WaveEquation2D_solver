@@ -6,6 +6,31 @@ wave2d_system_store::wave2d_system_store()
 	// Empty constructor
 }
 
+void wave2d_system_store::normalize_material_wave_speeds()
+{
+	this->max_wave_speed = 0.0;
+
+	// Find the maximum wave speed among all materials
+	for (const auto& material_pair : material_list)
+	{
+		const material_store& material = material_pair.second;
+		if (material.wave_speed > this->max_wave_speed)
+		{
+			this->max_wave_speed = material.wave_speed;
+		}
+	}
+
+	// Normalize the wave speeds for all materials based on the maximum wave speed
+	for (auto& material_pair : material_list)
+	{
+		material_store& material = material_pair.second;
+		material.norm_wave_speed = material.wave_speed / this->max_wave_speed;
+	}
+
+}
+
+
+
 
 
 uint64_t wave2d_system_store::get_model_signature() const
@@ -115,7 +140,7 @@ uint64_t wave2d_system_store::get_model_signature() const
 
 	for (const auto& [key, edge_cnstr] : edge_constraint_list)
 	{
-		if (!edge_cnstr.isFieldBC && !edge_cnstr.isSommerfieldBC) continue;
+		if (!edge_cnstr.isFieldBC) continue;
 
 		edge_constraint_h = fnv_mix(edge_constraint_h,
 			edge_cnstr.edge_constraint_set_id);

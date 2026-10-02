@@ -37,19 +37,15 @@ void modal_spectral_solver::create_global_matrices()
 	// Create the spectral mesh
 	wave2d_system_store wave_2dsystem = (*this->wave_2dsystem_ptr);
 
+
+	// Set the frequency scale factor based on the maximum wave speed and maximum boundary value
+	this->freq_scale_factor = wave_2dsystem.max_wave_speed * (10.0 / wave_2dsystem.max_geom_bound);
+
+
 	// Create the spectral mesh
 	this->spec_mesh2d.generate_spectral_mesh(wave_2dsystem);
 
 	report("Spectral mesh created");
-
-
-	// Create a node ID map (to create a nodes as ordered and numbered from 0,1,2...n)
-	int i = 0;
-	for (auto& nd : this->spec_mesh2d.spectral_node_list)
-	{
-		nodeid_map[nd.second.node_id] = i;
-		i++;
-	}
 
 
 	// Set the number of DOF
@@ -130,20 +126,11 @@ void modal_spectral_solver::create_global_matrices()
 			//________________________________________________________________________________________________
 			// Step 3: Create Element field vector
 			Eigen::VectorXi element_field_BC_flag_vector = Eigen::VectorXi::Zero(nen); // Element field vector BC flag
-			// Eigen::VectorXd element_field_vector = Eigen::VectorXd::Zero(nen); // Element field vector
-
 
 			get_trielement_field_vector(tri_elm, element_field_BC_flag_vector);
 
 			//________________________________________________________________________________________________
-			// Step 4: Create Element source vector
-			// Eigen::VectorXd element_source_vector = Eigen::VectorXd::Zero(nen); // Element source vector
-
-			get_trielement_source_vector(tri_elm, element_field_BC_flag_vector);
-
-
-			//________________________________________________________________________________________________
-			// Step 5: Set the global matrix and global vector
+			// Step 4: Set the global matrix and global vector
 
 			set_global_matrix(elem_nodes, nen,
 				element_k_matrix,
@@ -213,18 +200,12 @@ void modal_spectral_solver::create_global_matrices()
 			//________________________________________________________________________________________________
 			// Step 3: Create Element field vector
 			Eigen::VectorXi element_field_BC_flag_vector = Eigen::VectorXi::Zero(nen); // Element field vector BC flag
-			// Eigen::VectorXd element_field_vector = Eigen::VectorXd::Zero(nen); // Element field vector
 
 			get_quadelement_field_vector(quad_elm, element_field_BC_flag_vector);
 
-			//________________________________________________________________________________________________
-			// Step 4: Create Element source vector
-			// Eigen::VectorXd element_source_vector = Eigen::VectorXd::Zero(nen); // Element source vector
-
-			get_quadelement_source_vector(quad_elm, element_field_BC_flag_vector);
 
 			//________________________________________________________________________________________________
-			// Step 5: Set the global matrix and global vector
+			// Step 4: Set the global matrix and global vector
 
 			set_global_matrix(elem_nodes, nen,
 				element_k_matrix,
@@ -268,7 +249,7 @@ void modal_spectral_solver::create_global_matrices()
 
 
 
-bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes, int solver_type)
+bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
 {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
@@ -376,14 +357,9 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes, int solver_
 
 	bool isSolveSuccessful = false;
 
-	if (solver_type == SOLVER_SPECTRA)
-	{
-		isSolveSuccessful = solveWithSpectra(num_modes, K_ff, M_ff, eigenvalues, eigenvectors);
-	}
-	else if (solver_type == SOLVER_ARPACK)
-	{
-		isSolveSuccessful = solveWithARPACK(num_modes, K_ff, M_ff, eigenvalues, eigenvectors);
-	}
+
+	isSolveSuccessful = solveWithARPACK(num_modes, K_ff, M_ff, eigenvalues, eigenvectors);
+
 
 	if (!isSolveSuccessful)
 	{
@@ -537,6 +513,7 @@ void modal_spectral_solver::get_trielement_field_vector(const spectral_trielemen
 	Eigen::VectorXi& dirichlet_BC_flag)
 {
 
+	// Edge Boundary Condition 
 	for (int i = 0; i < 3; i++)
 	{
 		// Get the edge id
@@ -544,63 +521,83 @@ void modal_spectral_solver::get_trielement_field_vector(const spectral_trielemen
 
 		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
 
-		if (edge.isboundaryedge == true && edge.isFieldBC == true)
+		if (edge.isboundaryedge == true && edge.isFieldBC == true && edge.fieldvalue == 0.0)
 		{
 			// --- Assembly ---
 			// Dirichlet (field) BC contribution
-			double q_edge = edge.fieldvalue;  // field value
 
 			int local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
 
-			// dirichlet_vector(local_idx) = q_edge;
 			dirichlet_BC_flag(local_idx) = 1;
 
 			for (const int& j : spec_mesh2d.tri_element_id_structure.edge_node_ids[i])
 			{
 				local_idx = j;
 
-				// dirichlet_vector(local_idx) = q_edge;
 				dirichlet_BC_flag(local_idx) = 1;
 			}
 
 			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
 
-			// dirichlet_vector(local_idx) = q_edge;
 			dirichlet_BC_flag(local_idx) = 1;
-			//
 		}
-		//
 	}
-	//
-}
+	// ___________________________________________________
 
-
-void modal_spectral_solver::get_trielement_source_vector(const spectral_trielement_store& tri_elm,
-	Eigen::VectorXi& dirichlet_BC_flag)
-{
-	// Get the corner nodes
+	// Node Boundary Condition
 	const std::vector<int>& corner_nodes = tri_elm.corner_nodes;
 
 	for (int i = 0; i < 3; i++)
 	{
-		const spectral_node_store& nd = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
 
-		if (nd.isboundarynode == true)
+		// Corner 1
+		if (nd1.isboundarynode == true)
 		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
 			int local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
 
-			if (nd.isFieldBC == true)
+			if (nd1.isFieldBC == true && nd1.fieldvalue == 0.0)
 			{
 				// Apply field value at the node
-				// dirichlet_vector(local_idx) = nd.fieldvalue;
 				dirichlet_BC_flag(local_idx) = 1;
 			}
-			else
+		}
+
+		// edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.tri_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : tri_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
 			{
-				// Apply source value at the node
-				// source_vector(local_idx) = nd.sourcevalue;
+				int local_idx = edge_node_local_ids[j];
+
+				if (edge_nd.isFieldBC == true && edge_nd.fieldvalue == 0.0)
+				{
+					// Apply field value at the node
+					dirichlet_BC_flag(local_idx) = 1;
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 3]];
+		if (nd2.isboundarynode == true)
+		{
+			int local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			if (nd2.isFieldBC == true && nd2.fieldvalue == 0.0)
+			{
+				// Apply field value at the node
+				dirichlet_BC_flag(local_idx) = 1;
 			}
 		}
+
 
 	}
 	//
@@ -701,6 +698,7 @@ void modal_spectral_solver::get_quadelement_field_vector(const spectral_quadelem
 	Eigen::VectorXi& dirichlet_BC_flag)
 {
 
+	// Edge Boundary Condition 
 	for (int i = 0; i < 4; i++)
 	{
 		// Get the edge id
@@ -708,70 +706,90 @@ void modal_spectral_solver::get_quadelement_field_vector(const spectral_quadelem
 
 		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
 
-		if (edge.isboundaryedge == true && edge.isFieldBC == true)
+		if (edge.isboundaryedge == true && edge.isFieldBC == true && edge.fieldvalue == 0.0)
 		{
 			// --- Assembly ---
 			// Dirichlet (field) BC contribution
-			double q_edge = edge.fieldvalue;  // field value
 
 			int local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
 
-			// dirichlet_vector(local_idx) = q_edge;
 			dirichlet_BC_flag(local_idx) = 1;
 
 			for (const int& j : spec_mesh2d.quad_element_id_structure.edge_node_ids[i])
 			{
 				local_idx = j;
 
-				// dirichlet_vector(local_idx) = q_edge;
 				dirichlet_BC_flag(local_idx) = 1;
 			}
 
 			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
 
-			// dirichlet_vector(local_idx) = q_edge;
 			dirichlet_BC_flag(local_idx) = 1;
-			//
+
 		}
-		//
 	}
-	//
-}
+	// ___________________________________________________
 
-
-
-void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
-	Eigen::VectorXi& dirichlet_BC_flag)
-{
-	// Get the corner nodes
+	// Node Boundary Condition
 	const std::vector<int>& corner_nodes = quad_elm.corner_nodes;
 
 	for (int i = 0; i < 4; i++)
 	{
-		const spectral_node_store& nd = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+		// Corner 1
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
 
-		if (nd.isboundarynode == true)
+		if (nd1.isboundarynode == true)
 		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
 			int local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
 
-			if (nd.isFieldBC == true)
+			if (nd1.isFieldBC == true && nd1.fieldvalue == 0.0)
 			{
 				// Apply field value at the node
-				// dirichlet_vector(local_idx) = nd.fieldvalue;
 				dirichlet_BC_flag(local_idx) = 1;
 			}
-			else
+		}
+
+		// Edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.quad_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : quad_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
 			{
-				// Apply source value at the node
-				// source_vector(local_idx) = nd.sourcevalue;
+				int local_idx = edge_node_local_ids[j];
+
+				if (edge_nd.isFieldBC == true && edge_nd.fieldvalue == 0.0)
+				{
+					// Apply field value at the node
+					dirichlet_BC_flag(local_idx) = 1;
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 4]];
+
+		if (nd2.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			int local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
+
+			if (nd2.isFieldBC == true && nd2.fieldvalue == 0.0)
+			{
+				// Apply field value at the node
+				dirichlet_BC_flag(local_idx) = 1;
 			}
 		}
 
 	}
 	//
 }
-
-
 
 
 
@@ -923,87 +941,6 @@ void modal_spectral_solver::report(const char* msg)
 	//
 }
 
-
-
-
-bool modal_spectral_solver::solveWithSpectra(int num_modes,
-	const Eigen::SparseMatrix<double>& K_ff,
-	const Eigen::SparseMatrix<double>& M_ff,
-	Eigen::VectorXd& eigenvalues,
-	Eigen::MatrixXd& eigenvectors)
-{
-
-	report("Solving with Spectra solver...");
-	auto start_time = std::chrono::high_resolution_clock::now();
-
-	int n = static_cast<int>(K_ff.rows());
-	int ncv = std::min(2 * num_modes + 1, n);  // Number of Lanczos vectors
-
-	// Method 1: Using Cholesky to convert to standard eigenvalue problem
-	Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> chol(M_ff);
-
-
-	if (chol.info() != Eigen::Success)
-	{
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-		std::string msg = "Mass matrix is not positive definite, Solver failed in " + std::to_string(duration.count()) + " ms";
-		report(msg.c_str());
-
-		return false;
-		// throw std::runtime_error("Mass matrix is not positive definite");
-	}
-
-	// Create the operator for (M^{-1} * K)
-	MinvKOp op(K_ff, chol);
-
-	// Create the solver for standard eigenvalue problem
-	// Note: Spectra::SymEigsSolver expects only the operator type
-	Spectra::SymEigsSolver<MinvKOp> eigs(op, num_modes, ncv);
-
-	// Initialize and compute
-	eigs.init();
-
-	// Compute eigenvalues (smallest algebraic values for lowest frequencies)
-	int nconv = static_cast<int>(eigs.compute(Spectra::SortRule::SmallestAlge));
-
-	if (eigs.info() == Spectra::CompInfo::Successful)
-	{
-		eigenvalues = eigs.eigenvalues();
-		eigenvectors = eigs.eigenvectors();
-
-		// Convert eigenvalues from standard to generalized
-		// For standard problem: K*x = λ*M*x, we solved M^{-1}K*x = λ*x
-		// So λ are the same
-		//for (int i = 0; i < eigenvalues.size(); ++i) 
-		//{
-		//	if (eigenvalues(i) < 0) 
-		//	{
-		//		report("Warning: Negative eigenvalue detected");
-		//	}
-		//}
-	}
-	else
-	{
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-		std::string msg = "Spectra solver failed to converge in " + std::to_string(duration.count()) + " ms";
-		report(msg.c_str());
-
-		return false;
-
-		// throw std::runtime_error("Spectra solver failed to converge");
-	}
-
-	auto end_time = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-	std::string msg = "Spectra solver completed in " + std::to_string(duration.count()) + " ms";
-	report(msg.c_str());
-
-	return true;
-}
 
 
 

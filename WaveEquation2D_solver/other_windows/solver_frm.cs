@@ -44,8 +44,9 @@ namespace WaveEquation2D_solver.other_windows
             textBox_numberofmodes.Text = Properties.Settings.Default.Sett_numofmodes.ToString();
 
             checkBox_extendconstraints.Checked = true;
-            checkBox_loadmodalanalysis.Checked = true;
             checkBox_saveHrefinedmodel.Checked = false;
+
+            solvertype_changed();
 
         }
 
@@ -201,13 +202,23 @@ namespace WaveEquation2D_solver.other_windows
                     return;
                 }
 
-
-                if (!int.TryParse(textBox_numberofmodes.Text, out int numberofmodes))
+                int numberofmodes = 0;
+                if (comboBox_solvertype.SelectedIndex == 1) // Modal Superposition method
                 {
-                    AppendStatus("Invalid number of modes.\n");
-                    return;
+                    if (!int.TryParse(textBox_numberofmodes.Text, out int numberofmodes_temp) || numberofmodes_temp <= 0)
+                    {
+                        AppendStatus("Invalid number of modes. Please enter a positive integer.\n");
+                        return;
+                    }
+                    numberofmodes = numberofmodes_temp;
                 }
-
+                else
+                {
+                    // For Direct Integration method, set number of modes to 0
+                    textBox_numberofmodes.Text = "0";
+                    numberofmodes = 0;
+                }
+                
         
                 // Write input file
                 wave2DSolverInterop.SolverSettings solver_settings = new wave2DSolverInterop.SolverSettings();
@@ -218,7 +229,6 @@ namespace WaveEquation2D_solver.other_windows
                 solver_settings.TimeIncrement = timestep;
                 solver_settings.NumberOfModes = numberofmodes;
                 solver_settings.ExtendConstraints = checkBox_extendconstraints.Checked == false ? 0 : 1;
-                solver_settings.ImportModalAnalysisResults = checkBox_loadmodalanalysis.Checked == false ? 0 : 1;
                 solver_settings.SaveHRefinedModel = checkBox_saveHrefinedmodel.Checked == false ? 0 : 1;
           
 
@@ -569,7 +579,28 @@ namespace WaveEquation2D_solver.other_windows
             richTextBox_AnalysisUpdate.ScrollToCaret();
         }
 
-    
+        private void comboBox_solvertype_SelectedIndexChanged(object sender, EventArgs e) => solvertype_changed();
+
+
+        private void solvertype_changed()
+        {
+            if (comboBox_solvertype.SelectedIndex == 0) // Direct Integration method
+            {
+                label_numofmodes.Visible = false;
+                textBox_numberofmodes.Visible = false;
+                label_pml.Visible = false;
+              
+            }
+            else if (comboBox_solvertype.SelectedIndex == 1) // Modal Superposition method
+            {
+                label_numofmodes.Visible = true;
+                textBox_numberofmodes.Visible = true;
+                label_pml.Visible = true;
+
+            }
+        }
+
+
 
     }
 }

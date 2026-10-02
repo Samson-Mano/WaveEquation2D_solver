@@ -70,7 +70,6 @@ struct spectral_edge_store
 
 	bool isboundaryedge = false;
 
-	bool isSommerfieldBC = false;
 	bool isFieldBC = false;
 	bool isDerivFieldBC = false;
 	bool isSource = false;

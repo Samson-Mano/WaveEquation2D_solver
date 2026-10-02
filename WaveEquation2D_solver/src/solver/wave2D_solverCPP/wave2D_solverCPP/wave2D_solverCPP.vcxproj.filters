@@ -48,10 +48,10 @@
     <ClCompile Include="solve_2DwaveanalysisCPP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modal_analysis_solver\MinvKOp.cpp">
+    <ClCompile Include="modal_superposition_solver\MinvKOp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modal_analysis_solver\modal_spectral_solver.cpp">
+    <ClCompile Include="modal_superposition_solver\modal_spectral_solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,10 +86,10 @@
     <ClInclude Include="system_store\hash_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="modal_analysis_solver\MinvKOp.h">
+    <ClInclude Include="modal_superposition_solver\MinvKOp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="modal_analysis_solver\modal_spectral_solver.h">
+    <ClInclude Include="modal_superposition_solver\modal_spectral_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

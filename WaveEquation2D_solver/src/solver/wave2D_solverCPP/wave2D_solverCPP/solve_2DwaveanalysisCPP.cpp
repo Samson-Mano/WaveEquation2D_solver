@@ -25,7 +25,6 @@ struct SolverSettings
 	int NumberOfModes;          // Number of modes to consider in the analysis
 
 	int ExtendConstraints; // 0 or 1
-	int ImportModalAnalysisResults; // 0 or 1
 	int SaveHRefinedModel; // 0 or 1
 
 };
@@ -72,8 +71,8 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	int NumberOfModes = settings->NumberOfModes;          // Number of modes to consider in the analysis
 
 	int ExtendConstraints = settings->ExtendConstraints; // 0 or 1
-	int ImportModalAnalysisResults = settings->ImportModalAnalysisResults; // 0 or 1
 	int SaveHRefinedModel = settings->SaveHRefinedModel; // 0 or 1
+
 
 	msg = "H Refinement order = " + std::to_string(HRefinement) + ", Spectral order = " +
 		std::to_string(SpectralOrderN);
@@ -113,6 +112,12 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	}
 
 
+	// Find the geometry extents (min and max coordinates) for scaling
+	double geom_min_x = std::numeric_limits<double>::max();
+	double geom_max_x = std::numeric_limits<double>::lowest();
+	double geom_min_y = std::numeric_limits<double>::max();
+	double geom_max_y = std::numeric_limits<double>::lowest();
+
 
 	//_______________________________________________________________________________________
 	// Read the elements for H Refinement module
@@ -131,10 +136,39 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		infile.read(reinterpret_cast<char*>(&x_coord), 8);
 		infile.read(reinterpret_cast<char*>(&y_coord), 8);
 
+		// Find the geometry extents
+		geom_min_x = std::min(geom_min_x, x_coord);
+		geom_max_x = std::max(geom_max_x, x_coord);
+		geom_min_y = std::min(geom_min_y, y_coord);
+		geom_max_y = std::max(geom_max_y, y_coord);
+
 		// Add node to the H Refinement system store
 		h_refinement_model.add_node(node_id, x_coord, y_coord);
 
 	}
+
+
+	// Calculate the scaling factor based on the geometry extents
+	double geom_width = geom_max_x - geom_min_x;
+	double geom_height = geom_max_y - geom_min_y;
+
+
+	double max_bound = std::max(geom_width, geom_height);
+
+	// Determine the scaling factor to fit the geometry within a 10 x 10 box
+	double scale_value = 10.0 / max_bound;
+
+
+
+	// Scale the model coordinates to fit within the 10.0 x 10.0 box
+	for (auto& node_pair : h_refinement_model.node_list)
+	{
+		node_store& node = node_pair.second;
+		node.x_coord = (node.x_coord - geom_min_x) * scale_value;
+		node.y_coord = (node.y_coord - geom_min_y) * scale_value;
+	}
+
+
 
 	stopwatch_elapsed_str.str("");       // clear the string content
 	stopwatch_elapsed_str.clear();       // clear any error flags
@@ -225,9 +259,20 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		infile.read(reinterpret_cast<char*>(&yield_point), 8);
 		infile.read(reinterpret_cast<char*>(&thickness), 8);
 
+
+		if (materialid == 0)
+		{
+			// Perfectly matched layer (PML) material properties
+			material_density = 1.0; // to avoid division by zero
+		}
+
+		double wave_speed_squared = youngs_modulus / (material_density * (1 - poissons_ratio * poissons_ratio));
+		double wave_speed = std::sqrt(wave_speed_squared);
+
+
 		// Add material to the H Refinement system store
 		h_refinement_model.add_material(materialid, youngs_modulus, material_density, poissons_ratio,
-			yield_point, thickness);
+			yield_point, thickness, wave_speed);
 
 	}
 
@@ -300,7 +345,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		double fieldvalue = 0.0, normalderivfieldvalue = 0.0;
 		double sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
 		int32_t sourcetype = -1;
-		bool isFieldBC = false, isSommerfieldBC = false, isDerivFieldBC = false, isSource = false;
+		bool isFieldBC = false, isDerivFieldBC = false, isSource = false;
 
 		infile.read(reinterpret_cast<char*>(&edgeConstraintsetid), 4);
 		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
@@ -311,7 +356,6 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
 		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isDerivFieldBC), 1);
-		infile.read(reinterpret_cast<char*>(&isSommerfieldBC), 1);
 		infile.read(reinterpret_cast<char*>(&isSource), 1);
 
 		int32_t edgeidCount;
@@ -340,8 +384,9 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 		// Add edge constraints to the H Refinement system store
 		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_startpt_id_list, edge_endpt_id_list, edge_id_list,
-			isSommerfieldBC, isFieldBC, isDerivFieldBC, isSource,
-			fieldvalue, normalderivfieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
+			isFieldBC, isDerivFieldBC, isSource,
+			fieldvalue, normalderivfieldvalue, 
+			sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
 	}
 
@@ -385,20 +430,17 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 	wave_system.node_edge_map = std::move(h_refinement_model.node_edge_map);
 
+	// Set the maximum geometry bound for scaling
+	wave_system.max_geom_bound = max_bound;
+
+	// Normalize the material wave speeds
+	wave_system.normalize_material_wave_speeds();
+
+	
+	// Perform modal analysis
 
 
-	if (ImportModalAnalysisResults == 0)
-	{
-		// Perform modal analysis
 
-
-	}
-	else
-	{
-		// Read modal analysis results from file
-
-
-	}
 
 
 

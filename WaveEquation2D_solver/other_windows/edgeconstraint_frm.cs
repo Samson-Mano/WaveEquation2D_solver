@@ -131,19 +131,7 @@ namespace WaveEquation2D_solver.other_windows
                     constraint_edge_startpt_ids, constraint_edge_endpt_ids,
                     constraint_edge_startpts, constraint_edge_endpts,
                     field_value, normalderiv_value, 0.0, 0.0, -1, 0.0, 
-                    checkBox_dirichlet.Checked, checkBox_neumann.Checked, false, false);
-
-            }
-            else if (radioButton_sommerfield.Checked == true)
-            {
-                // ABC Sommerfield boundary condition
-
-                // Add the edge constraint
-                model_data.fe_data.fe_edgeconstraints.add_edgeconstraint(model_data.fe_data.selected_edge_ids.ToList(),
-                    constraint_edge_startpt_ids, constraint_edge_endpt_ids,
-                    constraint_edge_startpts, constraint_edge_endpts,
-                    0.0, 0.0, 0.0, 0.0, -1, 0.0,  
-                    false, false, true, false);
+                    checkBox_dirichlet.Checked, checkBox_neumann.Checked, false);
 
             }
             else if (radioButton_source.Checked == true)
@@ -164,7 +152,7 @@ namespace WaveEquation2D_solver.other_windows
                    constraint_edge_startpt_ids, constraint_edge_endpt_ids,
                    constraint_edge_startpts, constraint_edge_endpts,
                    0.0, 0.0, source_value, source_frequency, comboBox_sourcetype.SelectedIndex, source_start_time, 
-                   false, false, false, true);
+                   false, false, true);
 
             }
 
@@ -252,7 +240,6 @@ namespace WaveEquation2D_solver.other_windows
                     edgeIdsPreview,   // show some of constraint nodes as string here
                     cnst.field_value.ToString("G"),
                     cnst.normalderivfield_value.ToString("G"),
-                    cnst.isSommerfieldBC,
                     cnst.source_value.ToString("G"),
                     cnst.source_frequency.ToString("G")
                     );
@@ -313,9 +300,6 @@ namespace WaveEquation2D_solver.other_windows
         private void radioButton_boundaryconditions_CheckedChanged(object sender, EventArgs e) => UpdateEnabledStateUI();
 
 
-        private void radioButton_sommerfield_CheckedChanged(object sender, EventArgs e) => UpdateEnabledStateUI();
-
-
         private void radioButton_source_CheckedChanged(object sender, EventArgs e) => UpdateEnabledStateUI();
        
 
@@ -332,11 +316,6 @@ namespace WaveEquation2D_solver.other_windows
             checkBox_neumann.Enabled = isBoundartConditionSelected;
             textBox_neumann.Enabled= isBoundartConditionSelected;
             label_neumann.Enabled = isBoundartConditionSelected;
-
-
-            // ABC Sommerfield
-            bool isSommerfieldSelected = radioButton_sommerfield.Checked;
-            label_sommerfield.Enabled = isSommerfieldSelected;
 
             // Source
             bool isSourceSelected = radioButton_source.Checked;

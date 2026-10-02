@@ -57,7 +57,8 @@ public:
 		const double& matdensity,
 		const double& poissonsratio,
 		const double& yieldpoint, 
-		const double& thickness);
+		const double& thickness,
+		const double& wave_speed);
 
 
 	void add_nodeconstraint(const int& node_constraint_set_id,
@@ -74,7 +75,6 @@ public:
 		std::vector<int>& constraint_edge_startpt_ids,
 		std::vector<int>& constraint_edge_endpt_ids,
 		std::vector<int>& constraint_edge_ids,
-		const bool& isSommerfieldBC,
 		const bool& isFieldBC,
 		const bool& isDerivFieldBC,
 		const bool& isSource,

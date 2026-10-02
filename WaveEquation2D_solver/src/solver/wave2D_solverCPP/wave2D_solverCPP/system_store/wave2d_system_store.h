@@ -48,7 +48,6 @@ struct edge_store
 	bool isboundaryedge = false;
 
 	//_____________________________________________________________________
-	bool isSommerfieldBC = false;
 	bool isFieldBC = false;
 	bool isDerivFieldBC = false;
 	bool isSource = false;
@@ -110,7 +109,6 @@ struct edge_constraint_store
 	std::vector<int> constraint_edge_endpt_ids;
 	std::vector<int> constraint_edge_ids;
 
-	bool isSommerfieldBC = false;
 	bool isFieldBC = false;
 	bool isDerivFieldBC = false;
 	bool isSource = false;
@@ -135,7 +133,8 @@ struct material_store
 	double poissonsratio = 0.0;
 	double yieldpoint = 0.0;
 	double thickness = 0.0;
-
+	double wave_speed = 0.0;
+	double norm_wave_speed = 0.0;
 };
 
 
@@ -156,9 +155,13 @@ public:
 
 	std::unordered_map<int, std::vector<int>> node_edge_map;
 
+	double max_geom_bound = 0.0;
+	double max_wave_speed = 0.0;
 
 	wave2d_system_store();
 	~wave2d_system_store() = default;
+
+	void normalize_material_wave_speeds();
 
 
 	uint64_t get_model_signature() const;

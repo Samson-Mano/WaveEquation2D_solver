@@ -109,14 +109,7 @@ public:
 
 	void create_global_matrices();
 
-	bool solve_modal_analysis(int inpt_num_modes, int solver_type);
-
-
-	enum SolverType
-	{
-		SOLVER_SPECTRA = 1,
-		SOLVER_ARPACK = 2
-	};
+	bool solve_modal_analysis(int inpt_num_modes);
 
 
 	void store_matrices_text_debug();
@@ -125,6 +118,7 @@ public:
 
 private:
 	const double M_PI = 3.1415926535897932384626433;
+	double freq_scale_factor = 1.0; // Scale factor for frequency (to convert to model units (scaled geometry) to physical units (unscaled geometry))
 
 	wave2d_system_store* wave_2dsystem_ptr;
 	spectral_mesh2d spec_mesh2d;
@@ -135,8 +129,6 @@ private:
 
 
 	int numDOF = 0;
-	std::unordered_map<int, int> nodeid_map; // Node ID map
-
 
 	Eigen::SparseMatrix<double> global_k_matrix; // Global ke Matrix [Ke]
 	Eigen::SparseMatrix<double> global_m_matrix; // Global Me Matrix [Me]
@@ -180,8 +172,6 @@ private:
 		Eigen::VectorXi& dirichlet_BC_flag);
 
 
-	void get_trielement_source_vector(const spectral_trielement_store& tri_elm,
-		Eigen::VectorXi& dirichlet_BC_flag);
 
 
 	//________________________________________________________________________________________________
@@ -218,18 +208,7 @@ private:
 
 
 
-	void get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
-		Eigen::VectorXi& dirichlet_BC_flag);
-
 	//________________________________________________________________________________________________
-
-
-	bool solveWithSpectra(int num_modes,
-		const Eigen::SparseMatrix<double>& K_ff,
-		const Eigen::SparseMatrix<double>& M_ff,
-		Eigen::VectorXd& eigenvalues,
-		Eigen::MatrixXd& eigenvectors);
-
 
 
 	bool solveWithARPACK(int num_modes,

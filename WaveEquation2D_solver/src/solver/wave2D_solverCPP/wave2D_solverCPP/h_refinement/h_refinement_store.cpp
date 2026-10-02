@@ -124,10 +124,11 @@ void h_refinement_store::add_quadelement(const int& quad_id,
 
 void h_refinement_store::add_material(const int& materialid,
 	const double& youngsmodulus, const double& matdensity, const double& poissonsratio,
-	const double& yieldpoint, const double& thickness)
+	const double& yieldpoint, const double& thickness,
+	const double& wave_speed)
 {
-	// Material additio
-	material_store temp_material(materialid, youngsmodulus, matdensity, poissonsratio, yieldpoint, thickness);
+	// Material addition
+	material_store temp_material(materialid, youngsmodulus, matdensity, poissonsratio, yieldpoint, thickness, wave_speed);
 
 	// Insert to the material list
 	material_list.insert({ materialid, temp_material });
@@ -168,7 +169,6 @@ void h_refinement_store::add_edgeconstraint(const int& edge_constraint_set_id,
 	std::vector<int>& constraint_edge_startpt_ids,
 	std::vector<int>& constraint_edge_endpt_ids,
 	std::vector<int>& constraint_edge_ids,
-	const bool& isSommerfieldBC,
 	const bool& isFieldBC,
 	const bool& isDerivFieldBC,
 	const bool& isSource,
@@ -183,7 +183,6 @@ void h_refinement_store::add_edgeconstraint(const int& edge_constraint_set_id,
 	edge_constraint_store temp_edge_constraint;
 	temp_edge_constraint.edge_constraint_set_id = edge_constraint_set_id;
 
-	temp_edge_constraint.isSommerfieldBC = isSommerfieldBC;
 	temp_edge_constraint.isFieldBC = isFieldBC;
 	temp_edge_constraint.isDerivFieldBC = isDerivFieldBC;
 	temp_edge_constraint.isSource = isSource;
@@ -379,7 +378,6 @@ void h_refinement_store::renumber_model()
 
 		edge_constraint_store temp_edge_constraint;
 		temp_edge_constraint.edge_constraint_set_id = edge_constraint_set_id;
-		temp_edge_constraint.isSommerfieldBC = edge_cnstr.isSommerfieldBC;
 		temp_edge_constraint.isFieldBC = edge_cnstr.isFieldBC;
 		temp_edge_constraint.isDerivFieldBC = edge_cnstr.isDerivFieldBC;
 		temp_edge_constraint.isSource = edge_cnstr.isSource;
@@ -919,7 +917,6 @@ void h_refinement_store::recreate_edges(const std::unordered_map<int, std::tuple
 
 			edge_constraint_store temp_edge_constraint;
 			temp_edge_constraint.edge_constraint_set_id = edge_cnstr.edge_constraint_set_id;
-			temp_edge_constraint.isSommerfieldBC = edge_cnstr.isSommerfieldBC;
 			temp_edge_constraint.isFieldBC = edge_cnstr.isFieldBC;
 			temp_edge_constraint.isDerivFieldBC = edge_cnstr.isDerivFieldBC;
 			temp_edge_constraint.isSource = edge_cnstr.isSource;
@@ -1017,7 +1014,6 @@ void h_refinement_store::map_constraints_to_nodes_and_edges()
 			edge_list[edge_id].isboundaryedge = true;
 
 			//_____________________________________________________________________
-			edge_list[edge_id].isSommerfieldBC = edge_cnstr.isSommerfieldBC;
 			edge_list[edge_id].isFieldBC = edge_cnstr.isFieldBC;
 			edge_list[edge_id].isDerivFieldBC = edge_cnstr.isDerivFieldBC;
 			edge_list[edge_id].isSource = edge_cnstr.isSource;
@@ -1313,7 +1309,6 @@ void h_refinement_store::save_hrefined_model()
 
 		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isFieldBC), sizeof(bool));
 		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isDerivFieldBC), sizeof(bool));
-		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isSommerfieldBC), sizeof(bool));
 		bin_file.write(reinterpret_cast<const char*>(&edge_cnstr.isSource), sizeof(bool));
 
 
