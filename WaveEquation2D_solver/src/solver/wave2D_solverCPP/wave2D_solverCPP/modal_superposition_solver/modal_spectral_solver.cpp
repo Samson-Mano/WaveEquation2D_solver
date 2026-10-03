@@ -7,8 +7,8 @@ modal_spectral_solver::modal_spectral_solver()
 
 
 
-void modal_spectral_solver::init(wave2d_system_store* wave_2dsystem_ptr,
-	const char* output_file_char, stopwatch_events* stopwatch, void(*callback)(const char*))
+void modal_spectral_solver::init(wave2d_system_store* wave_2dsystem_ptr, 
+	stopwatch_events* stopwatch, void(*callback)(const char*))
 {
 	// Set the initialized system ptr
 	this->wave_2dsystem_ptr = wave_2dsystem_ptr;
@@ -20,12 +20,12 @@ void modal_spectral_solver::init(wave2d_system_store* wave_2dsystem_ptr,
 	// Store callback locally
 	this->m_callback = callback;
 
-	// Store the output file name
-	// CRITICAL: Copy the string to std::string for permanent storage
-	this->output_file = std::string(output_file_char);
+	//// Store the output file name
+	//// CRITICAL: Copy the string to std::string for permanent storage
+	//this->output_file = std::string(output_file_char);
 
-	std::string msg = "Output file set to: " + this->output_file;
-	report(msg.c_str());
+	//std::string msg = "Output file set to: " + this->output_file;
+	//report(msg.c_str());
 
 
 }
@@ -119,9 +119,16 @@ void modal_spectral_solver::create_global_matrices()
 			get_trielement_k_grad_k_mass_matrix(elem_nodes, elem_coords,
 				element_k_matrix, element_m_matrix);
 
+			int material_id = tri_elm.materialid;
 
-			// double wave_speed = spec_mesh2d.material_list[tri_elm.materialid].wave_speed; // get the material wave speed
-			// element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+			if (material_id == 0)
+			{
+				// Perfectly matched layer (PML) material, set the normalized wave speed to default material id 1
+				material_id = 1;
+			}
+
+			double norm_wave_speed = spec_mesh2d.material_list[material_id].norm_wave_speed; // get the normalized material wave speed
+			element_k_matrix = (norm_wave_speed * norm_wave_speed) * element_k_matrix;
 
 			//________________________________________________________________________________________________
 			// Step 3: Create Element field vector
@@ -193,8 +200,16 @@ void modal_spectral_solver::create_global_matrices()
 				element_k_matrix, element_m_matrix);
 
 
-			// double wave_speed = spec_mesh2d.material_list[quad_elm.materialid].wave_speed; // get the material wave speed
-			// element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+			int material_id = quad_elm.materialid;
+
+			if (material_id == 0)
+			{
+				// Perfectly matched layer (PML) material, set the normalized wave speed to default material id 1
+				material_id = 1;
+			}
+
+			double norm_wave_speed = spec_mesh2d.material_list[material_id].norm_wave_speed; // get the normalized material wave speed
+			element_k_matrix = (norm_wave_speed * norm_wave_speed) * element_k_matrix;
 
 
 			//________________________________________________________________________________________________
@@ -249,7 +264,7 @@ void modal_spectral_solver::create_global_matrices()
 
 
 
-bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
+bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes, double geom_min_x, double geom_min_y, double scale_value)
 {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
@@ -367,6 +382,24 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
 		return false;
 	}
 
+	// Sort eigenvalues and eigenvectors in ascending order of eigenvalues
+	// Spectra returns ascending order for SmallestAlge, but sort defensively.
+	std::vector<int> idx(eigenvalues.size());
+	std::iota(idx.begin(), idx.end(), 0);
+	std::sort(idx.begin(), idx.end(),
+		[&](int a, int b) { return eigenvalues(a) < eigenvalues(b); });
+
+	Eigen::VectorXd sorted_vals(eigenvalues.size());
+	Eigen::MatrixXd sorted_vecs(eigenvectors.rows(), eigenvectors.cols());
+	for (int i = 0; i < static_cast<int>(idx.size()); ++i) {
+		sorted_vals(i) = eigenvalues(idx[i]);
+		sorted_vecs.col(i) = eigenvectors.col(idx[i]);
+	}
+	eigenvalues = std::move(sorted_vals);
+	eigenvectors = std::move(sorted_vecs);
+
+
+
 	// 4) Convert eigenvalues to frequencies
 	this->natural_frequencies.clear();
 	// this->natural_frequencies.reserve(eigenvalues.size());
@@ -378,7 +411,11 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
 		{  // Positive definite check
 			double omega = std::sqrt(lambda);
 			double freq = omega / (2.0 * M_PI);
-			this->natural_frequencies.push_back(freq);
+
+
+			double scaled_freq = this->freq_scale_factor * freq; // Scale the frequency based on the maximum wave speed and maximum boundary value	
+
+			this->natural_frequencies.push_back(scaled_freq);
 		}
 		else
 		{
@@ -396,6 +433,11 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
 		if (norm > 1e-12)
 		{
 			eigenvectors.col(i) /= norm;
+		}
+		else
+		{
+			// Rigid body mode (set to 1.0 for all free DOFs)
+			eigenvectors.col(i) = Eigen::VectorXd::Ones(eigenvectors.rows());
 		}
 	}
 
@@ -415,7 +457,11 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes)
 	report(msg.c_str());
 
 	// Store results
-	store_results_with_index();
+	store_results_with_index(geom_min_x, geom_min_y, scale_value);
+
+	// Perfrom modal superposition of global matrices
+	perform_modal_superposition_of_globalmatrices();
+
 
 	return true;
 }
@@ -808,12 +854,12 @@ void modal_spectral_solver::set_global_matrix(const std::vector<int>& elem_nodes
 	for (int i = 0; i < nen; i++)
 	{
 		// get the global map id
-		int i_node_map = this->nodeid_map[elem_nodes[i]];
+		int i_node_map = elem_nodes[i];
 
 		for (int j = 0; j < nen; j++)
 		{
 			// get the global map id
-			int j_node_map = this->nodeid_map[elem_nodes[j]];
+			int j_node_map = elem_nodes[j];
 
 			double k_val = element_k_matrix(i, j);
 			double m_val = element_m_matrix(i, j);
@@ -838,7 +884,7 @@ void modal_spectral_solver::set_global_BC_flag_vector(const std::vector<int>& el
 	for (int i = 0; i < nen; i++)
 	{
 		// get the global map id
-		int i_node_map = this->nodeid_map[elem_nodes[i]];
+		int i_node_map = elem_nodes[i];
 
 		global_BC_flag_vector(i_node_map) = element_BC_flag_vector(i);
 	}
@@ -1043,147 +1089,41 @@ bool modal_spectral_solver::solveWithARPACK(int num_modes,
 
 
 
-void modal_spectral_solver::store_results_with_index()
+void modal_spectral_solver::store_results_with_index(double geom_min_x, double geom_min_y, double scale_value)
 {
-	// Open file in binary mode
-	std::ofstream bin_file(output_file, std::ios::binary);
-
-	if (!bin_file.is_open())
-	{
-		std::string error_msg = "Failed to open output file: " + this->output_file;
-		report(error_msg.c_str());
-		throw std::runtime_error("Failed to open output file: " + output_file);
-	}
-
-	// Get counts
-	int32_t num_nodes = static_cast<int32_t>(spec_mesh2d.renderer_node_points.size());
-	int32_t num_modes = static_cast<int32_t>(natural_frequencies.size());
-	uint32_t num_edges = static_cast<uint32_t>(spec_mesh2d.renderer_edge_lines.size());
-	uint32_t num_triangles = static_cast<uint32_t>(spec_mesh2d.renderer_element_triangles.size());
-
-	// Calculate offsets (will be updated after writing)
-	uint64_t header_size = sizeof(BinaryFileHeader);
-	uint64_t node_data_offset = header_size;
-
-	// Node data size
-	uint64_t node_data_size = num_nodes * (sizeof(int32_t) + 2 * sizeof(double));
-	uint64_t edge_data_offset = node_data_offset + node_data_size;
-
-	// Edge data size
-	uint64_t edge_data_size = spec_mesh2d.renderer_edge_lines.size() * (2 * sizeof(int32_t));
-	uint64_t triangle_data_offset = edge_data_offset + edge_data_size;
-
-	// Triangle data size
-	uint64_t triangle_data_size = spec_mesh2d.renderer_element_triangles.size() * (3 * sizeof(int32_t));
-	uint64_t mode_index_offset = triangle_data_offset + triangle_data_size;
-
-	// Mode index table size
-	uint64_t mode_index_size = num_modes * (sizeof(uint32_t) + sizeof(double) + sizeof(uint64_t) + sizeof(uint64_t));
-	uint64_t mode_data_offset = mode_index_offset + mode_index_size;
-
-	std::string success_msg = "";
-
-	// Write header
-	BinaryFileHeader header;
-	header.num_modes = num_modes;
-	header.num_nodes = num_nodes;
-	header.num_edges = num_edges;
-	header.num_triangles = num_triangles;
-	header.mode_data_offset = mode_data_offset;
-	header.mode_index_offset = mode_index_offset;
-
-	bin_file.write(reinterpret_cast<const char*>(&header), sizeof(header));
-
-
-	// Write nodes
-	for (const auto& node : spec_mesh2d.renderer_node_points)
-	{
-		int32_t node_id = static_cast<int32_t>(node.n_id);
-		bin_file.write(reinterpret_cast<const char*>(&node_id), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&node.x), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&node.y), sizeof(double));
-
-	}
-
-	report("Result mesh: Nodes written");
-
-	// Write edges
-	for (const auto& edge : spec_mesh2d.renderer_edge_lines)
-	{
-		int32_t start_id = static_cast<int32_t>(edge.nstart);
-		int32_t end_id = static_cast<int32_t>(edge.nend);
-		bin_file.write(reinterpret_cast<const char*>(&start_id), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&end_id), sizeof(int32_t));
-
-	}
-
-	report("Result mesh: Edges written");
-
-	// Write triangles
-	for (const auto& tri : spec_mesh2d.renderer_element_triangles)
-	{
-		int32_t n1 = static_cast<int32_t>(tri.n1);
-		int32_t n2 = static_cast<int32_t>(tri.n2);
-		int32_t n3 = static_cast<int32_t>(tri.n3);
-		bin_file.write(reinterpret_cast<const char*>(&n1), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&n2), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&n3), sizeof(int32_t));
-
-	}
-
-	report("Result mesh: Triangles written");
-
-	std::vector<ModeIndexEntry> mode_index;
-	uint64_t current_offset = mode_data_offset;
-
-	// Write mode index table - field by field 
-	for (int32_t i = 0; i < num_modes; i++)
-	{
-		uint32_t mode_id = i;
-		double frequency = natural_frequencies[i];
-		uint64_t file_offset = current_offset;
-		uint64_t data_size = sizeof(int32_t) + (num_nodes * (sizeof(int32_t) + sizeof(double)));
-
-		// Write each field individually
-		bin_file.write(reinterpret_cast<const char*>(&mode_id), sizeof(uint32_t));
-		bin_file.write(reinterpret_cast<const char*>(&frequency), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&file_offset), sizeof(uint64_t));
-		bin_file.write(reinterpret_cast<const char*>(&data_size), sizeof(uint64_t));
-
-		mode_index.push_back({ mode_id, frequency, file_offset, data_size });
-		current_offset += data_size;
-	}
-
-	report("Mode index table written");
-
-	// Write mode data (each mode separately)
-	for (int32_t mode_id = 0; mode_id < num_modes; mode_id++)
-	{
-		// Write mode ID first (for redundancy)
-		bin_file.write(reinterpret_cast<const char*>(&mode_id), sizeof(int32_t));
-
-		// Write mode shape values for each node
-		for (const auto& node : spec_mesh2d.renderer_node_points)
-		{
-			int32_t node_id = static_cast<int32_t>(node.n_id);
-			int nd_idx = nodeid_map[node.n_id];
-			double mode_value = natural_modes(nd_idx, mode_id);
-
-			bin_file.write(reinterpret_cast<const char*>(&node_id), sizeof(int32_t));
-			bin_file.write(reinterpret_cast<const char*>(&mode_value), sizeof(double));
-		}
-	}
-
-	bin_file.flush();
-	bin_file.close();
-
-	success_msg = "Modal results stored successfully: " + this->output_file +
-		" (" + std::to_string(num_nodes) + " nodes, " +
-		std::to_string(num_modes) + " modes)";
-
-	report(success_msg.c_str());
+	// Not USED
 
 }
+
+
+void modal_spectral_solver::perform_modal_superposition_of_globalmatrices()
+{
+
+	// Get the number of modes
+	const int num_modes = static_cast<int>(natural_modes.cols());
+
+	// Clear the modal superposition matrices
+	this->modal_k_vector.clear();
+	this->modal_m_vector.clear();
+
+	this->modal_k_vector.reserve(num_modes);
+	this->modal_m_vector.reserve(num_modes);
+
+
+	for (int mode_idx = 0; mode_idx < num_modes; ++mode_idx)
+	{
+		//double freq = this->natural_frequencies[mode_idx];
+
+		const Eigen::VectorXd phi = natural_modes.col(mode_idx);
+		
+		// Compute modal stiffness and mass contributions
+		this->modal_k_vector.push_back(phi.dot(global_k_matrix * phi));
+		this->modal_m_vector.push_back(phi.dot(global_m_matrix * phi));
+	}
+	//
+}
+
+
 
 
 void modal_spectral_solver::store_matrices_text_debug()
@@ -1276,6 +1216,40 @@ void modal_spectral_solver::store_matrices_text_debug()
 		}
 	}
 	text_file << "\n";
+
+	//__________________________________________________________________________________________________________________________
+	matrix_rows = global_dirichlet_BC_flags_vector.size();
+
+	text_file << "=== Global dirichlet BC vector ===\n";
+	text_file << "Size: " << matrix_rows << "\n";
+
+	if (matrix_rows > max_print_size)
+	{
+		text_file << "WARNING: Vector size exceeds " << max_print_size
+			<< ". Printing only the first " << max_print_size << " elements.\n\n";
+
+		// Print only the top-left corner
+		for (int i = 0; i < std::min(max_print_size, matrix_rows); i++)
+		{
+
+			text_file << std::setw(15) << std::setprecision(6) << global_dirichlet_BC_flags_vector[i] << " ";
+
+			text_file << "\n";
+		}
+	}
+	else
+	{
+		// Print full vector
+		for (int i = 0; i < matrix_rows; i++)
+		{
+
+			text_file << std::setw(15) << std::setprecision(6) << global_dirichlet_BC_flags_vector[i] << " ";
+
+			text_file << "\n";
+		}
+	}
+	text_file << "\n";
+
 
 	// Optional: Print matrix statistics
 	text_file << "=== Matrix Statistics ===\n";
@@ -1428,7 +1402,7 @@ void modal_spectral_solver::store_results_text_debug()
 		for (const auto& node : spec_mesh2d.renderer_node_points)
 		{
 			int32_t node_id = static_cast<int32_t>(node.n_id);
-			int nd_idx = nodeid_map[node.n_id];
+			int nd_idx = node_id;
 			double mode_value = natural_modes(nd_idx, mode_id);
 
 			text_file << "  " << node_id << ", " << mode_value << "\n";

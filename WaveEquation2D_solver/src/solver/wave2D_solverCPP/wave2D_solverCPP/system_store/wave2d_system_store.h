@@ -25,6 +25,8 @@ struct node_store
 
 	//_____________________________________________________________________
 	bool isFieldBC = false;
+	bool isSource = false;
+
 	double fieldvalue = 0.0; // Field value in the node
 	
 	double sourcevalue = 0.0; // Source value in the node
@@ -91,6 +93,7 @@ struct node_constraint_store
 	std::vector<int> constraint_node_ids;
 
 	bool isFieldBC = false;
+	bool isSource = false;
 	double fieldvalue = 0.0; // Field value in the node
 
 	double sourcevalue = 0.0; // Source value in the node

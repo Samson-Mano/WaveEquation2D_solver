@@ -64,6 +64,7 @@ public:
 	void add_nodeconstraint(const int& node_constraint_set_id,
 		std::vector<int>& node_ids,
 		const bool& isFieldBC,
+		const bool& isSource,
 		const double& fieldvalue,
 		const double& sourcevalue,
 		const double& sourcefrequency,

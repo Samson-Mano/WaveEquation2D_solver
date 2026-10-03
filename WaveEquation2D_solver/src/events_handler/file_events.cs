@@ -268,6 +268,7 @@ namespace WaveEquation2D_solver.src.events_handler
                             double NodeConstraint_source_starttime = double.Parse(splitValues[5]);
                             int NodeConstraint_sourcetype = int.Parse(splitValues[6]);
                             int NodeConstraint_isField = int.Parse(splitValues[7]);
+                            int NodeConstraint_isSource = int.Parse(splitValues[8]);
 
                             if (!NodeConstraintSetData.ContainsKey(NodeConstraintSetId))
                                 NodeConstraintSetData[NodeConstraintSetId] = new nodecnst_data();
@@ -284,10 +285,11 @@ namespace WaveEquation2D_solver.src.events_handler
                                 NodeconstraintEntry.source_start_time = NodeConstraint_source_starttime; // Source start time
 
                                 // Source type (0: Half sine pulse, 1: Rectangular pulse, 2: Triangle pulse, 3: Step force with finite rise,
-                                // 4. Full sine pulse, 5. Harmonic/ periodic exictation)
+                                // 4. Full sine pulse, 5. Harmonic/ periodic excitation)
                                 NodeconstraintEntry.source_type = NodeConstraint_sourcetype;        
 
                                 NodeconstraintEntry.isField = NodeConstraint_isField == 1 ? true : false;
+                                NodeconstraintEntry.isSource = NodeConstraint_isSource == 1 ? true : false;
                             }
                         }
                         catch (Exception ex)
@@ -321,7 +323,7 @@ namespace WaveEquation2D_solver.src.events_handler
                         // Add the node constraint to the list
                        fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
                                             cnst.field_value, cnst.source_value, cnst.source_frequency, cnst.source_start_time, 
-                                            cnst.source_type, cnst.isField);
+                                            cnst.source_type, cnst.isField, cnst.isSource);
 
                     }
                     // Console.WriteLine($"Constraint data read completed at {stopwatch.Elapsed.TotalSeconds:F2} secs");
@@ -585,6 +587,7 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(cnst.source_type);
                     writer.Write(cnst.source_start_time);
                     writer.Write(cnst.isField);
+                    writer.Write(cnst.isSource);
 
                     writer.Write(cnst.constraint_node_ids.Count);
                     foreach (int nid in cnst.constraint_node_ids)
@@ -780,7 +783,7 @@ namespace WaveEquation2D_solver.src.events_handler
                     cnst.source_type = reader.ReadInt32();
                     cnst.source_start_time = reader.ReadDouble();
                     cnst.isField = reader.ReadBoolean();
-
+                    cnst.isSource = reader.ReadBoolean();
 
                     int nidCount = reader.ReadInt32();
                     cnst.constraint_node_ids = new List<int>();
@@ -802,7 +805,7 @@ namespace WaveEquation2D_solver.src.events_handler
                     // Add the node constraint to the list
                     fedata.fe_nodeconstraints.add_nodeconstraint(cnst.constraint_node_ids, constraint_node_pts,
                         cnst.field_value, cnst.source_value, cnst.source_frequency, cnst.source_start_time, 
-                        cnst.source_type, cnst.isField);
+                        cnst.source_type, cnst.isField, cnst.isSource);
 
                 }
 

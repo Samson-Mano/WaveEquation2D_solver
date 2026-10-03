@@ -140,6 +140,7 @@ void h_refinement_store::add_material(const int& materialid,
 void h_refinement_store::add_nodeconstraint(const int& node_constraint_set_id,
 	std::vector<int>& node_ids,
 	const bool& isFieldBC,
+	const bool& isSource,
 	const double& fieldvalue,
 	const double& sourcevalue,
 	const double& sourcefrequency,
@@ -149,8 +150,12 @@ void h_refinement_store::add_nodeconstraint(const int& node_constraint_set_id,
 	// Constraint addition
 	node_constraint_store temp_node_constraint;
 	temp_node_constraint.node_constraint_set_id = node_constraint_set_id;
+
 	temp_node_constraint.isFieldBC = isFieldBC;
+	temp_node_constraint.isSource = isSource;	
+
 	temp_node_constraint.fieldvalue = fieldvalue;
+
 	temp_node_constraint.sourcevalue = sourcevalue;
 	temp_node_constraint.sourcefrequency = sourcefrequency;
 	temp_node_constraint.sourcetype = sourcetype;
@@ -346,6 +351,7 @@ void h_refinement_store::renumber_model()
 		node_constraint_store temp_node_constraint;
 		temp_node_constraint.node_constraint_set_id = node_constraint_set_id;
 		temp_node_constraint.isFieldBC = node_cnstr.isFieldBC;
+		temp_node_constraint.isSource = node_cnstr.isSource;
 		temp_node_constraint.fieldvalue = node_cnstr.fieldvalue;
 		temp_node_constraint.sourcevalue = node_cnstr.sourcevalue;
 		temp_node_constraint.sourcefrequency = node_cnstr.sourcefrequency;

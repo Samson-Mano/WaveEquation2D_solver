@@ -57,6 +57,17 @@ int main()
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << std::fixed << std::setprecision(6);
 
+
+
+
+	// Find the geometry extents (min and max coordinates) for scaling
+	double geom_min_x = std::numeric_limits<double>::max();
+	double geom_max_x = std::numeric_limits<double>::lowest();
+	double geom_min_y = std::numeric_limits<double>::max();
+	double geom_max_y = std::numeric_limits<double>::lowest();
+
+
+
 	//_______________________________________________________________________________________
 	// Read the elements for H Refinement module
 	h_refinement_store h_refinement_model;
@@ -73,10 +84,39 @@ int main()
 		infile.read(reinterpret_cast<char*>(&x_coord), 8);
 		infile.read(reinterpret_cast<char*>(&y_coord), 8);
 
+		// Find the geometry extents
+		geom_min_x = std::min(geom_min_x, x_coord);
+		geom_max_x = std::max(geom_max_x, x_coord);
+		geom_min_y = std::min(geom_min_y, y_coord);
+		geom_max_y = std::max(geom_max_y, y_coord);
+
 		// Add node to the H Refinement system store
 		h_refinement_model.add_node(node_id, x_coord, y_coord);
 
 	}
+
+
+	// Calculate the scaling factor based on the geometry extents
+	double geom_width = geom_max_x - geom_min_x;
+	double geom_height = geom_max_y - geom_min_y;
+
+
+	double max_bound = std::max(geom_width, geom_height);
+
+	// Determine the scaling factor to fit the geometry within a 10 x 10 box
+	double scale_value = 10.0 / max_bound;
+
+
+
+	// Scale the model coordinates to fit within the 10.0 x 10.0 box
+	for (auto& node_pair : h_refinement_model.node_list)
+	{
+		node_store& node = node_pair.second;
+		node.x_coord = (node.x_coord - geom_min_x) * scale_value;
+		node.y_coord = (node.y_coord - geom_min_y) * scale_value;
+	}
+
+
 
 	stopwatch_elapsed_str.str("");       // clear the string content
 	stopwatch_elapsed_str.clear();       // clear any error flags
@@ -163,9 +203,20 @@ int main()
 		infile.read(reinterpret_cast<char*>(&yield_point), 8);
 		infile.read(reinterpret_cast<char*>(&thickness), 8);
 
+
+		if (materialid == 0)
+		{
+			// Perfectly matched layer (PML) material properties
+			material_density = 1.0; // to avoid division by zero
+		}
+
+		double wave_speed_squared = youngs_modulus / (material_density * (1 - poissons_ratio * poissons_ratio));
+		double wave_speed = std::sqrt(wave_speed_squared);
+
+
 		// Add material to the H Refinement system store
 		h_refinement_model.add_material(materialid, youngs_modulus, material_density, poissons_ratio,
-			yield_point, thickness);
+			yield_point, thickness, wave_speed);
 
 	}
 
@@ -186,7 +237,7 @@ int main()
 		int32_t nodeConstraintsetid = 0;
 		double fieldvalue = 0.0, sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
 		int32_t sourcetype = -1;
-		bool isFieldBC = false;
+		bool isFieldBC = false, isSource = false;
 
 		infile.read(reinterpret_cast<char*>(&nodeConstraintsetid), 4);
 		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
@@ -195,6 +246,7 @@ int main()
 		infile.read(reinterpret_cast<char*>(&sourcetype), 4);
 		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
 		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isSource), 1);
 
 		int32_t nodeidCount;
 		infile.read(reinterpret_cast<char*>(&nodeidCount), 4);
@@ -211,7 +263,7 @@ int main()
 		}
 
 		// Add node constraints to the H Refinement system store
-		h_refinement_model.add_nodeconstraint(nodeConstraintsetid, node_id_list, isFieldBC,
+		h_refinement_model.add_nodeconstraint(nodeConstraintsetid, node_id_list, isFieldBC, isSource,
 			fieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
 	}

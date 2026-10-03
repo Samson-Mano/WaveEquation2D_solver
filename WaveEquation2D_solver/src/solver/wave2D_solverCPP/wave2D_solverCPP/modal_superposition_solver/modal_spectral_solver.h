@@ -71,27 +71,27 @@ using namespace Spectra;
 
 
 
-
-struct BinaryFileHeader
-{
-	uint32_t num_modes;   // Number of modes
-	uint32_t num_nodes;   // Number of nodes
-	uint32_t num_edges;      // Number of edges
-	uint32_t num_triangles; // Number of triangles
-	uint64_t mode_data_offset;  // File position where mode data starts
-	uint64_t mode_index_offset; // File position where mode index table starts
-};
-
-
-
-struct ModeIndexEntry
-{
-	uint32_t mode_id;           // Mode number (0-based)
-	double frequency;           // Natural frequency
-	uint64_t file_offset;       // Position in file where mode data starts
-	uint64_t data_size;         // Size of mode data in bytes
-};
-
+//
+//struct BinaryFileHeader
+//{
+//	uint32_t num_modes;   // Number of modes
+//	uint32_t num_nodes;   // Number of nodes
+//	uint32_t num_edges;      // Number of edges
+//	uint32_t num_triangles; // Number of triangles
+//	uint64_t mode_data_offset;  // File position where mode data starts
+//	uint64_t mode_index_offset; // File position where mode index table starts
+//};
+//
+//
+//
+//struct ModeIndexEntry
+//{
+//	uint32_t mode_id;           // Mode number (0-based)
+//	double frequency;           // Natural frequency
+//	uint64_t file_offset;       // Position in file where mode data starts
+//	uint64_t data_size;         // Size of mode data in bytes
+//};
+//
 
 
 
@@ -102,14 +102,38 @@ public:
 	modal_spectral_solver();
 	~modal_spectral_solver() = default;
 
+
+	const std::vector<double>& getNaturalFrequencies() const 
+	{
+		return natural_frequencies;
+	}
+
+
+	const Eigen::MatrixXd& getNaturalModes() const 
+	{
+		return natural_modes;
+	}
+
+
+	const std::vector<double>& getModalKVector() const
+	{
+		return modal_k_vector;
+	}
+	
+	const std::vector<double>& getModalMVector() const
+	{
+		return modal_m_vector;
+	}
+	
+
+
 	void init(wave2d_system_store* wave_2dsystem_ptr,
-		const char* output_file_char,
 		stopwatch_events* stopwatch,
 		void(*callback)(const char*));
 
 	void create_global_matrices();
 
-	bool solve_modal_analysis(int inpt_num_modes);
+	bool solve_modal_analysis(int inpt_num_modes, double geom_min_x, double geom_min_y, double scale_value);
 
 
 	void store_matrices_text_debug();
@@ -125,7 +149,7 @@ private:
 
 	stopwatch_events* m_stopwatch;
 
-	std::string output_file;
+	// std::string output_file;
 
 
 	int numDOF = 0;
@@ -139,6 +163,8 @@ private:
 	std::vector<double> natural_frequencies;
 	Eigen::MatrixXd natural_modes;
 
+	std::vector<double> modal_k_vector;
+	std::vector<double> modal_m_vector;
 
 
 	// Quadrature points for triangle element
@@ -218,9 +244,9 @@ private:
 		Eigen::MatrixXd& eigenvectors);
 
 
-	void store_results_with_index();
+	void store_results_with_index(double geom_min_x, double geom_min_y, double scale_value);
 
-
+	void perform_modal_superposition_of_globalmatrices();
 
 	void(*m_callback)(const char*) = nullptr;
 

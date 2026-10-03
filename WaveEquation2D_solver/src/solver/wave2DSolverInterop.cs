@@ -19,6 +19,9 @@ namespace WaveEquation2D_solver.src.solver
 
             public double TotalSimulationTime; // Total simulation time
             public double TimeIncrement;         // Time increment for the simulation
+
+            public double DampingRatio;          // Damping ratio for the simulation
+
             public int NumberOfModes;          // Number of modes to consider in the analysis
 
             public int ExtendConstraints; // 0 or 1

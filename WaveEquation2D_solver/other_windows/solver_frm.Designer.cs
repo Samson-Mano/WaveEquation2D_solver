@@ -49,6 +49,8 @@
             this.textBox_numberofmodes = new System.Windows.Forms.TextBox();
             this.label_numofmodes = new System.Windows.Forms.Label();
             this.label_pml = new System.Windows.Forms.Label();
+            this.textBox_globaldampingratio = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // richTextBox_AnalysisUpdate
@@ -106,7 +108,7 @@
             // 
             // button_solve
             // 
-            this.button_solve.Location = new System.Drawing.Point(504, 489);
+            this.button_solve.Location = new System.Drawing.Point(517, 534);
             this.button_solve.Name = "button_solve";
             this.button_solve.Size = new System.Drawing.Size(161, 71);
             this.button_solve.TabIndex = 22;
@@ -117,7 +119,7 @@
             // checkBox_extendconstraints
             // 
             this.checkBox_extendconstraints.AutoSize = true;
-            this.checkBox_extendconstraints.Location = new System.Drawing.Point(127, 547);
+            this.checkBox_extendconstraints.Location = new System.Drawing.Point(127, 573);
             this.checkBox_extendconstraints.Name = "checkBox_extendconstraints";
             this.checkBox_extendconstraints.Size = new System.Drawing.Size(318, 21);
             this.checkBox_extendconstraints.TabIndex = 25;
@@ -127,7 +129,7 @@
             // checkBox_saveHrefinedmodel
             // 
             this.checkBox_saveHrefinedmodel.AutoSize = true;
-            this.checkBox_saveHrefinedmodel.Location = new System.Drawing.Point(128, 574);
+            this.checkBox_saveHrefinedmodel.Location = new System.Drawing.Point(128, 600);
             this.checkBox_saveHrefinedmodel.Name = "checkBox_saveHrefinedmodel";
             this.checkBox_saveHrefinedmodel.Size = new System.Drawing.Size(179, 21);
             this.checkBox_saveHrefinedmodel.TabIndex = 27;
@@ -164,7 +166,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(380, 511);
+            this.label8.Location = new System.Drawing.Point(380, 537);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(43, 17);
             this.label8.TabIndex = 35;
@@ -173,7 +175,7 @@
             // textBox_xyextent
             // 
             this.textBox_xyextent.Enabled = false;
-            this.textBox_xyextent.Location = new System.Drawing.Point(274, 508);
+            this.textBox_xyextent.Location = new System.Drawing.Point(274, 534);
             this.textBox_xyextent.Name = "textBox_xyextent";
             this.textBox_xyextent.Size = new System.Drawing.Size(100, 24);
             this.textBox_xyextent.TabIndex = 33;
@@ -181,7 +183,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(124, 511);
+            this.label4.Location = new System.Drawing.Point(124, 537);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(144, 17);
             this.label4.TabIndex = 32;
@@ -221,7 +223,7 @@
             // 
             // textBox_numberofmodes
             // 
-            this.textBox_numberofmodes.Location = new System.Drawing.Point(274, 447);
+            this.textBox_numberofmodes.Location = new System.Drawing.Point(274, 477);
             this.textBox_numberofmodes.Name = "textBox_numberofmodes";
             this.textBox_numberofmodes.Size = new System.Drawing.Size(117, 24);
             this.textBox_numberofmodes.TabIndex = 41;
@@ -229,7 +231,7 @@
             // label_numofmodes
             // 
             this.label_numofmodes.AutoSize = true;
-            this.label_numofmodes.Location = new System.Drawing.Point(125, 450);
+            this.label_numofmodes.Location = new System.Drawing.Point(125, 480);
             this.label_numofmodes.Name = "label_numofmodes";
             this.label_numofmodes.Size = new System.Drawing.Size(143, 17);
             this.label_numofmodes.TabIndex = 40;
@@ -238,17 +240,35 @@
             // label_pml
             // 
             this.label_pml.AutoSize = true;
-            this.label_pml.Location = new System.Drawing.Point(414, 450);
+            this.label_pml.Location = new System.Drawing.Point(414, 480);
             this.label_pml.Name = "label_pml";
             this.label_pml.Size = new System.Drawing.Size(313, 17);
             this.label_pml.TabIndex = 43;
             this.label_pml.Text = "PML elements will revert to default material.";
             // 
+            // textBox_globaldampingratio
+            // 
+            this.textBox_globaldampingratio.Location = new System.Drawing.Point(274, 447);
+            this.textBox_globaldampingratio.Name = "textBox_globaldampingratio";
+            this.textBox_globaldampingratio.Size = new System.Drawing.Size(117, 24);
+            this.textBox_globaldampingratio.TabIndex = 44;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(98, 450);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(170, 17);
+            this.label2.TabIndex = 45;
+            this.label2.Text = "Global Damping Ratio: ";
+            // 
             // solver_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 631);
+            this.ClientSize = new System.Drawing.Size(794, 641);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.textBox_globaldampingratio);
             this.Controls.Add(this.label_pml);
             this.Controls.Add(this.textBox_numberofmodes);
             this.Controls.Add(this.label_numofmodes);
@@ -273,7 +293,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximumSize = new System.Drawing.Size(810, 680);
-            this.MinimumSize = new System.Drawing.Size(800, 670);
+            this.MinimumSize = new System.Drawing.Size(810, 680);
             this.Name = "solver_frm";
             this.Opacity = 0.85D;
             this.Text = "Finite Element Solver";
@@ -305,5 +325,7 @@
         private System.Windows.Forms.TextBox textBox_numberofmodes;
         private System.Windows.Forms.Label label_numofmodes;
         private System.Windows.Forms.Label label_pml;
+        private System.Windows.Forms.TextBox textBox_globaldampingratio;
+        private System.Windows.Forms.Label label2;
     }
 }

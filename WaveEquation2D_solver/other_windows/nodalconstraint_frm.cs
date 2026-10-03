@@ -91,10 +91,12 @@ namespace WaveEquation2D_solver.other_windows
             }
 
             bool isField = radioButton_dirichlet.Checked;
+            bool isSource = radioButton_source.Checked;
 
             // Add the constraint
             model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(), 
-                constraint_node_pts, field_value, source_value, source_frequency, source_start_time, comboBox_sourcetype.SelectedIndex, isField);
+                constraint_node_pts, field_value, source_value, source_frequency, source_start_time, comboBox_sourcetype.SelectedIndex, 
+                isField, isSource);
 
             // Clear the selected point ids
             model_data.fe_data.clear_selected_nodes();

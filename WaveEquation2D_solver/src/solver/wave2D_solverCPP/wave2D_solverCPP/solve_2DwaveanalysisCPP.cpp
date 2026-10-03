@@ -10,7 +10,7 @@
 #include "h_refinement/h_refinement_store.h"
 #include "system_store/wave2d_system_store.h"
 #include "system_store/stopwatch_events.h"
-// #include "solver/wave2d_solver.h"
+#include "modal_superposition_solver/modal_superposition_solver.h"
 
 
 #pragma pack(push, 1)
@@ -22,6 +22,8 @@ struct SolverSettings
 
 	double TotalSimulationTime; // Total simulation time
 	double TimeIncrement;         // Time increment for the simulation
+	double DampingRatio; // Global Damping ratio for the analysis
+
 	int NumberOfModes;          // Number of modes to consider in the analysis
 
 	int ExtendConstraints; // 0 or 1
@@ -68,6 +70,8 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 	double TotalSimulationTime = settings->TotalSimulationTime; // Total simulation time
 	double TimeIncrement = settings->TimeIncrement;         // Time increment for the simulation
+	double DampingRatio = settings->DampingRatio; // Global Damping ratio for the analysis
+
 	int NumberOfModes = settings->NumberOfModes;          // Number of modes to consider in the analysis
 
 	int ExtendConstraints = settings->ExtendConstraints; // 0 or 1
@@ -295,7 +299,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		int32_t nodeConstraintsetid = 0;
 		double fieldvalue = 0.0 , sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
 		int32_t sourcetype = -1;
-		bool isFieldBC = false;
+		bool isFieldBC = false, isSource = false;
 
 		infile.read(reinterpret_cast<char*>(&nodeConstraintsetid), 4);
 		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
@@ -304,6 +308,8 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		infile.read(reinterpret_cast<char*>(&sourcetype), 4);
 		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
 		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isSource), 1);
+
 
 		int32_t nodeidCount;
 		infile.read(reinterpret_cast<char*>(&nodeidCount), 4);
@@ -320,7 +326,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		}
 
 		// Add node constraints to the H Refinement system store
-		h_refinement_model.add_nodeconstraint(nodeConstraintsetid, node_id_list, isFieldBC, 
+		h_refinement_model.add_nodeconstraint(nodeConstraintsetid, node_id_list, isFieldBC, isSource,
 			fieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
 	}
@@ -438,14 +444,47 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 	
 	// Perform modal analysis
+	if (SolverType == 0)
+	{
+		// Direct Time Integration Solver
 
 
 
+		(*isAnalysisSuccess) = false;
 
+	}
+	else if (SolverType == 1)
+	{
 
+		try
+		{
+			//_________________________________________________________
+		// Modal Superposition Solver
 
+			modal_superposition_solver modal_superposition_solver;
 
-	(*isAnalysisSuccess) = false;
+			modal_superposition_solver.init(&wave_system, output_file, &stopwatch, callback);
+
+			// Perform modal superposition solve
+			(*isAnalysisSuccess) = modal_superposition_solver.perform_modal_superposition_solve(NumberOfModes,
+				DampingRatio, geom_min_x, geom_min_y, scale_value);
+
+		}
+		catch (const std::exception& e)
+		{
+			msg = "Error during modal superposition analysis: " + std::string(e.what());
+			if (callback) callback(msg.c_str());
+			(*isAnalysisSuccess) = false;
+		}
+		catch (...)
+		{
+			msg = "Unknown error during modal superposition analysis.";
+			if (callback) callback(msg.c_str());
+			(*isAnalysisSuccess) = false;
+		}
+
+	}
+
 
 	//_________________________________________________________
 	// Close the files

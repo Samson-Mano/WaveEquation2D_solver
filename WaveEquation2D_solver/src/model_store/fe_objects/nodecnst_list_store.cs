@@ -43,6 +43,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
         public bool isField { get; set; } // is Field value
 
+        public bool isSource { get; set; } // is Source value
 
     }
 
@@ -111,7 +112,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
         public void add_nodeconstraint(List<int> constraint_node_ids, List<Vector2> constraint_node_pts,
-            double field_value, double source_value, double source_frequency, double source_start_time, int source_type, bool isField)
+            double field_value, double source_value, double source_frequency, double source_start_time, int source_type, 
+            bool isField, bool isSource)
         {
             // Get an unique constraint set id
             int unique_constraintset_id = gvariables_static.get_unique_id(all_constraintset_ids);
@@ -131,7 +133,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
                 source_frequency = source_frequency,
                 source_start_time = source_start_time,
                 source_type = source_type,
-                isField = isField
+                isField = isField,
+                isSource = isSource
             };
 
             // Insert the constraint to nodes
