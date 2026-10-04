@@ -90,7 +90,7 @@ void modal_spectral_solver::create_global_matrices()
 		for (auto& tri_elm_m : spec_mesh2d.spectral_trielement_list)
 		{
 			// get the element
-			spectral_trielement_store tri_elm = tri_elm_m.second;
+			const spectral_trielement_store& tri_elm = tri_elm_m.second;
 
 			//________________________________________________________________________________________________
 			// Step 1: Create local node & node coordinate list
@@ -171,7 +171,7 @@ void modal_spectral_solver::create_global_matrices()
 		for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
 		{
 			// get the element
-			spectral_quadelement_store quad_elm = quad_elm_m.second;
+			const spectral_quadelement_store& quad_elm = quad_elm_m.second;
 
 			//________________________________________________________________________________________________
 			// Step 1: Create local node & node coordinate list
@@ -1122,6 +1122,666 @@ void modal_spectral_solver::perform_modal_superposition_of_globalmatrices()
 	}
 	//
 }
+
+
+
+void modal_spectral_solver::create_global_load_vectors()
+{
+
+	// Clear the load maps before creating new ones
+	load_maps.clear();
+
+
+	if (static_cast<int>(spec_mesh2d.spectral_trielement_list.size()) > 0)
+	{
+
+		// Triangle elements
+		for (auto& tri_elm_m : spec_mesh2d.spectral_trielement_list)
+		{
+			// get the element
+			const spectral_trielement_store& tri_elm = tri_elm_m.second;
+
+
+			// Get node coordinates ________________________________________________
+			std::vector<int> elem_nodes = tri_elm.lexi_ordered_node_ids;
+
+			std::vector<Eigen::Vector2d> elem_coords;
+
+			for (int nid : elem_nodes)
+			{
+				const auto& node = spec_mesh2d.spectral_node_list[nid];
+				elem_coords.emplace_back(node.x_coord, node.y_coord);
+			}
+
+
+			//________________________________________________________________________________________________
+			// Element field vector
+
+			get_trielement_field_vector(tri_elm, elem_nodes, load_maps);
+
+			//________________________________________________________________________________________________
+			// Element normal derivative field vector
+
+			get_trielement_normderivfield_vector(tri_elm, elem_nodes, elem_coords, load_maps);
+
+
+		}
+
+	}
+
+
+	if (static_cast<int>(spec_mesh2d.spectral_quadelement_list.size()) > 0)
+	{
+
+		// Quadrilateral elements
+		for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
+		{
+			// get the element
+			const spectral_quadelement_store& quad_elm = quad_elm_m.second;
+
+			//________________________________________________________________________________________________
+			// Step 1: Create local node & node coordinate list
+			// Build local node list _______________________________________________
+			std::vector<int> elem_nodes = quad_elm.row_ordered_node_ids;
+
+			// Get node coordinates ________________________________________________
+			std::vector<Eigen::Vector2d> elem_coords;
+
+			for (int nid : elem_nodes)
+			{
+				const auto& node = spec_mesh2d.spectral_node_list.at(nid);
+				elem_coords.emplace_back(node.x_coord, node.y_coord);
+			}
+
+
+			
+			//________________________________________________________________________________________________
+			// Element field vector
+
+			get_quadelement_field_vector(quad_elm, elem_nodes, load_maps);
+
+			//________________________________________________________________________________________________
+			// Element normal derivative field vector
+
+			get_quadelement_normderivfield_vector(quad_elm, elem_nodes, elem_coords, load_maps);	
+
+
+
+
+		}
+
+	}
+	//
+}
+
+
+void modal_spectral_solver::get_trielement_field_vector(const spectral_trielement_store& tri_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+	int local_idx = -1;
+	int global_idx = -1;
+
+
+	// Edge Boundary Condition 
+	for (int i = 0; i < 3; i++)
+	{
+		// Get the edge id
+		int edge_id = tri_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isFieldBC == true && edge.fieldvalue != 0.0)
+		{
+			// --- Assembly ---
+			// Dirichlet (field) BC contribution
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			load_maps[global_idx].node_id = global_idx;
+			load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+
+			for (const int& j : spec_mesh2d.tri_element_id_structure.edge_node_ids[i])
+			{
+				local_idx = j;
+				global_idx = elem_nodes[local_idx];
+
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+
+			}
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			load_maps[global_idx].node_id = global_idx;
+			load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+
+		}
+	}
+	// ___________________________________________________
+
+	// Node Boundary Condition
+	const std::vector<int>& corner_nodes = tri_elm.corner_nodes;
+
+	for (int i = 0; i < 3; i++)
+	{
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+
+		// Corner 1
+		if (nd1.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd1.isFieldBC == true && nd1.fieldvalue != 0.0)
+			{
+				// Apply field value at the node
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(nd1.fieldvalue);
+		
+			}
+		}
+
+		// edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.tri_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : tri_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
+			{
+				local_idx = edge_node_local_ids[j];
+				global_idx = elem_nodes[local_idx];
+
+				if (edge_nd.isFieldBC == true && edge_nd.fieldvalue != 0.0)
+				{
+					// Apply field value at the node
+					load_maps[global_idx].node_id = global_idx;
+					load_maps[global_idx].initial_field_values.push_back(edge_nd.fieldvalue);
+				
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 3]];
+		if (nd2.isboundarynode == true)
+		{
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd2.isFieldBC == true && nd2.fieldvalue != 0.0)
+			{
+				// Apply field value at the node
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(nd2.fieldvalue);
+				
+			}
+		}
+	}
+	//
+}
+
+
+void modal_spectral_solver::get_trielement_normderivfield_vector(const spectral_trielement_store& tri_elm,
+	const std::vector<int>& elem_nodes,
+	const std::vector<Eigen::Vector2d>& elem_coords,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+
+	int nen = static_cast<int>(elem_nodes.size());
+
+	for (int i = 0; i < 3; i++)
+	{
+		// Get the edge id
+		int edge_id = tri_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isDerivFieldBC == true)
+		{
+
+			int n_gll_points = spec_mesh2d.spectral_order + 1;
+
+			// Pre-compute edge mapping parameters
+			auto get_edge_coordinates = [i](double s, double& xi, double& eta,
+				double& dxi_ds, double& deta_ds)
+				{
+					if (i == 0)
+					{      // Bottom edge
+						xi = s;  eta = 0.0;
+						dxi_ds = 1.0;  deta_ds = 0.0;
+					}
+					else if (i == 1)
+					{ // Diagonal edge
+						xi = 1.0 - s;  eta = s;
+						dxi_ds = -1.0;  deta_ds = 1.0;
+					}
+					else
+					{             // Left edge
+						xi = 0.0;  eta = 1.0 - s;
+						dxi_ds = 0.0;  deta_ds = -1.0;
+					}
+				};
+
+
+
+			for (int j = 0; j < n_gll_points; j++)
+			{
+				// Map the 1D GLL point to [0, 1]
+				double s = (this->gll_locations[j] + 1.0) * 0.5;
+
+				// Get the weigths
+				double wt = this->gll_weights[j] * 0.5;
+
+				double xi, eta, dxi_ds, deta_ds;
+				get_edge_coordinates(s, xi, eta, dxi_ds, deta_ds);
+
+
+				// --- Shape functions ---
+				Eigen::VectorXd N(nen);
+				Eigen::VectorXd dN_dxi(nen); // [dN/dxi, dN/deta]
+				Eigen::VectorXd dN_deta(nen); // [dN/dxi, dN/deta]
+
+				spectral_tri_element::evaluate_triangle_shape_functions(xi, eta, spec_mesh2d.spectral_order,
+					this->inv_vandermonde_matrix, this->triangle_basis_terms,
+					N, dN_dxi, dN_deta);
+
+
+				// --- Compute physical edge length Jacobian ---
+				Eigen::Vector2d dx_ds = Eigen::Vector2d::Zero();
+
+				for (int k = 0; k < nen; k++)
+				{
+					double dN_ds = dN_dxi(k) * dxi_ds + dN_deta(k) * deta_ds;
+
+					dx_ds += dN_ds * elem_coords[k];
+				}
+
+				double J_edge = dx_ds.norm();
+				double dV = J_edge * wt;
+
+				// --- Assembly ---
+				// Neumann (flux) BC contribution
+				double dq_edge = edge.normalderivfieldvalue;  // flux value
+
+				for (int a = 0; a < nen; a++)
+				{
+					double neumann_vector_value = dq_edge * N(a) * dV;
+
+					int local_idx = a;
+					int global_idx = elem_nodes[local_idx];
+
+					load_maps[global_idx].node_id = global_idx;
+					load_maps[global_idx].initial_field_derivative_values.push_back(neumann_vector_value);
+				}
+			}
+		}
+	}
+	//
+}
+
+
+
+
+void modal_spectral_solver::get_trielement_source_vector(const spectral_trielement_store& tri_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+	int local_idx = -1;
+	int global_idx = -1;
+
+	auto add_sources = [&](int global_idx,
+		const std::unordered_map<int, load_vector_store>& src)
+		{
+			if (src.empty()) return;
+			auto& lm = load_maps[global_idx];
+			lm.node_id = global_idx;
+			for (const auto& [set_id, lv] : src) 
+			{
+				// Policy: same set_id at same node should assert.
+				auto [it, inserted] = lm.source_values.try_emplace(set_id, lv);
+				//if (!inserted) 
+				//{
+				//	// either accumulate, or assert:
+				//	// it->second.sourceamplitude += lv.sourceamplitude;
+				//	assert(false && "duplicate source set on node");
+				//}
+			}
+		};
+
+	// Edge Boundary Condition 
+	for (int i = 0; i < 3; i++)
+	{
+		// Get the edge id
+		int edge_id = tri_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isSource == true)
+		{
+			// --- Assembly ---
+			// Dirichlet (field) BC contribution
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+			for (const int& j : spec_mesh2d.tri_element_id_structure.edge_node_ids[i])
+			{
+				local_idx = j;
+				global_idx = elem_nodes[local_idx];
+
+				add_sources(global_idx, edge.source_values);
+
+			}
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+		}
+	}
+	// ___________________________________________________
+
+	// Node Boundary Condition
+	const std::vector<int>& corner_nodes = tri_elm.corner_nodes;
+
+	for (int i = 0; i < 3; i++)
+	{
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+
+		// Corner 1
+		if (nd1.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd1.isSource == true)
+			{
+				// Apply source value at the node
+				add_sources(global_idx, nd1.source_values);
+			}
+		}
+
+		// edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.tri_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : tri_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
+			{
+				local_idx = edge_node_local_ids[j];
+				global_idx = elem_nodes[local_idx];
+
+				if (edge_nd.isSource == true)
+				{
+					// Apply source value at the node
+					add_sources(global_idx, edge_nd.source_values);
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 3]];
+		if (nd2.isboundarynode == true)
+		{
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd2.isSource == true)
+			{
+				// Apply source value at the node
+				add_sources(global_idx, nd2.source_values);
+			}
+		}
+	}
+	//
+}
+
+
+
+
+void modal_spectral_solver::get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+	int local_idx = -1;
+	int global_idx = -1;
+
+	// Edge Boundary Condition 
+	for (int i = 0; i < 4; i++)
+	{
+		// Get the edge id
+		int edge_id = quad_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isFieldBC == true && edge.fieldvalue != 0.0)
+		{
+			// --- Assembly ---
+			// Dirichlet (field) BC contribution
+
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			load_maps[global_idx].node_id = global_idx;
+			load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+
+			for (const int& j : spec_mesh2d.quad_element_id_structure.edge_node_ids[i])
+			{
+				local_idx = j;
+				global_idx = elem_nodes[local_idx];
+
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+			}
+
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
+			global_idx = elem_nodes[local_idx];
+
+			load_maps[global_idx].node_id = global_idx;
+			load_maps[global_idx].initial_field_values.push_back(edge.fieldvalue);
+
+		}
+	}
+	// ___________________________________________________
+
+	// Node Boundary Condition
+	const std::vector<int>& corner_nodes = quad_elm.corner_nodes;
+
+	for (int i = 0; i < 4; i++)
+	{
+		// Corner 1
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+
+		if (nd1.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd1.isFieldBC == true && nd1.fieldvalue != 0.0)
+			{
+				// Apply field value at the node
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(nd1.fieldvalue);
+			}
+		}
+
+		// Edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.quad_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : quad_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
+			{
+				local_idx = edge_node_local_ids[j];
+				global_idx = elem_nodes[local_idx];
+
+				if (edge_nd.isFieldBC == true && edge_nd.fieldvalue != 0.0)
+				{
+					// Apply field value at the node
+					load_maps[global_idx].node_id = global_idx;
+					load_maps[global_idx].initial_field_values.push_back(edge_nd.fieldvalue);
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 4]];
+
+		if (nd2.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd2.isFieldBC == true && nd2.fieldvalue != 0.0)
+			{
+				// Apply field value at the node
+				load_maps[global_idx].node_id = global_idx;
+				load_maps[global_idx].initial_field_values.push_back(nd2.fieldvalue);
+			}
+		}
+
+	}
+	//
+}
+
+
+
+
+void modal_spectral_solver::get_quadelement_normderivfield_vector(const spectral_quadelement_store& quad_elm,
+	const std::vector<int>& elem_nodes,
+	const std::vector<Eigen::Vector2d>& elem_coords,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+
+	int nen = static_cast<int>(elem_nodes.size());
+
+	for (int i = 0; i < 4; i++)
+	{
+		// Get the edge id
+		int edge_id = quad_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isDerivFieldBC == true)
+		{
+			int n_gll_points = spec_mesh2d.spectral_order + 1;
+
+			// Pre-compute edge mapping parameters
+			auto get_edge_coordinates = [i](double s, double& xi, double& eta,
+				double& dxi_ds, double& deta_ds)
+				{
+					if (i == 0)
+					{      // Edge 1 (-1,-1) to (1,-1) bottom edge
+						xi = s;  eta = -1.0;
+						dxi_ds = 1.0;  deta_ds = 0.0;
+					}
+					else if (i == 1)
+					{	// Edge 2 (1,-1) to (1, 1) right edge
+						xi = 1.0;  eta = s;
+						dxi_ds = 0.0;  deta_ds = 1.0;
+					}
+					else if (i == 2)
+					{  // Edge 3 (1,1) to (-1,1) top edge
+						xi = -s;  eta = 1.0;
+						dxi_ds = -1.0;  deta_ds = 0.0;
+					}
+					else
+					{  // Edge 4 (-1,1) to (-1,-1) left edge
+						xi = -1.0;  eta = -s;
+						dxi_ds = 0.0;  deta_ds = -1.0;
+					}
+				};
+
+
+			for (int j = 0; j < n_gll_points; j++)
+			{
+				// Get the 1D GLL point [-1, 1]
+				double s = this->gll_locations[j];
+
+				// Get the weigths
+				double wt = this->gll_weights[j];
+
+				double xi, eta, dxi_ds, deta_ds;
+				get_edge_coordinates(s, xi, eta, dxi_ds, deta_ds);
+
+				// --- Shape functions ---
+				Eigen::VectorXd N(nen);
+				Eigen::VectorXd dN_dxi(nen);
+				Eigen::VectorXd dN_deta(nen);
+
+				spectral_quad_element::evaluate_quadrilateral_shape_functions(xi, eta, spec_mesh2d.spectral_order, gll_locations,
+					N, dN_dxi, dN_deta);
+
+				// --- Compute physical edge length Jacobian ---
+				Eigen::Vector2d dx_ds = Eigen::Vector2d::Zero();
+
+				for (int k = 0; k < nen; k++)
+				{
+					double dN_ds = dN_dxi(k) * dxi_ds + dN_deta(k) * deta_ds;
+
+					dx_ds += dN_ds * elem_coords[k];
+				}
+
+				double J_edge = dx_ds.norm();
+				double dV = J_edge * wt;
+
+				// --- Assembly ---
+				// Neumann (flux) BC contribution
+				double dq_edge = edge.normalderivfieldvalue;  // flux value
+
+				for (int a = 0; a < nen; a++)
+				{
+					double neumann_vector_value = dq_edge * N(a) * dV;
+
+					int local_idx = a;
+					int global_idx = elem_nodes[local_idx];
+
+					load_maps[global_idx].node_id = global_idx;
+					load_maps[global_idx].initial_field_derivative_values.push_back(neumann_vector_value);
+				}
+			}
+		}
+	}
+	//
+}
+
+
+
+void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, load_map_store>& load_maps)
+{
+
+
+
+}
+
+
 
 
 

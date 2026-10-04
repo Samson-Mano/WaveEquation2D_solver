@@ -93,7 +93,7 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 			"Consider increasing the number of modes for correct results.";
 		report(error_msg.c_str());
 
-		return false; // Indicate that the modal superposition solve may not be accurate
+		return false; // Indicate that the modal superposition fails
 	}
 	else
 	{
@@ -101,9 +101,6 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 			" Hz, Maximum natural frequency = " + std::to_string(max_natural_frequency) + " Hz.";
 		report("Maximum source frequency is within the range of natural frequencies.");
 	}
-
-	
-
 
 
 
@@ -113,6 +110,7 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 
 
 }
+
 
 
 

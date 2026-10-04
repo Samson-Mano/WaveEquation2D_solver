@@ -15,6 +15,21 @@
 using hash_utils::fnv_mix;
 
 
+
+
+struct load_vector_store
+{
+	int constraint_set_id = 0;
+
+	double sourceamplitude = 0.0; // Source amplitude in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
+
+};
+
+
+
 struct node_store
 {
 	int node_id = 0;
@@ -28,11 +43,8 @@ struct node_store
 	bool isSource = false;
 
 	double fieldvalue = 0.0; // Field value in the node
-	
-	double sourcevalue = 0.0; // Source value in the node
-	double sourcefrequency = 0.0; // Source frequency in the node
-	int sourcetype = -1; // Source type in the node
-	double sourcestarttime = 0.0; // Source start time in the node	
+
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node	
 
 };
 
@@ -57,10 +69,13 @@ struct edge_store
 	double fieldvalue = 0.0;
 	double normalderivfieldvalue = 0.0;
 
-	double sourcevalue = 0.0; // Source value in the node
-	double sourcefrequency = 0.0; // Source frequency in the node
-	int sourcetype = -1; // Source type in the node
-	double sourcestarttime = 0.0; // Source start time in the node	
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the edges	
+
+
+	//double sourcevalue = 0.0; // Source value in the node
+	//double sourcefrequency = 0.0; // Source frequency in the node
+	//int sourcetype = -1; // Source type in the node
+	//double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 

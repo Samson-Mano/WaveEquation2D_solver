@@ -46,12 +46,16 @@ struct spectral_node_store
 	bool isboundarynode = false;
 
 	bool isFieldBC = false;
+	bool isSource = false;
+
 	double fieldvalue = 0.0; // Field value in the node
 
-	double sourcevalue = 0.0; // Source value in the node
-	double sourcefrequency = 0.0; // Source frequency in the node
-	int sourcetype = -1; // Source type in the node
-	double sourcestarttime = 0.0; // Source start time in the node	
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node
+
+	//double sourcevalue = 0.0; // Source value in the node
+	//double sourcefrequency = 0.0; // Source frequency in the node
+	//int sourcetype = -1; // Source type in the node
+	//double sourcestarttime = 0.0; // Source start time in the node	
 
 };
 
@@ -77,10 +81,7 @@ struct spectral_edge_store
 	double fieldvalue = 0.0;
 	double normalderivfieldvalue = 0.0;
 
-	double sourcevalue = 0.0; // Source value in the node
-	double sourcefrequency = 0.0; // Source frequency in the node
-	int sourcetype = -1; // Source type in the node
-	double sourcestarttime = 0.0; // Source start time in the node	
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node
 
 };
 
@@ -233,11 +234,9 @@ private:
 		double y_coord,
 		bool isboundarynode,
 		bool isFieldBC,
+		bool isSource,
 		double fieldvalue,
-		double sourcevalue,
-		double sourcefrequency,
-		int sourcetype,
-		double sourcestarttime);
+		std::unordered_map<int, load_vector_store> source_values);
 
 
 	void create_spectral_edges(edge_store edge,

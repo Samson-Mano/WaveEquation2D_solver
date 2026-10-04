@@ -4,6 +4,8 @@
 
 #include "modal_spectral_solver.h"
 
+
+
 class modal_superposition_solver
 {
 public:
@@ -24,6 +26,8 @@ private:
 	stopwatch_events* m_stopwatch;
 
 	std::string output_file;
+
+
 
 
 	void(*m_callback)(const char*) = nullptr;

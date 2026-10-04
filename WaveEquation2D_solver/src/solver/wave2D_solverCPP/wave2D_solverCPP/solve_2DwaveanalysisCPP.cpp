@@ -459,7 +459,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		try
 		{
 			//_________________________________________________________
-		// Modal Superposition Solver
+			// Modal Superposition Solver
 
 			modal_superposition_solver modal_superposition_solver;
 

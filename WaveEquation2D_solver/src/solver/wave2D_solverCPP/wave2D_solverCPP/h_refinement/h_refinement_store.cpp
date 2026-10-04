@@ -1000,10 +1000,21 @@ void h_refinement_store::map_constraints_to_nodes_and_edges()
 			node_list[nd_id].isFieldBC = node_cnstr.isFieldBC;
 			node_list[nd_id].fieldvalue = node_cnstr.fieldvalue; // Field value in the node
 
-			node_list[nd_id].sourcevalue = node_cnstr.sourcevalue; // Source value in the node
-			node_list[nd_id].sourcefrequency = node_cnstr.sourcefrequency; // Source frequency in the node
-			node_list[nd_id].sourcetype = node_cnstr.sourcetype; // Source type in the node
-			node_list[nd_id].sourcestarttime = node_cnstr.sourcestarttime; // Source start time in the node	
+
+			node_list[nd_id].isSource = node_cnstr.isSource;
+
+			// Create a temp load vector for the node if it is a source
+			if (node_cnstr.isSource)
+			{
+				load_vector_store temp_load_vector;
+				temp_load_vector.constraint_set_id = node_cnstr.node_constraint_set_id;
+				temp_load_vector.sourceamplitude = node_cnstr.sourcevalue;
+				temp_load_vector.sourcefrequency = node_cnstr.sourcefrequency;
+				temp_load_vector.sourcetype = node_cnstr.sourcetype;
+				temp_load_vector.sourcestarttime = node_cnstr.sourcestarttime;
+
+				node_list[nd_id].source_values.emplace(temp_load_vector.constraint_set_id, std::move(temp_load_vector));
+			}	
 
 		}
 
@@ -1027,11 +1038,17 @@ void h_refinement_store::map_constraints_to_nodes_and_edges()
 			edge_list[edge_id].fieldvalue = edge_cnstr.fieldvalue;
 			edge_list[edge_id].normalderivfieldvalue = edge_cnstr.normalderivfieldvalue;
 
-			edge_list[edge_id].sourcevalue = edge_cnstr.sourcevalue; // Source value in the node
-			edge_list[edge_id].sourcefrequency = edge_cnstr.sourcefrequency; // Source frequency in the node
-			edge_list[edge_id].sourcetype = edge_cnstr.sourcetype; // Source type in the node
-			edge_list[edge_id].sourcestarttime = edge_cnstr.sourcestarttime; // Source start time in the node	
+			if (edge_cnstr.isSource)
+			{
+				load_vector_store temp_load_vector;
+				temp_load_vector.constraint_set_id = edge_cnstr.edge_constraint_set_id;
+				temp_load_vector.sourceamplitude = edge_cnstr.sourcevalue;
+				temp_load_vector.sourcefrequency = edge_cnstr.sourcefrequency;
+				temp_load_vector.sourcetype = edge_cnstr.sourcetype;
+				temp_load_vector.sourcestarttime = edge_cnstr.sourcestarttime;
 
+				edge_list[edge_id].source_values.emplace(temp_load_vector.constraint_set_id, std::move(temp_load_vector));
+			}
 		}
 
 	}

@@ -96,6 +96,23 @@ using namespace Spectra;
 
 
 
+
+struct load_map_store
+{
+	int node_id = 0;
+
+	// Initial condition values for the node
+	std::vector<double> initial_field_values; // Initial field value for the node
+	std::vector<double> initial_field_derivative_values; // Initial field derivative value for the node
+
+	// Source information for the node
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node
+
+};
+
+
+
+
 class modal_spectral_solver
 {
 public:
@@ -125,7 +142,6 @@ public:
 		return modal_m_vector;
 	}
 	
-
 
 	void init(wave2d_system_store* wave_2dsystem_ptr,
 		stopwatch_events* stopwatch,
@@ -247,6 +263,54 @@ private:
 	void store_results_with_index(double geom_min_x, double geom_min_y, double scale_value);
 
 	void perform_modal_superposition_of_globalmatrices();
+
+
+	//________________________________________________________________________________________________
+
+	std::unordered_map<int, load_map_store> load_maps; // Map to store load maps for each node
+
+
+	void create_global_load_vectors();
+
+
+	void get_trielement_field_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+
+	void get_trielement_normderivfield_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+	void get_trielement_source_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+
+	void get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+
+	void get_quadelement_normderivfield_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+
+	void get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, load_map_store>& load_maps);
+
+
+
+	//________________________________________________________________________________________________
 
 	void(*m_callback)(const char*) = nullptr;
 
