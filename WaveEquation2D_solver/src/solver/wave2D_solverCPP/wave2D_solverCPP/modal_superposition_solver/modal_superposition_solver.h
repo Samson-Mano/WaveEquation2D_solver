@@ -6,6 +6,31 @@
 
 
 
+
+struct source_load_vector_data
+{
+	int load_id = 0;
+
+
+	// Source term types
+	// 0 = Half sine pulse
+	// 1 = Rectangular pulse
+	// 2 = Triangular pulse
+	// 3 = Step force with finite rise
+	// 4 = Full sine pulse
+	// 5 = Harmonic/ periodic excitation
+	int load_type = -1;
+
+	double load_start_time = 0.0;
+	double load_end_time = 0.0;
+
+
+	Eigen::VectorXd modal_LoadAmplitudeVector;
+	Eigen::VectorXd LoadAmplitudeVector;
+};
+
+
+
 class modal_superposition_solver
 {
 public:
@@ -17,6 +42,7 @@ public:
 		const char* output_file_char, stopwatch_events* stopwatch, void(*callback)(const char*));
 
 	bool perform_modal_superposition_solve(int inpt_num_modes, double global_damping_ratio, 
+		double TotalSimulationTime,	double TimeIncrement,
 		double geom_min_x, double geom_min_y, double scale_value);
 
 
@@ -27,8 +53,7 @@ private:
 
 	std::string output_file;
 
-
-
+	std::unordered_map<int, source_load_vector_data> source_load_vectors;
 
 	void(*m_callback)(const char*) = nullptr;
 

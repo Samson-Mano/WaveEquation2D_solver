@@ -23,7 +23,17 @@ struct load_vector_store
 
 	double sourceamplitude = 0.0; // Source amplitude in the node
 	double sourcefrequency = 0.0; // Source frequency in the node
-	int sourcetype = -1; // Source type in the node
+	
+	
+	// Source term types
+	// 0 = Half sine pulse
+	// 1 = Rectangular pulse
+	// 2 = Triangular pulse
+	// 3 = Step force with finite rise
+	// 4 = Full sine pulse
+	// 5 = Harmonic/ periodic excitation
+
+	int sourcetype = -1; // Source type in the node 
 	double sourcestarttime = 0.0; // Source start time in the node	
 
 };

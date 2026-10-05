@@ -105,6 +105,14 @@ struct load_map_store
 	std::vector<double> initial_field_values; // Initial field value for the node
 	std::vector<double> initial_field_derivative_values; // Initial field derivative value for the node
 
+	bool isFieldBC = false; // Flag to indicate if the node has an initial field value
+	bool isFieldDerivativeBC = false; // Flag to indicate if the node has an initial field derivative value
+
+	bool isSource = false; // Flag to indicate if the node has a source term
+
+	double initial_field_value = 0.0; // Initial field value for the node
+	double initial_field_derivative_value = 0.0; // Initial field derivative value for the node
+
 	// Source information for the node
 	std::unordered_map<int, load_vector_store> source_values; // Source values for the node
 
@@ -125,10 +133,25 @@ public:
 		return natural_frequencies;
 	}
 
+	bool getIsRigid() const
+	{
+		return IsRigid;
+	}
+
+	const int getNumberofModes() const
+	{
+		return number_of_modes;
+	}
 
 	const Eigen::MatrixXd& getNaturalModes() const 
 	{
 		return natural_modes;
+	}
+
+
+	const Eigen::SparseMatrix<double>& getGlobalMMatrix() const
+	{
+		return global_m_matrix;
 	}
 
 
@@ -142,6 +165,12 @@ public:
 		return modal_m_vector;
 	}
 	
+	const std::unordered_map<int, load_map_store>& getLoadMaps() const
+	{
+		return load_maps;
+	}
+
+
 
 	void init(wave2d_system_store* wave_2dsystem_ptr,
 		stopwatch_events* stopwatch,
@@ -169,6 +198,7 @@ private:
 
 
 	int numDOF = 0;
+	int number_of_modes = 0;
 
 	Eigen::SparseMatrix<double> global_k_matrix; // Global ke Matrix [Ke]
 	Eigen::SparseMatrix<double> global_m_matrix; // Global Me Matrix [Me]
@@ -176,6 +206,7 @@ private:
 	Eigen::VectorXi global_dirichlet_BC_flags_vector; // Global boundary condition Vector (To track the nodes where prescribed field is applied)
 
 	// Solution
+	bool IsRigid = false; // Flag to indicate if the system is rigid (no deformation)
 	std::vector<double> natural_frequencies;
 	Eigen::MatrixXd natural_modes;
 
@@ -200,6 +231,7 @@ private:
 	// Quadrature points for quadrilateral element
 	std::vector<spectral_point> quadrilateral_quadrature_points;
 
+	std::unordered_map<int, load_map_store> load_maps; // Map to store load maps for each node
 
 
 	//________________________________________________________________________________________________
@@ -266,9 +298,6 @@ private:
 
 
 	//________________________________________________________________________________________________
-
-	std::unordered_map<int, load_map_store> load_maps; // Map to store load maps for each node
-
 
 	void create_global_load_vectors();
 

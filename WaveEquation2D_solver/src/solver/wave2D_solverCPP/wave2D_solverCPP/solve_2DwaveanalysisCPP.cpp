@@ -467,7 +467,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 			// Perform modal superposition solve
 			(*isAnalysisSuccess) = modal_superposition_solver.perform_modal_superposition_solve(NumberOfModes,
-				DampingRatio, geom_min_x, geom_min_y, scale_value);
+				DampingRatio, TotalSimulationTime, TimeIncrement, geom_min_x, geom_min_y, scale_value);
 
 		}
 		catch (const std::exception& e)

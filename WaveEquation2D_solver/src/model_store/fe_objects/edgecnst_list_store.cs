@@ -4,6 +4,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,15 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         // Source term values for the constraint
         public double source_value { get; set; } // source term amplitude
         public double source_frequency { get; set; } // source term frequency
+
+        // Source term types
+        // 0 = Half sine pulse
+        // 1 = Rectangular pulse
+        // 2 = Triangular pulse
+        // 3 = Step force with finite rise
+        // 4 = Full sine pulse
+        // 5 = Harmonic/ periodic excitation
+
         public int source_type { get; set; } // source term type
         public double source_starttime { get; set; } // source term start time
 
