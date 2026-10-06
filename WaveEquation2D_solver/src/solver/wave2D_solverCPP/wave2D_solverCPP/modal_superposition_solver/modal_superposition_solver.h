@@ -3,7 +3,7 @@
 #include "../system_store/stopwatch_events.h"
 
 #include "modal_spectral_solver.h"
-
+#include "shm_solver.h"
 
 
 
@@ -31,6 +31,17 @@ struct source_load_vector_data
 
 
 
+struct nodal_results_store
+{
+	int node_id = 0;
+	std::vector<double> time_vector;
+	std::vector<double> field_vector; // Displacement or field values at the node over time
+	std::vector<double> field_derivative_vector; // Velocity or field derivative values at the node over time
+	std::vector<double> field_acceleration_vector; // Acceleration or field second derivative values at the node over time
+};
+
+
+
 class modal_superposition_solver
 {
 public:
@@ -50,10 +61,11 @@ private:
 
 	wave2d_system_store* wave_2dsystem_ptr;
 	stopwatch_events* m_stopwatch;
+	shm_solver m_shm_solver;
 
 	std::string output_file;
 
-	std::unordered_map<int, source_load_vector_data> source_load_vectors;
+	// std::unordered_map<int, source_load_vector_data> source_load_vectors;
 
 	void(*m_callback)(const char*) = nullptr;
 

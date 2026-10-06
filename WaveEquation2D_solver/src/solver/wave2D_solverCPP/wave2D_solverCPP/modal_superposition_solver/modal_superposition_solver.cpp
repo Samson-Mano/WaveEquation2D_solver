@@ -122,7 +122,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 	Eigen::VectorXd initial_field_derivative_vector = Eigen::VectorXd::Zero(numDOF);
 
 	// Create the source load vectors for the modal superposition solve
-	source_load_vectors.clear();
+	std::unordered_map<int, source_load_vector_data> source_load_vectors;
+	// source_load_vectors.clear();
 
 
 	for (const auto& [node_id, loads] : modal_spec_solver.getLoadMaps())
@@ -197,6 +198,201 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 
 	//____________________________________________________________________________________________________________________
 
+	std::unordered_map<int, nodal_results_store> nodal_results; // Map to store nodal results
+
+	const int num_steps =
+		static_cast<int>(TotalSimulationTime / TimeIncrement) + 1;
+
+	for (int node_id = 0; node_id < numDOF; ++node_id)
+	{
+		auto& nr = nodal_results[node_id];
+		nr.node_id = node_id;
+
+		nr.time_vector.resize(num_steps);
+		nr.field_vector.resize(num_steps);
+		nr.field_derivative_vector.resize(num_steps);
+		nr.field_acceleration_vector.resize(num_steps);
+	}
+
+	// Get the modal mass and stiffness vectors
+	const std::vector<double>& modal_m_vector = modal_spec_solver.getModalMVector();
+	const std::vector<double>& modal_k_vector = modal_spec_solver.getModalKVector();
+
+	// Get the mode shape block for transforming modal coordinates back to global coordinates
+	// for a block spanning all rows and given columns
+	const Eigen::MatrixXd& mode_shape_block = modal_spec_solver.getNaturalModes().middleCols(mode_start_index, modal_dof);
+
+
+	for (int step = 0; step < num_steps; ++step)
+	{
+		const double time_t = step * TimeIncrement;
+
+		// For each time step, compute the modal response and then reconstruct the nodal response
+
+		Eigen::VectorXd modal_displresponse_vector = Eigen::VectorXd::Zero(modal_dof);
+		Eigen::VectorXd modal_veloresponse_vector = Eigen::VectorXd::Zero(modal_dof);
+		Eigen::VectorXd modal_acclresponse_vector = Eigen::VectorXd::Zero(modal_dof);
+
+
+		for (int i = mode_start_index; i < mode_end_index; ++i)
+		{
+			const int local_i = i - mode_start_index;   // <-- local index
+
+			double displ_resp_initial = 0.0; // Displacement response due to initial condition
+			double velo_resp_initial = 0.0; // Velocity response due to initial condition
+			double accl_resp_initial = 0.0; // Acceleration response due to initial condition
+
+
+			m_shm_solver.get_steady_state_initial_condition_soln(displ_resp_initial,
+				velo_resp_initial,
+				accl_resp_initial,
+				time_t,
+				modal_m_vector[i],
+				modal_k_vector[i],
+				modal_initial_field_vector[local_i],
+				modal_initial_field_derivative_vector[local_i]);
+
+			//_______________________________________________________________________
+			double displ_resp_force = 0.0; // Displacement response due to pulse force
+			double velo_resp_force = 0.0; // Velocity response due to pulse force
+			double accl_resp_force = 0.0; // Acceleration response due to pulse force
+
+			// get all the loads
+			for (const auto& [load_id, source_load] : source_load_vectors)
+			{
+				// Go through all the force
+				double at_force_displ_resp = 0.0;
+				double at_force_velo_resp = 0.0;
+				double at_force_accl_resp = 0.0;
+
+				if (source_load.load_type == 0)
+				{
+					// Half sine pulse
+
+					m_shm_solver.get_steady_state_half_sine_pulse_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+				}
+				else if (source_load.load_type == 1)
+				{
+					// Rectangular pulse
+
+					m_shm_solver.get_steady_state_rectangular_pulse_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+				}
+				else if (source_load.load_type == 2)
+				{
+					// Triangular pulse
+
+					m_shm_solver.get_steady_state_triangular_pulse_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+				}
+				else if (source_load.load_type == 3)
+				{
+					// Step force with finite rise
+
+					m_shm_solver.get_steady_state_stepforce_finiterise_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+
+				}
+				else if (source_load.load_type == 4)
+				{
+					// Full sine pulse
+					m_shm_solver.get_steady_state_full_sine_pulse_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+
+				}
+				else if (source_load.load_type == 5)
+				{
+					// Harmonic Excitation
+					m_shm_solver.get_total_harmonic_soln(at_force_displ_resp,
+						at_force_velo_resp,
+						at_force_accl_resp,
+						time_t,
+						modal_m_vector[i],
+						modal_k_vector[i],
+						source_load.modal_LoadAmplitudeVector[local_i],
+						source_load.load_start_time,
+						source_load.load_end_time);
+
+				}
+
+				displ_resp_force = displ_resp_force + at_force_displ_resp;
+				velo_resp_force = velo_resp_force + at_force_velo_resp;
+				accl_resp_force = accl_resp_force + at_force_accl_resp;
+
+			}
+
+			// Add to the modal displ, velo, and accl matrices
+			modal_displresponse_vector[local_i] = displ_resp_initial + displ_resp_force;
+			modal_veloresponse_vector[local_i] = velo_resp_initial + velo_resp_force;
+			modal_acclresponse_vector[local_i] = accl_resp_initial + accl_resp_force;
+
+		}
+
+		// Transform modal space responses back to global coordinate (nodal) responses at time t
+
+		Eigen::VectorXd globalcoord_displresponse_vector = Eigen::VectorXd::Zero(numDOF);
+		Eigen::VectorXd globalcoord_veloresponse_vector = Eigen::VectorXd::Zero(numDOF);
+		Eigen::VectorXd globalcoord_acclresponse_vector = Eigen::VectorXd::Zero(numDOF);
+
+
+		globalcoord_displresponse_vector.noalias() = mode_shape_block * modal_displresponse_vector;
+		globalcoord_veloresponse_vector.noalias() = mode_shape_block * modal_veloresponse_vector;
+		globalcoord_acclresponse_vector.noalias() = mode_shape_block * modal_acclresponse_vector;
+
+
+		// Store the results in the nodal_results map
+		for (int node_id = 0; node_id < numDOF; ++node_id)
+		{
+			auto& nodal_result = nodal_results[node_id];
+
+			nodal_result.node_id = node_id;
+			nodal_result.time_vector[step] = time_t;
+			nodal_result.field_vector[step] = globalcoord_displresponse_vector[node_id];
+			nodal_result.field_derivative_vector[step] = globalcoord_veloresponse_vector[node_id];
+			nodal_result.field_acceleration_vector[step] = globalcoord_acclresponse_vector[node_id];
+		}
+	}
 
 
 
