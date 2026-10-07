@@ -37,6 +37,10 @@ namespace WaveEquation2D_solver.other_windows
             SetSelectionMode(gvariables_static.is_RectangleSelection);
 
             comboBox_sourcetype.SelectedIndex = 0; // Default to "Half Sine Pulse"
+
+            label_XYextent.Text = $"X: {model_data.geom_bounds.X}, Y: {model_data.geom_bounds.Y}";
+
+            updateSourceWavelength();
         }
 
         private void rectangleSelectionToolStripMenuItem_Click(object sender, EventArgs e) => SetSelectionMode(true);
@@ -147,6 +151,13 @@ namespace WaveEquation2D_solver.other_windows
                     return;
                 }
 
+
+
+                if(source_value == 0 || source_frequency <= 0 || source_start_time < 0)
+                {
+                    MessageBox.Show("Source value and source frequency must be non-zero and start time must be non-negative for a source constraint.");
+                    return;
+                }
 
                 model_data.fe_data.fe_edgeconstraints.add_edgeconstraint(model_data.fe_data.selected_edge_ids.ToList(),
                    constraint_edge_startpt_ids, constraint_edge_endpt_ids,
@@ -358,6 +369,19 @@ namespace WaveEquation2D_solver.other_windows
 
         }
 
+        private void textBox_sourcefreq_TextChanged(object sender, EventArgs e) => updateSourceWavelength();
+
+        private void updateSourceWavelength()
+        {
+            if (double.TryParse(textBox_sourcefreq.Text, out double frequency) && frequency != 0.0)
+            {
+                label_wavelength.Text = $"λ: {1.0 / frequency}";
+            }
+            else
+            {
+                label_wavelength.Text = "λ: N/A";
+            }
+        }
 
     }
 }

@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using WaveEquation2D_solver.src.model_store.fe_objects;
 
 namespace WaveEquation2D_solver.other_windows
 {
@@ -227,8 +228,56 @@ namespace WaveEquation2D_solver.other_windows
                     textBox_numberofmodes.Text = "0";
                     numberofmodes = 0;
                 }
-                
-        
+
+
+                bool isFieldAppliedtoNodes = false;
+                bool isSourceAppliedtoNodes = false;
+
+                // Check whether the loads / initial conditions to nodes are applied or not
+                foreach (nodecnst_data nd_cnst in modeldata.fe_data.fe_nodeconstraints.ndcnstMap.Values)
+                {
+                    if (nd_cnst.isField == true && nd_cnst.field_value != 0.0)
+                    {
+                        isFieldAppliedtoNodes = true;
+                    }
+                    if (nd_cnst.isSource == true && nd_cnst.source_value != 0.0)
+                    {
+                        isSourceAppliedtoNodes = true;
+                    }
+                }
+
+
+                bool isFieldAppliedtoEdges = false;
+                bool isSourceAppliedtoEdges = false;
+
+                // Check whether the loads / initial conditions to edges are applied or not
+                foreach (edgecnst_store edge_cnst in modeldata.fe_data.fe_edgeconstraints.edgecnstMap.Values)
+                {
+                    if (edge_cnst.isfieldvalue == true && edge_cnst.field_value != 0.0)
+                    {
+                        isFieldAppliedtoEdges = true;
+                    }
+
+                    if(edge_cnst.isnormalderivfieldvalue == true && edge_cnst.normalderivfield_value != 0.0)
+                    {
+                        isFieldAppliedtoEdges = true;
+                    }
+
+                    if (edge_cnst.isSource == true && edge_cnst.source_value != 0.0)
+                    {
+                        isSourceAppliedtoEdges = true;
+                    }
+                }
+
+
+                if (!isFieldAppliedtoNodes && !isSourceAppliedtoNodes && !isFieldAppliedtoEdges && !isSourceAppliedtoEdges)
+                {
+                    AppendStatus("No field or source applied to nodes or edges. Please apply boundary conditions.\n");
+                    return;
+                }
+
+
+
                 // Write input file
                 wave2DSolverInterop.SolverSettings solver_settings = new wave2DSolverInterop.SolverSettings();
                 solver_settings.SolverType = comboBox_solvertype.SelectedIndex; // 0 = Direct Time Integration, 1 = Modal Superposition

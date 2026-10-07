@@ -1,4 +1,19 @@
 #pragma once
+
+
+#pragma warning(push)
+#pragma warning (disable : 26451)
+#pragma warning (disable : 26495)
+#pragma warning (disable : 6255)
+#pragma warning (disable : 6294)
+#pragma warning (disable : 26813)
+#pragma warning (disable : 26454)
+#pragma warning (disable : 4244)
+#pragma warning (disable : 4091)
+#pragma warning (disable : 6011)
+#pragma warning (disable : 6387)
+
+
 #include "hash_utils.h"
 
 #include <Eigen/Dense>
@@ -14,7 +29,7 @@
 
 using hash_utils::fnv_mix;
 
-
+#pragma warning(pop)
 
 
 struct load_vector_store

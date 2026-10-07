@@ -34,7 +34,7 @@ struct source_load_vector_data
 struct nodal_results_store
 {
 	int node_id = 0;
-	std::vector<double> time_vector;
+	
 	std::vector<double> field_vector; // Displacement or field values at the node over time
 	std::vector<double> field_derivative_vector; // Velocity or field derivative values at the node over time
 	std::vector<double> field_acceleration_vector; // Acceleration or field second derivative values at the node over time
@@ -65,7 +65,15 @@ private:
 
 	std::string output_file;
 
+	std::vector<double> time_vector;
+
 	// std::unordered_map<int, source_load_vector_data> source_load_vectors;
+
+
+	void store_results(const modal_spectral_solver& modal_spec_solver,
+		const std::unordered_map<int, nodal_results_store>& nodal_results, 
+		double geom_min_x, double geom_min_y, double scale_value);
+
 
 	void(*m_callback)(const char*) = nullptr;
 

@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WaveEquation2D_solver.src.model_store;
+using System.Reflection.Emit;
 
 namespace WaveEquation2D_solver.other_windows
 {
@@ -35,6 +36,10 @@ namespace WaveEquation2D_solver.other_windows
             SetSelectionMode(gvariables_static.is_RectangleSelection);
 
             comboBox_sourcetype.SelectedIndex = 0; // Default to "Half Sine Pulse"
+
+            label_XYextent.Text = $"X: {model_data.geom_bounds.X}, Y: {model_data.geom_bounds.Y}";
+
+            updateSourceWavelength();
         }
 
 
@@ -79,13 +84,23 @@ namespace WaveEquation2D_solver.other_windows
                 return;
             }
 
+            if (radioButton_source.Checked == true)
+            {
+                if (source_value == 0 || source_frequency <= 0 || source_start_time < 0)
+                {
+                    MessageBox.Show("Source value and source frequency must be non-zero for a source constraint.");
+                    return;
+                }
+            }
+
+
             // Get the point locations
             List<Vector2> constraint_node_pts = new List<Vector2>();
 
-            foreach(int nd_id in model_data.fe_data.selected_node_ids)
+            foreach (int nd_id in model_data.fe_data.selected_node_ids)
             {
                 node_store nd = model_data.fe_data.fe_nodes.nodeMap[nd_id];
-                
+
                 constraint_node_pts.Add(new Vector2((float)nd.node_pt_x_coord,
                     (float)nd.node_pt_y_coord));
             }
@@ -94,8 +109,8 @@ namespace WaveEquation2D_solver.other_windows
             bool isSource = radioButton_source.Checked;
 
             // Add the constraint
-            model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(), 
-                constraint_node_pts, field_value, source_value, source_frequency, source_start_time, comboBox_sourcetype.SelectedIndex, 
+            model_data.fe_data.fe_nodeconstraints.add_nodeconstraint(model_data.fe_data.selected_node_ids.ToList(),
+                constraint_node_pts, field_value, source_value, source_frequency, source_start_time, comboBox_sourcetype.SelectedIndex,
                 isField, isSource);
 
             // Clear the selected point ids
@@ -264,6 +279,21 @@ namespace WaveEquation2D_solver.other_windows
             label_dirichlet.Enabled = !isSourceSelected;
         }
 
+
+        private void textBox_sourcefreq_TextChanged(object sender, EventArgs e) => updateSourceWavelength();
+
+
+        private void updateSourceWavelength()
+        {
+            if (double.TryParse(textBox_sourcefreq.Text, out double frequency) && frequency != 0.0)
+            {
+                label_wavelength.Text = $"λ: {1.0 / frequency}";
+            }
+            else
+            {
+                label_wavelength.Text = "λ: N/A";
+            }
+        }
 
     }
 }

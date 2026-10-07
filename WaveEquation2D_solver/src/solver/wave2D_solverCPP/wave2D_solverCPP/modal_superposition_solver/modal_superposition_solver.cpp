@@ -153,6 +153,9 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 					source_load.load_id = load_id;
 					source_load.load_type = load.sourcetype;
 					source_load.load_start_time = load.sourcestarttime;
+
+					// // Scale the load frequency based on the modal spectral solver's frequency scale factor
+					// double load_freq = load.sourcefrequency * modal_spec_solver.getFreqScaleFactor();
 					source_load.load_end_time = load.sourcestarttime + (1.0 / load.sourcefrequency);
 
 					source_load.LoadAmplitudeVector = Eigen::VectorXd::Zero(numDOF);
@@ -208,11 +211,12 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 		auto& nr = nodal_results[node_id];
 		nr.node_id = node_id;
 
-		nr.time_vector.resize(num_steps);
 		nr.field_vector.resize(num_steps);
 		nr.field_derivative_vector.resize(num_steps);
 		nr.field_acceleration_vector.resize(num_steps);
 	}
+
+	this->time_vector.resize(num_steps);
 
 	// Get the modal mass and stiffness vectors
 	const std::vector<double>& modal_m_vector = modal_spec_solver.getModalMVector();
@@ -242,13 +246,17 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 			double velo_resp_initial = 0.0; // Velocity response due to initial condition
 			double accl_resp_initial = 0.0; // Acceleration response due to initial condition
 
+			// Get the modal mass and modal stiffness for the current mode
+			double modal_mass = modal_m_vector[i] * std::pow(modal_spec_solver.getFreqScaleFactor(), 2);
+			double modal_stiffness = modal_k_vector[i];
+
 
 			m_shm_solver.get_steady_state_initial_condition_soln(displ_resp_initial,
 				velo_resp_initial,
 				accl_resp_initial,
 				time_t,
-				modal_m_vector[i],
-				modal_k_vector[i],
+				modal_mass,
+				modal_stiffness,
 				modal_initial_field_vector[local_i],
 				modal_initial_field_derivative_vector[local_i]);
 
@@ -273,8 +281,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -288,8 +296,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -303,8 +311,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -318,8 +326,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -333,8 +341,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -348,8 +356,8 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 						at_force_velo_resp,
 						at_force_accl_resp,
 						time_t,
-						modal_m_vector[i],
-						modal_k_vector[i],
+						modal_mass,
+						modal_stiffness,
 						source_load.modal_LoadAmplitudeVector[local_i],
 						source_load.load_start_time,
 						source_load.load_end_time);
@@ -387,22 +395,140 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 			auto& nodal_result = nodal_results[node_id];
 
 			nodal_result.node_id = node_id;
-			nodal_result.time_vector[step] = time_t;
+			
 			nodal_result.field_vector[step] = globalcoord_displresponse_vector[node_id];
 			nodal_result.field_derivative_vector[step] = globalcoord_veloresponse_vector[node_id];
 			nodal_result.field_acceleration_vector[step] = globalcoord_acclresponse_vector[node_id];
 		}
+
+		// Add to time vector
+		time_vector[step] = time_t;
 	}
 
+	// Store the results to the output file
+	store_results(modal_spec_solver, nodal_results, geom_min_x, geom_min_y, scale_value);
 
 
-	return false; // Remove this after the actual modal superposition solve logic is implemented.
-
+	return true; // Remove this after the actual modal superposition solve logic is implemented.
 
 }
 
 
+void modal_superposition_solver::store_results(const modal_spectral_solver& modal_spec_solver,
+	const std::unordered_map<int, nodal_results_store>& nodal_results,
+	double geom_min_x, double geom_min_y, double scale_value)
+{
+	std::ofstream bin_file(this->output_file.c_str(), std::ios::binary);
 
+	if (!bin_file.is_open())
+	{
+		std::string error_msg = "Failed to open output file: " + this->output_file;
+		report(error_msg.c_str());
+		throw std::runtime_error(error_msg);
+	}
+
+
+	int32_t node_points_count = static_cast<int32_t>(modal_spec_solver.getSpectralMesh2D().renderer_node_points.size());
+	bin_file.write(reinterpret_cast<const char*>(&node_points_count), sizeof(int32_t));
+
+	// Write the nodes
+	for (const auto& node : modal_spec_solver.getSpectralMesh2D().renderer_node_points)
+	{
+		int32_t nodeid = static_cast<int32_t>(node.n_id);
+		double scaled_x = (node.x / scale_value) + geom_min_x;
+		double scaled_y = (node.y / scale_value) + geom_min_y;
+
+		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&scaled_x), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&scaled_y), sizeof(double));
+	}
+
+	report("Results: Nodes written");
+
+	int32_t edge_lines_count = static_cast<int32_t>(modal_spec_solver.getSpectralMesh2D().renderer_edge_lines.size());
+	bin_file.write(reinterpret_cast<const char*>(&edge_lines_count), sizeof(int32_t));
+
+	// Write the edges
+	for (const auto& edge : modal_spec_solver.getSpectralMesh2D().renderer_edge_lines)
+	{
+		int32_t start_nodeid = static_cast<int32_t>(edge.nstart);
+		int32_t end_nodeid = static_cast<int32_t>(edge.nend);
+
+		bin_file.write(reinterpret_cast<const char*>(&start_nodeid), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&end_nodeid), sizeof(int32_t));
+	}
+
+	report("Results: Edges written");
+
+	int32_t triangles_count = static_cast<int32_t>(modal_spec_solver.getSpectralMesh2D().renderer_element_triangles.size());
+	bin_file.write(reinterpret_cast<const char*>(&triangles_count), sizeof(int32_t));
+
+	// Write the triangles
+	for (const auto& tri : modal_spec_solver.getSpectralMesh2D().renderer_element_triangles)
+	{
+		int32_t n1 = static_cast<int32_t>(tri.n1);
+		int32_t n2 = static_cast<int32_t>(tri.n2);
+		int32_t n3 = static_cast<int32_t>(tri.n3);
+
+		bin_file.write(reinterpret_cast<const char*>(&n1), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&n2), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&n3), sizeof(int32_t));
+	}
+
+	report("Results: Triangles written");
+
+	int32_t time_vector_size = static_cast<int32_t>(time_vector.size());
+	bin_file.write(reinterpret_cast<const char*>(&time_vector_size), sizeof(int32_t));
+
+
+	// Write the time vector
+	bin_file.write(reinterpret_cast<const char*>(this->time_vector.data()),
+		static_cast<std::streamsize>(this->time_vector.size() * sizeof(double)));
+
+
+	report("Time vectors written");
+
+
+	for (const auto& node : modal_spec_solver.getSpectralMesh2D().renderer_node_points)
+	{
+		int32_t nodeid = static_cast<int32_t>(node.n_id);
+		// Write the node ID
+		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
+
+		// Get the nodal results for the current node
+		const nodal_results_store& n_result =   nodal_results.at(node.n_id);
+
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_vector.data()),
+			static_cast<std::streamsize>(n_result.field_vector.size() * sizeof(double)));
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_derivative_vector.data()),
+			static_cast<std::streamsize>(n_result.field_derivative_vector.size() * sizeof(double)));
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_acceleration_vector.data()),
+			static_cast<std::streamsize>(n_result.field_acceleration_vector.size() * sizeof(double)));
+
+
+	}
+
+	report("Nodal results written");
+
+
+
+	bin_file.flush();
+
+	auto file_size = bin_file.tellp();  // tellp() for output file (tellg() is for input)
+
+	bin_file.close();
+
+	// Report Success and file size
+	std::string success_msg = "Results stored successfully: " +
+		this->output_file +
+		" (" + std::to_string(node_points_count) + " nodes, " +
+		std::to_string(triangles_count) + " triangles)";
+	report(success_msg.c_str());
+
+
+
+	//
+}
 
 
 

@@ -143,6 +143,11 @@ public:
 		return number_of_modes;
 	}
 
+	const double getFreqScaleFactor() const
+	{
+		return freq_scale_factor;
+	}
+
 	const Eigen::MatrixXd& getNaturalModes() const 
 	{
 		return natural_modes;
@@ -170,6 +175,10 @@ public:
 		return load_maps;
 	}
 
+	const spectral_mesh2d& getSpectralMesh2D() const
+	{
+		return spec_mesh2d;
+	}
 
 
 	void init(wave2d_system_store* wave_2dsystem_ptr,

@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(nodalconstraint_frm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.textBox_sourcestarttime = new System.Windows.Forms.TextBox();
+            this.label_sourcestarttime = new System.Windows.Forms.Label();
             this.comboBox_sourcetype = new System.Windows.Forms.ComboBox();
             this.label_sourcetype = new System.Windows.Forms.Label();
             this.textBox_sourcefreq = new System.Windows.Forms.TextBox();
@@ -53,8 +55,8 @@
             this.Column3_fieldvalue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column4_sourcevalue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5_sourcefrequency = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label_sourcestarttime = new System.Windows.Forms.Label();
-            this.textBox_sourcestarttime = new System.Windows.Forms.TextBox();
+            this.label_XYextent = new System.Windows.Forms.Label();
+            this.label_wavelength = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConstraintList)).BeginInit();
@@ -62,6 +64,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label_wavelength);
+            this.groupBox1.Controls.Add(this.label_XYextent);
             this.groupBox1.Controls.Add(this.textBox_sourcestarttime);
             this.groupBox1.Controls.Add(this.label_sourcestarttime);
             this.groupBox1.Controls.Add(this.comboBox_sourcetype);
@@ -81,6 +85,23 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Nodal Constraint Data: ";
             // 
+            // textBox_sourcestarttime
+            // 
+            this.textBox_sourcestarttime.Location = new System.Drawing.Point(115, 234);
+            this.textBox_sourcestarttime.Name = "textBox_sourcestarttime";
+            this.textBox_sourcestarttime.Size = new System.Drawing.Size(76, 27);
+            this.textBox_sourcestarttime.TabIndex = 13;
+            this.textBox_sourcestarttime.Text = "0";
+            // 
+            // label_sourcestarttime
+            // 
+            this.label_sourcestarttime.AutoSize = true;
+            this.label_sourcestarttime.Location = new System.Drawing.Point(18, 237);
+            this.label_sourcestarttime.Name = "label_sourcestarttime";
+            this.label_sourcestarttime.Size = new System.Drawing.Size(121, 20);
+            this.label_sourcestarttime.TabIndex = 12;
+            this.label_sourcestarttime.Text = "Start time t_s = ";
+            // 
             // comboBox_sourcetype
             // 
             this.comboBox_sourcetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -94,7 +115,7 @@
             "Harmonic/ periodic excitation"});
             this.comboBox_sourcetype.Location = new System.Drawing.Point(115, 205);
             this.comboBox_sourcetype.Name = "comboBox_sourcetype";
-            this.comboBox_sourcetype.Size = new System.Drawing.Size(133, 23);
+            this.comboBox_sourcetype.Size = new System.Drawing.Size(133, 27);
             this.comboBox_sourcetype.TabIndex = 11;
             // 
             // label_sourcetype
@@ -102,7 +123,7 @@
             this.label_sourcetype.AutoSize = true;
             this.label_sourcetype.Location = new System.Drawing.Point(64, 208);
             this.label_sourcetype.Name = "label_sourcetype";
-            this.label_sourcetype.Size = new System.Drawing.Size(48, 15);
+            this.label_sourcetype.Size = new System.Drawing.Size(62, 20);
             this.label_sourcetype.TabIndex = 10;
             this.label_sourcetype.Text = "Type = ";
             // 
@@ -110,16 +131,17 @@
             // 
             this.textBox_sourcefreq.Location = new System.Drawing.Point(115, 173);
             this.textBox_sourcefreq.Name = "textBox_sourcefreq";
-            this.textBox_sourcefreq.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourcefreq.Size = new System.Drawing.Size(76, 27);
             this.textBox_sourcefreq.TabIndex = 9;
-            this.textBox_sourcefreq.Text = "0";
+            this.textBox_sourcefreq.Text = "1";
+            this.textBox_sourcefreq.TextChanged += new System.EventHandler(this.textBox_sourcefreq_TextChanged);
             // 
             // label_sourcefreq
             // 
             this.label_sourcefreq.AutoSize = true;
             this.label_sourcefreq.Location = new System.Drawing.Point(73, 176);
             this.label_sourcefreq.Name = "label_sourcefreq";
-            this.label_sourcefreq.Size = new System.Drawing.Size(36, 15);
+            this.label_sourcefreq.Size = new System.Drawing.Size(46, 20);
             this.label_sourcefreq.TabIndex = 8;
             this.label_sourcefreq.Text = "ω_f =";
             // 
@@ -128,7 +150,7 @@
             this.radioButton_source.AutoSize = true;
             this.radioButton_source.Location = new System.Drawing.Point(11, 119);
             this.radioButton_source.Name = "radioButton_source";
-            this.radioButton_source.Size = new System.Drawing.Size(180, 19);
+            this.radioButton_source.Size = new System.Drawing.Size(238, 24);
             this.radioButton_source.TabIndex = 7;
             this.radioButton_source.TabStop = true;
             this.radioButton_source.Text = "Source/ External Excitation: ";
@@ -141,7 +163,7 @@
             this.radioButton_dirichlet.Checked = true;
             this.radioButton_dirichlet.Location = new System.Drawing.Point(11, 39);
             this.radioButton_dirichlet.Name = "radioButton_dirichlet";
-            this.radioButton_dirichlet.Size = new System.Drawing.Size(262, 19);
+            this.radioButton_dirichlet.Size = new System.Drawing.Size(340, 24);
             this.radioButton_dirichlet.TabIndex = 6;
             this.radioButton_dirichlet.TabStop = true;
             this.radioButton_dirichlet.Text = "Essential or Dirichlet Boundary Condition: ";
@@ -152,16 +174,16 @@
             // 
             this.textBox_sourceampl.Location = new System.Drawing.Point(115, 144);
             this.textBox_sourceampl.Name = "textBox_sourceampl";
-            this.textBox_sourceampl.Size = new System.Drawing.Size(76, 23);
+            this.textBox_sourceampl.Size = new System.Drawing.Size(76, 27);
             this.textBox_sourceampl.TabIndex = 5;
-            this.textBox_sourceampl.Text = "0";
+            this.textBox_sourceampl.Text = "10";
             // 
             // label_source
             // 
             this.label_source.AutoSize = true;
             this.label_source.Location = new System.Drawing.Point(62, 147);
             this.label_source.Name = "label_source";
-            this.label_source.Size = new System.Drawing.Size(47, 15);
+            this.label_source.Size = new System.Drawing.Size(59, 20);
             this.label_source.TabIndex = 4;
             this.label_source.Text = "f(x,y) =";
             // 
@@ -169,7 +191,7 @@
             // 
             this.textBox_dirichlet.Location = new System.Drawing.Point(115, 64);
             this.textBox_dirichlet.Name = "textBox_dirichlet";
-            this.textBox_dirichlet.Size = new System.Drawing.Size(76, 23);
+            this.textBox_dirichlet.Size = new System.Drawing.Size(76, 27);
             this.textBox_dirichlet.TabIndex = 2;
             this.textBox_dirichlet.Text = "0";
             // 
@@ -178,7 +200,7 @@
             this.label_dirichlet.AutoSize = true;
             this.label_dirichlet.Location = new System.Drawing.Point(83, 67);
             this.label_dirichlet.Name = "label_dirichlet";
-            this.label_dirichlet.Size = new System.Drawing.Size(24, 15);
+            this.label_dirichlet.Size = new System.Drawing.Size(31, 20);
             this.label_dirichlet.TabIndex = 1;
             this.label_dirichlet.Text = "u =";
             // 
@@ -187,7 +209,7 @@
             this.label_selectedNodeCount.AutoSize = true;
             this.label_selectedNodeCount.Location = new System.Drawing.Point(295, 253);
             this.label_selectedNodeCount.Name = "label_selectedNodeCount";
-            this.label_selectedNodeCount.Size = new System.Drawing.Size(96, 15);
+            this.label_selectedNodeCount.Size = new System.Drawing.Size(126, 20);
             this.label_selectedNodeCount.TabIndex = 1;
             this.label_selectedNodeCount.Text = "Selected Nodes: ";
             // 
@@ -222,12 +244,13 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.rectangleSelectionToolStripMenuItem,
             this.circleSelectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(814, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(814, 28);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -236,14 +259,14 @@
             this.rectangleSelectionToolStripMenuItem.Checked = true;
             this.rectangleSelectionToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rectangleSelectionToolStripMenuItem.Name = "rectangleSelectionToolStripMenuItem";
-            this.rectangleSelectionToolStripMenuItem.Size = new System.Drawing.Size(122, 20);
+            this.rectangleSelectionToolStripMenuItem.Size = new System.Drawing.Size(154, 24);
             this.rectangleSelectionToolStripMenuItem.Text = "Rectangle Selection";
             this.rectangleSelectionToolStripMenuItem.Click += new System.EventHandler(this.rectangleSelectionToolStripMenuItem_Click);
             // 
             // circleSelectionToolStripMenuItem
             // 
             this.circleSelectionToolStripMenuItem.Name = "circleSelectionToolStripMenuItem";
-            this.circleSelectionToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.circleSelectionToolStripMenuItem.Size = new System.Drawing.Size(125, 24);
             this.circleSelectionToolStripMenuItem.Text = "Circle Selection";
             this.circleSelectionToolStripMenuItem.Click += new System.EventHandler(this.circleSelectionToolStripMenuItem_Click);
             // 
@@ -285,6 +308,7 @@
             this.Column2_nodeids.MinimumWidth = 8;
             this.Column2_nodeids.Name = "Column2_nodeids";
             this.Column2_nodeids.ReadOnly = true;
+            this.Column2_nodeids.Width = 125;
             // 
             // Column3_fieldvalue
             // 
@@ -308,32 +332,34 @@
             // 
             this.Column5_sourcefrequency.FillWeight = 80F;
             this.Column5_sourcefrequency.HeaderText = "Source frequency (ω_f)";
+            this.Column5_sourcefrequency.MinimumWidth = 6;
             this.Column5_sourcefrequency.Name = "Column5_sourcefrequency";
             this.Column5_sourcefrequency.ReadOnly = true;
             this.Column5_sourcefrequency.Width = 80;
             // 
-            // label_sourcestarttime
+            // label_XYextent
             // 
-            this.label_sourcestarttime.AutoSize = true;
-            this.label_sourcestarttime.Location = new System.Drawing.Point(18, 237);
-            this.label_sourcestarttime.Name = "label_sourcestarttime";
-            this.label_sourcestarttime.Size = new System.Drawing.Size(91, 15);
-            this.label_sourcestarttime.TabIndex = 12;
-            this.label_sourcestarttime.Text = "Start time t_s = ";
+            this.label_XYextent.AutoSize = true;
+            this.label_XYextent.Location = new System.Drawing.Point(37, 304);
+            this.label_XYextent.Name = "label_XYextent";
+            this.label_XYextent.Size = new System.Drawing.Size(53, 20);
+            this.label_XYextent.TabIndex = 14;
+            this.label_XYextent.Text = "label1";
             // 
-            // textBox_sourcestarttime
+            // label_wavelength
             // 
-            this.textBox_sourcestarttime.Location = new System.Drawing.Point(115, 234);
-            this.textBox_sourcestarttime.Name = "textBox_sourcestarttime";
-            this.textBox_sourcestarttime.Size = new System.Drawing.Size(76, 23);
-            this.textBox_sourcestarttime.TabIndex = 13;
-            this.textBox_sourcestarttime.Text = "0";
+            this.label_wavelength.AutoSize = true;
+            this.label_wavelength.Location = new System.Drawing.Point(196, 176);
+            this.label_wavelength.Name = "label_wavelength";
+            this.label_wavelength.Size = new System.Drawing.Size(53, 20);
+            this.label_wavelength.TabIndex = 15;
+            this.label_wavelength.Text = "label1";
             // 
             // nodalconstraint_frm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(814, 411);
+            this.ClientSize = new System.Drawing.Size(814, 403);
             this.Controls.Add(this.dataGridView_ConstraintList);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.button_deleteconstraint);
@@ -389,5 +415,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5_sourcefrequency;
         private System.Windows.Forms.TextBox textBox_sourcestarttime;
         private System.Windows.Forms.Label label_sourcestarttime;
+        private System.Windows.Forms.Label label_XYextent;
+        private System.Windows.Forms.Label label_wavelength;
     }
 }
