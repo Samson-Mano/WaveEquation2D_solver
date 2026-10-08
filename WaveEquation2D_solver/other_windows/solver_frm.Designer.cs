@@ -51,6 +51,8 @@
             this.label_pml = new System.Windows.Forms.Label();
             this.textBox_globaldampingratio = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.label_intermediatesteps = new System.Windows.Forms.Label();
+            this.textBox_intermediatesteps = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // richTextBox_AnalysisUpdate
@@ -262,11 +264,30 @@
             this.label2.TabIndex = 45;
             this.label2.Text = "Global Damping Ratio: ";
             // 
+            // label_intermediatesteps
+            // 
+            this.label_intermediatesteps.AutoSize = true;
+            this.label_intermediatesteps.Location = new System.Drawing.Point(114, 480);
+            this.label_intermediatesteps.Name = "label_intermediatesteps";
+            this.label_intermediatesteps.Size = new System.Drawing.Size(152, 17);
+            this.label_intermediatesteps.TabIndex = 46;
+            this.label_intermediatesteps.Text = "Intermediate steps: ";
+            // 
+            // textBox_intermediatesteps
+            // 
+            this.textBox_intermediatesteps.Location = new System.Drawing.Point(274, 477);
+            this.textBox_intermediatesteps.Name = "textBox_intermediatesteps";
+            this.textBox_intermediatesteps.Size = new System.Drawing.Size(117, 24);
+            this.textBox_intermediatesteps.TabIndex = 47;
+            this.textBox_intermediatesteps.Text = "10";
+            // 
             // solver_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(794, 641);
+            this.Controls.Add(this.textBox_intermediatesteps);
+            this.Controls.Add(this.label_intermediatesteps);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox_globaldampingratio);
             this.Controls.Add(this.label_pml);
@@ -327,5 +348,7 @@
         private System.Windows.Forms.Label label_pml;
         private System.Windows.Forms.TextBox textBox_globaldampingratio;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_intermediatesteps;
+        private System.Windows.Forms.TextBox textBox_intermediatesteps;
     }
 }

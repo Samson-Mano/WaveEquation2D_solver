@@ -43,6 +43,9 @@ namespace WaveEquation2D_solver
         private nodalconstraint_frm nodalconstraint_Form;
 
         private solver_frm solver_Form;
+        private animationcontrol_frm animationcontrol_Form;
+
+
         //private rsltoption_frm rsltoption_Form;
         //private annotate_frm annotate_Form;
 
@@ -697,6 +700,45 @@ namespace WaveEquation2D_solver
 
         }
 
+
+        private void resultOptionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (modeldata.IsModelSet == false)
+                return;
+
+            // Check if animation_Form is null or disposed
+            if (animationcontrol_Form == null || animationcontrol_Form.IsDisposed)
+            {
+                animationcontrol_Form = new animationcontrol_frm(ref modeldata);
+
+                // Make it behave like a tool window
+                animationcontrol_Form.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                animationcontrol_Form.ShowInTaskbar = false;
+                animationcontrol_Form.TopLevel = true;
+                animationcontrol_Form.Owner = this;
+
+                // Set the start position to manual so we can control placement
+                animationcontrol_Form.StartPosition = FormStartPosition.Manual;
+
+                // Center the form on the parent
+                CenterFormOnParent(animationcontrol_Form);
+
+            }
+
+            if (!animationcontrol_Form.Visible)
+            {
+                animationcontrol_Form.Show(this);
+            }
+
+            // animationcontrol_Form.updateTextBox();
+            animationcontrol_Form.BringToFront();
+
+            glControl_main_panel.Invalidate();
+
+
+        }
+
+
         #endregion
 
 
@@ -810,11 +852,11 @@ namespace WaveEquation2D_solver
             about_Form.Activate();
         }
 
+
+
         #endregion
 
         #endregion
-
-
 
     }
 }

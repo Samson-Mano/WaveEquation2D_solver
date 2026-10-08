@@ -25,6 +25,7 @@ struct SolverSettings
 	double DampingRatio; // Global Damping ratio for the analysis
 
 	int NumberOfModes;          // Number of modes to consider in the analysis
+	int IntermediateSteps;      // Number of intermediate steps
 
 	int ExtendConstraints; // 0 or 1
 	int SaveHRefinedModel; // 0 or 1
@@ -73,6 +74,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	double DampingRatio = settings->DampingRatio; // Global Damping ratio for the analysis
 
 	int NumberOfModes = settings->NumberOfModes;          // Number of modes to consider in the analysis
+	int IntermediateSteps = settings->IntermediateSteps;      // Number of intermediate steps
 
 	int ExtendConstraints = settings->ExtendConstraints; // 0 or 1
 	int SaveHRefinedModel = settings->SaveHRefinedModel; // 0 or 1

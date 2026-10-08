@@ -23,6 +23,7 @@ namespace WaveEquation2D_solver.src.solver
             public double DampingRatio;          // Damping ratio for the simulation
 
             public int NumberOfModes;          // Number of modes to consider in the analysis
+            public int IntermediateSteps;      // Number of intermediate steps
 
             public int ExtendConstraints; // 0 or 1
             public int SaveHRefinedModel; // 0 or 1

@@ -43,6 +43,9 @@ namespace WaveEquation2D_solver.other_windows
             textBox_totalsimulationtime.Text = Properties.Settings.Default.Sett_totalsimulationtime.ToString();
             textBox_timeinterval.Text = Properties.Settings.Default.Sett_timeinterval.ToString();
             textBox_numberofmodes.Text = Properties.Settings.Default.Sett_numofmodes.ToString();
+            textBox_globaldampingratio.Text = Properties.Settings.Default.Sett_globaldampratio.ToString();
+            textBox_intermediatesteps.Text = Properties.Settings.Default.Sett_intermediatesteps.ToString();
+
 
             checkBox_extendconstraints.Checked = true;
             checkBox_saveHrefinedmodel.Checked = false;
@@ -229,6 +232,24 @@ namespace WaveEquation2D_solver.other_windows
                     numberofmodes = 0;
                 }
 
+                int numberofintermediatesteps = 0;
+                if(comboBox_solvertype.SelectedIndex == 0) // Direct Integration method
+                {
+                    if (!int.TryParse(textBox_intermediatesteps.Text, out int numberofintermediatesteps_temp) || numberofintermediatesteps_temp < 0)
+                    {
+                        AppendStatus("Invalid number of intermediate steps. Please enter a non-negative integer.\n");
+                        return;
+                    }
+                    numberofintermediatesteps = numberofintermediatesteps_temp;
+                }
+                else
+                {
+                    // For Modal Superposition method, set number of intermediate steps to 0
+                    textBox_intermediatesteps.Text = "0";
+                    numberofintermediatesteps = 0;
+                }
+
+
 
                 bool isFieldAppliedtoNodes = false;
                 bool isSourceAppliedtoNodes = false;
@@ -287,6 +308,7 @@ namespace WaveEquation2D_solver.other_windows
                 solver_settings.TimeIncrement = timestep;
                 solver_settings.DampingRatio = dampingratio;
                 solver_settings.NumberOfModes = numberofmodes;
+                solver_settings.IntermediateSteps = numberofintermediatesteps;
                 solver_settings.ExtendConstraints = checkBox_extendconstraints.Checked == false ? 0 : 1;
                 solver_settings.SaveHRefinedModel = checkBox_saveHrefinedmodel.Checked == false ? 0 : 1;
           
@@ -614,6 +636,8 @@ namespace WaveEquation2D_solver.other_windows
             Properties.Settings.Default.Sett_totalsimulationtime = double.Parse(textBox_totalsimulationtime.Text);
             Properties.Settings.Default.Sett_timeinterval = double.Parse(textBox_timeinterval.Text);
             Properties.Settings.Default.Sett_numofmodes = int.Parse(textBox_numberofmodes.Text);
+            Properties.Settings.Default.Sett_intermediatesteps = int.Parse(textBox_intermediatesteps.Text);
+            Properties.Settings.Default.Sett_globaldampratio = double.Parse(textBox_globaldampingratio.Text);
             
             Properties.Settings.Default.Save();
         }
@@ -648,13 +672,19 @@ namespace WaveEquation2D_solver.other_windows
                 label_numofmodes.Visible = false;
                 textBox_numberofmodes.Visible = false;
                 label_pml.Visible = false;
-              
+
+                label_intermediatesteps.Visible = true;
+                textBox_intermediatesteps.Visible = true;
+
             }
             else if (comboBox_solvertype.SelectedIndex == 1) // Modal Superposition method
             {
                 label_numofmodes.Visible = true;
                 textBox_numberofmodes.Visible = true;
                 label_pml.Visible = true;
+
+                label_intermediatesteps.Visible = false;
+                textBox_intermediatesteps.Visible = false;
 
             }
         }

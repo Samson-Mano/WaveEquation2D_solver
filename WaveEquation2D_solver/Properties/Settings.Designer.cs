@@ -130,5 +130,29 @@ namespace WaveEquation2D_solver.Properties {
                 this["Sett_numofmodes"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int Sett_intermediatesteps {
+            get {
+                return ((int)(this["Sett_intermediatesteps"]));
+            }
+            set {
+                this["Sett_intermediatesteps"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double Sett_globaldampratio {
+            get {
+                return ((double)(this["Sett_globaldampratio"]));
+            }
+            set {
+                this["Sett_globaldampratio"] = value;
+            }
+        }
     }
 }

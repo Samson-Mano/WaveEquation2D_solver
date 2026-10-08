@@ -86,6 +86,12 @@
     <Compile Include="other_windows\about_frm.Designer.cs">
       <DependentUpon>about_frm.cs</DependentUpon>
     </Compile>
+    <Compile Include="other_windows\animationcontrol_frm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="other_windows\animationcontrol_frm.Designer.cs">
+      <DependentUpon>animationcontrol_frm.cs</DependentUpon>
+    </Compile>
     <Compile Include="other_windows\edgeconstraint_frm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,6 +166,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="other_windows\about_frm.resx">
       <DependentUpon>about_frm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="other_windows\animationcontrol_frm.resx">
+      <DependentUpon>animationcontrol_frm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="other_windows\edgeconstraint_frm.resx">
       <DependentUpon>edgeconstraint_frm.cs</DependentUpon>
