@@ -46,10 +46,6 @@ namespace WaveEquation2D_solver
         private animationcontrol_frm animationcontrol_Form;
 
 
-        //private rsltoption_frm rsltoption_Form;
-        //private annotate_frm annotate_Form;
-
-
         private helper_frm helper_Form;
 
         private about_frm about_Form;
@@ -739,6 +735,90 @@ namespace WaveEquation2D_solver
         }
 
 
+        private void fieldValuesToolStripMenuItem_Click(object sender, EventArgs e) => TrySetResultOption(1);
+        
+
+        private void firstDerivativeFieldToolStripMenuItem_Click(object sender, EventArgs e) => TrySetResultOption(2);
+
+
+        private void secondDerivativeFieldToolStripMenuItem_Click(object sender, EventArgs e) => TrySetResultOption(3);
+
+
+        private void hideResultsToolStripMenuItem_Click(object sender, EventArgs e) => TrySetResultOption(0);
+
+
+
+        private void TrySetResultOption(int option)
+        {
+            if (modeldata.IsResultSet == false)
+                return;
+
+            // Set the result option
+            set_ResultOption(option);
+
+        }
+
+
+
+        public void set_ResultOption(int option = 0)
+        {
+            // Result menu checks
+            fieldValuesToolStripMenuItem.Checked = (option == 1);
+            firstDerivativeFieldToolStripMenuItem.Checked = (option == 2);
+            secondDerivativeFieldToolStripMenuItem.Checked = (option == 3);
+            hideResultsToolStripMenuItem.Checked = (option == 0);
+
+            // Reset the result option flags in the modeldata_store
+            gvariables_static.is_paint_fieldvalues = false;
+            gvariables_static.is_paint_firstderivativefield = false;
+            gvariables_static.is_paint_secondderivativefield = false;
+
+            // Transparency defaults
+            gvariables_static.geom_transparency = 1.0f;
+            gvariables_static.rslt_transparency = 0.0f;
+
+            const float default_result_geom_transparency = 0.3f;
+            const float default_result_rslt_transparency = 0.8f;
+
+            // Apply selection
+            switch (option)
+            {
+                case 1:
+                    // Field Values Result (Displacement)
+                    gvariables_static.is_paint_fieldvalues = true;
+                    gvariables_static.geom_transparency = default_result_geom_transparency;
+                    gvariables_static.rslt_transparency = default_result_rslt_transparency;
+                    break;
+                case 2:
+                    // First Derivative Field Result (Velocity)
+                    gvariables_static.is_paint_firstderivativefield = true;
+                    gvariables_static.geom_transparency = default_result_geom_transparency;
+                    gvariables_static.rslt_transparency = default_result_rslt_transparency;
+                    break;
+                case 3:
+                    // Second Derivative Field Result (Acceleration)
+                    gvariables_static.is_paint_secondderivativefield = true;
+                    gvariables_static.geom_transparency = default_result_geom_transparency;
+                    gvariables_static.rslt_transparency = default_result_rslt_transparency;
+                    break;
+                default:
+                    // Hide results
+                    break;
+            }
+
+            // Switch the result option in the modeldata_store
+            gvariables_static.result_option = option;
+            modeldata.switch_result_option(true);
+
+            modeldata.update_openTK_uniforms();
+
+            glControl_main_panel.Invalidate();
+
+        }
+
+
+
+
         #endregion
 
 
@@ -857,6 +937,7 @@ namespace WaveEquation2D_solver
         #endregion
 
         #endregion
+
 
     }
 }

@@ -27,8 +27,8 @@ namespace WaveEquation2D_solver.src.model_store
         public rsltdata_store rslt_data;
 
 
-        // // Contour bar data for results visualization
-        // private contourlevelbar_store contour_bar_data;
+        // Contour bar data for results visualization
+        private contourlevelbar_store contour_bar_data;
 
 
         // Drawing bound data
@@ -48,7 +48,7 @@ namespace WaveEquation2D_solver.src.model_store
         public bool isEdgeConstraintUpdateInProgress = false;
         public bool isLoadUpdateInProgress = false;
         public bool isMaterialUpdateInProgress = false;
-        public bool isAnnotateResultInProgress = false;
+
 
         public bool IsModelSet = false;
         public bool IsResultSet = false;
@@ -87,7 +87,7 @@ namespace WaveEquation2D_solver.src.model_store
             rslt_data = new rsltdata_store();
 
 
-            // contour_bar_data = new contourlevelbar_store();
+            contour_bar_data = new contourlevelbar_store();
 
             IsResultSet = false;
 
@@ -136,8 +136,8 @@ namespace WaveEquation2D_solver.src.model_store
 
             fe_data.set_meshdrawing_data();
 
-            // // Initialize contour bar data
-            // contour_bar_data.InitializeContourLevelBarData(graphic_events_control.window_width, graphic_events_control.window_height);
+            // Initialize contour bar data
+            contour_bar_data.InitializeContourLevelBarData(graphic_events_control.window_width, graphic_events_control.window_height);
 
             update_openTK_uniforms();
 
@@ -191,21 +191,7 @@ namespace WaveEquation2D_solver.src.model_store
             {
                 rslt_data.paint_results();
 
-                // contour_bar_data.draw_contour_bar();
-
-                if (isAnnotateResultInProgress == true)
-                {
-                    if (gvariables_static.is_RectangleSelection == true)
-                    {
-                        // Paint the selection rectangle
-                        selection_rectangle.draw_selection_rectangle();
-                    }
-                    else
-                    {
-                        // Paint the selection circle
-                        selection_circle.draw_selection_circle();
-                    }
-                }
+                contour_bar_data.draw_contour_bar();
 
             }
 
@@ -224,66 +210,29 @@ namespace WaveEquation2D_solver.src.model_store
             int option = gvariables_static.result_option;
 
 
-            //// Switch the result option
-            //switch (option)
-            //{
-            //    case 1:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            0.0f, (float)rslt_data.rslt_extremes.max_displacement, "Displacement");
-            //        break;
-            //    case 2:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_stressX,
-            //            (float)rslt_data.rslt_extremes.max_stressX, "Stress X");
-            //        break;
-            //    case 3:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_stressY,
-            //            (float)rslt_data.rslt_extremes.max_stressY, "Stress Y");
-            //        break;
-            //    case 4:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_tauXY,
-            //            (float)rslt_data.rslt_extremes.max_tauXY, "Shear Stress XY");
-            //        break;
-            //    case 5:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_vonMises,
-            //            (float)rslt_data.rslt_extremes.max_vonMises, "Von Mises Stress");
-            //        break;
-            //    case 6:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_principalStress1,
-            //            (float)rslt_data.rslt_extremes.max_principalStress1, "Principal Stress 1");
-            //        break;
-            //    case 7:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_principalStress2,
-            //            (float)rslt_data.rslt_extremes.max_principalStress2, "Principal Stress 2");
-            //        break;
-            //    case 8:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height,
-            //            (float)rslt_data.rslt_extremes.min_shearStress,
-            //            (float)rslt_data.rslt_extremes.max_shearStress, "Max Shear Stress");
-            //        break;
-            //    case 9:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height, -1.0f, 1.0f, "PSL Type 1");
-            //        break;
-            //    case 10:
-            //        contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
-            //            graphic_events_control.window_height, -1.0f, 1.0f, "PSL Type 2");
-            //        break;
-
-            //}
+            // Switch the result option
+            switch (option)
+            {
+                case 1: // Field values (Displacement)
+                    contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
+                        graphic_events_control.window_height,
+                        (float)rslt_data.rslt_extremes.min_fieldvalues, 
+                        (float)rslt_data.rslt_extremes.max_fieldvalues, "Displacement");
+                    break;
+                case 2: // First Derivative Field values (Velocity)
+                    contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
+                        graphic_events_control.window_height,
+                        (float)rslt_data.rslt_extremes.min_firstderivativefield,
+                        (float)rslt_data.rslt_extremes.max_firstderivativefield, "Velocity");
+                    break;
+                case 3: // Second Derivative Field values (Acceleration)
+                    contour_bar_data.UpdateContourLevelBarPosition(graphic_events_control.window_width,
+                        graphic_events_control.window_height,
+                        (float)rslt_data.rslt_extremes.min_secondderivativefield,
+                        (float)rslt_data.rslt_extremes.max_secondderivativefield, "Acceleration");
+                    break;
+             
+            }
 
             if (updateBuffer == true)
             {
@@ -353,11 +302,6 @@ namespace WaveEquation2D_solver.src.model_store
             }
 
 
-            if (isAnnotateResultInProgress == true)
-            {
-                // // Select the points for result annotation
-                // rslt_data.select_result_nodes(o_pt, c_pt, isRightButton, graphic_events_control);
-            }
 
         }
 

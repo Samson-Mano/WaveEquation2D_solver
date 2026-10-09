@@ -42,6 +42,8 @@
             this.mediumPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.solverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dWaveEquationSolveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.resultOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generalInstructionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -49,8 +51,12 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_zoom_value = new System.Windows.Forms.ToolStripStatusLabel();
             this.glControl_main_panel = new OpenTK.GLControl();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.resultOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fieldValuesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.firstDerivativeFieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.secondDerivativeFieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.hideResultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -65,8 +71,8 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(602, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(803, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -79,41 +85,41 @@
             this.optionToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // importTXTFileToolStripMenuItem
             // 
             this.importTXTFileToolStripMenuItem.Name = "importTXTFileToolStripMenuItem";
-            this.importTXTFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importTXTFileToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
             this.importTXTFileToolStripMenuItem.Text = "Import TXT File";
             this.importTXTFileToolStripMenuItem.Click += new System.EventHandler(this.importTXTFileToolStripMenuItem_Click);
             // 
             // importModelToolStripMenuItem
             // 
             this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
-            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
             this.importModelToolStripMenuItem.Text = "Import Model";
             this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click);
             // 
             // exportModelToolStripMenuItem
             // 
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
             this.exportModelToolStripMenuItem.Text = "Export Model";
             this.exportModelToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
             // optionToolStripMenuItem
             // 
             this.optionToolStripMenuItem.Name = "optionToolStripMenuItem";
-            this.optionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.optionToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
             this.optionToolStripMenuItem.Text = "Option";
             this.optionToolStripMenuItem.Click += new System.EventHandler(this.optionToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -124,27 +130,27 @@
             this.addEdgeConstraintsToolStripMenuItem,
             this.mediumPropertiesToolStripMenuItem});
             this.constraintsToolStripMenuItem.Name = "constraintsToolStripMenuItem";
-            this.constraintsToolStripMenuItem.Size = new System.Drawing.Size(79, 20);
+            this.constraintsToolStripMenuItem.Size = new System.Drawing.Size(96, 24);
             this.constraintsToolStripMenuItem.Text = "Constraints";
             // 
             // addNodalConstraintsToolStripMenuItem
             // 
             this.addNodalConstraintsToolStripMenuItem.Name = "addNodalConstraintsToolStripMenuItem";
-            this.addNodalConstraintsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.addNodalConstraintsToolStripMenuItem.Size = new System.Drawing.Size(242, 26);
             this.addNodalConstraintsToolStripMenuItem.Text = "Add Nodal Constraints";
             this.addNodalConstraintsToolStripMenuItem.Click += new System.EventHandler(this.addNodalConstraintsToolStripMenuItem_Click);
             // 
             // addEdgeConstraintsToolStripMenuItem
             // 
             this.addEdgeConstraintsToolStripMenuItem.Name = "addEdgeConstraintsToolStripMenuItem";
-            this.addEdgeConstraintsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.addEdgeConstraintsToolStripMenuItem.Size = new System.Drawing.Size(242, 26);
             this.addEdgeConstraintsToolStripMenuItem.Text = "Add Edge Constraints";
             this.addEdgeConstraintsToolStripMenuItem.Click += new System.EventHandler(this.addEdgeConstraintsToolStripMenuItem_Click);
             // 
             // mediumPropertiesToolStripMenuItem
             // 
             this.mediumPropertiesToolStripMenuItem.Name = "mediumPropertiesToolStripMenuItem";
-            this.mediumPropertiesToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.mediumPropertiesToolStripMenuItem.Size = new System.Drawing.Size(242, 26);
             this.mediumPropertiesToolStripMenuItem.Text = "Medium Properties";
             this.mediumPropertiesToolStripMenuItem.Click += new System.EventHandler(this.mediumPropertiesToolStripMenuItem_Click);
             // 
@@ -153,17 +159,30 @@
             this.solverToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dWaveEquationSolveToolStripMenuItem,
             this.toolStripSeparator2,
+            this.resultsToolStripMenuItem,
             this.resultOptionsToolStripMenuItem});
             this.solverToolStripMenuItem.Name = "solverToolStripMenuItem";
-            this.solverToolStripMenuItem.Size = new System.Drawing.Size(51, 20);
+            this.solverToolStripMenuItem.Size = new System.Drawing.Size(64, 24);
             this.solverToolStripMenuItem.Text = "Solver";
             // 
             // dWaveEquationSolveToolStripMenuItem
             // 
             this.dWaveEquationSolveToolStripMenuItem.Name = "dWaveEquationSolveToolStripMenuItem";
-            this.dWaveEquationSolveToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.dWaveEquationSolveToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.dWaveEquationSolveToolStripMenuItem.Text = "2D Wave Equation Solve";
             this.dWaveEquationSolveToolStripMenuItem.Click += new System.EventHandler(this.dWaveEquationSolveToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(251, 6);
+            // 
+            // resultOptionsToolStripMenuItem
+            // 
+            this.resultOptionsToolStripMenuItem.Name = "resultOptionsToolStripMenuItem";
+            this.resultOptionsToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.resultOptionsToolStripMenuItem.Text = "Result Option";
+            this.resultOptionsToolStripMenuItem.Click += new System.EventHandler(this.resultOptionsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -172,25 +191,25 @@
             this.toolStripSeparator1,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // generalInstructionToolStripMenuItem
             // 
             this.generalInstructionToolStripMenuItem.Name = "generalInstructionToolStripMenuItem";
-            this.generalInstructionToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.generalInstructionToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.generalInstructionToolStripMenuItem.Text = "General Instruction";
             this.generalInstructionToolStripMenuItem.Click += new System.EventHandler(this.generalInstructionToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(171, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(213, 6);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -199,27 +218,27 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_zoom_value});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 385);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 475);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(602, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 13, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(803, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_zoom_value
             // 
             this.toolStripStatusLabel_zoom_value.Name = "toolStripStatusLabel_zoom_value";
-            this.toolStripStatusLabel_zoom_value.Size = new System.Drawing.Size(73, 17);
+            this.toolStripStatusLabel_zoom_value.Size = new System.Drawing.Size(92, 20);
             this.toolStripStatusLabel_zoom_value.Text = "Zoom: 100%";
             // 
             // glControl_main_panel
             // 
             this.glControl_main_panel.BackColor = System.Drawing.Color.Black;
             this.glControl_main_panel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.glControl_main_panel.Location = new System.Drawing.Point(75, 79);
-            this.glControl_main_panel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.glControl_main_panel.Location = new System.Drawing.Point(100, 97);
+            this.glControl_main_panel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.glControl_main_panel.Name = "glControl_main_panel";
-            this.glControl_main_panel.Size = new System.Drawing.Size(210, 140);
+            this.glControl_main_panel.Size = new System.Drawing.Size(279, 171);
             this.glControl_main_panel.TabIndex = 2;
             this.glControl_main_panel.VSync = false;
             this.glControl_main_panel.Load += new System.EventHandler(this.glControl_main_panel_Load);
@@ -233,29 +252,62 @@
             this.glControl_main_panel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glControl_main_panel_MouseUp);
             this.glControl_main_panel.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glControl_main_panel_MouseWheel);
             // 
-            // toolStripSeparator2
+            // resultsToolStripMenuItem
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(198, 6);
+            this.resultsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fieldValuesToolStripMenuItem,
+            this.firstDerivativeFieldToolStripMenuItem,
+            this.secondDerivativeFieldToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.hideResultsToolStripMenuItem});
+            this.resultsToolStripMenuItem.Name = "resultsToolStripMenuItem";
+            this.resultsToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.resultsToolStripMenuItem.Text = "Results";
             // 
-            // resultOptionsToolStripMenuItem
+            // fieldValuesToolStripMenuItem
             // 
-            this.resultOptionsToolStripMenuItem.Name = "resultOptionsToolStripMenuItem";
-            this.resultOptionsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
-            this.resultOptionsToolStripMenuItem.Text = "Result Option";
-            this.resultOptionsToolStripMenuItem.Click += new System.EventHandler(this.resultOptionsToolStripMenuItem_Click);
+            this.fieldValuesToolStripMenuItem.Name = "fieldValuesToolStripMenuItem";
+            this.fieldValuesToolStripMenuItem.Size = new System.Drawing.Size(248, 26);
+            this.fieldValuesToolStripMenuItem.Text = "Field values";
+            this.fieldValuesToolStripMenuItem.Click += new System.EventHandler(this.fieldValuesToolStripMenuItem_Click);
+            // 
+            // firstDerivativeFieldToolStripMenuItem
+            // 
+            this.firstDerivativeFieldToolStripMenuItem.Name = "firstDerivativeFieldToolStripMenuItem";
+            this.firstDerivativeFieldToolStripMenuItem.Size = new System.Drawing.Size(248, 26);
+            this.firstDerivativeFieldToolStripMenuItem.Text = "First Derivative Field";
+            this.firstDerivativeFieldToolStripMenuItem.Click += new System.EventHandler(this.firstDerivativeFieldToolStripMenuItem_Click);
+            // 
+            // secondDerivativeFieldToolStripMenuItem
+            // 
+            this.secondDerivativeFieldToolStripMenuItem.Name = "secondDerivativeFieldToolStripMenuItem";
+            this.secondDerivativeFieldToolStripMenuItem.Size = new System.Drawing.Size(248, 26);
+            this.secondDerivativeFieldToolStripMenuItem.Text = "Second Derivative Field";
+            this.secondDerivativeFieldToolStripMenuItem.Click += new System.EventHandler(this.secondDerivativeFieldToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(245, 6);
+            // 
+            // hideResultsToolStripMenuItem
+            // 
+            this.hideResultsToolStripMenuItem.Name = "hideResultsToolStripMenuItem";
+            this.hideResultsToolStripMenuItem.Size = new System.Drawing.Size(248, 26);
+            this.hideResultsToolStripMenuItem.Text = "Hide Results";
+            this.hideResultsToolStripMenuItem.Click += new System.EventHandler(this.hideResultsToolStripMenuItem_Click);
             // 
             // main_frm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(602, 407);
+            this.ClientSize = new System.Drawing.Size(803, 501);
             this.Controls.Add(this.glControl_main_panel);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "main_frm";
             this.Text = "2D Wave Equation Solver";
             this.Load += new System.EventHandler(this.main_frm_Load);
@@ -292,6 +344,12 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem resultOptionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resultsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fieldValuesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem firstDerivativeFieldToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem secondDerivativeFieldToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem hideResultsToolStripMenuItem;
     }
 }
 

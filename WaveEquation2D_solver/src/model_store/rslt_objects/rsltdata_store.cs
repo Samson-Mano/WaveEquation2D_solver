@@ -27,23 +27,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             public double x_coord;
             public double y_coord;
 
-            public double displ_x;
-            public double displ_y;
-            public double displ_magnitude;
-
-            public double sigma_x;
-            public double sigma_y;
-            public double tau_xy;
-
-            public double sigma_1;
-            public double sigma_2;
-
-            public double von_mises;
-            public double max_shear;
-            public double theta_p; // principal stress angle
-
-            public double streamfunction_tension;
-            public double streamfunction_compression;
+            public List<double> field_values;
+            public List<double> first_derivative_field_values;
+            public List<double> second_derivative_field_values;
 
         }
 
@@ -64,54 +50,20 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         }
 
 
-        private struct reaction_store
-        {
-            public int point_id;
-            public double x_coord;
-            public double y_coord;
-
-            public int constraint_type; // 0 = free, 1 = pinned, 2 = roller
-            public double constraint_angle;
-
-            public double reaction_x;
-            public double reaction_y;
-        }
-
 
         public struct result_extremes
         {
-            // Displacement (option = 1)
-            public double max_displacement;
+            // Field Values (Displacement) (option = 1)
+            public double max_fieldvalues;
+            public double min_fieldvalues;
 
-            // Stress extremes in X direction (option = 2)
-            public double max_stressX;
-            public double min_stressX;
+            // First Derivative Field Values (Velocity) (option = 2)
+            public double max_firstderivativefield;
+            public double min_firstderivativefield;
 
-            // Stress extremes in Y direction (option = 3)
-            public double max_stressY;
-            public double min_stressY;
-
-            // Shear stress extremes (option = 4)
-            public double max_tauXY;
-            public double min_tauXY;
-
-            // Von Mises stress extremes (option = 5)
-            public double max_vonMises;
-            public double min_vonMises;
-
-            // Principal stress 1 extremes (option = 6)
-            public double max_principalStress1;
-            public double min_principalStress1;
-
-            // Principal stress 2 extremes (option = 7)
-            public double max_principalStress2;
-            public double min_principalStress2;
-
-            // Max shear stress extremes (option = 8)
-            public double max_shearStress;
-            public double min_shearStress;
-
-            // PSL Lines (option = 9)
+            // Second Derivative Field Values (Acceleration) (option = 3)
+            public double max_secondderivativefield;
+            public double min_secondderivativefield;
 
         }
 
@@ -120,8 +72,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private Dictionary<int, point_store> points = new Dictionary<int, point_store>();
         private List<line_store> wireframe_lines = new List<line_store>();
         private List<tri_store> tris = new List<tri_store>();
-        private List<reaction_store> reactions = new List<reaction_store>();
 
+        private List<double> timeVector = new List<double>();
 
         public result_extremes rslt_extremes { get { return _rslt_extremes; } }
         private result_extremes _rslt_extremes;
@@ -131,28 +83,11 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         private Shader rsltmeshShader;
         private Shader rsltmeshwireframeShader;
-        // private Shader rsltPSLShader;
-        // private Shader rsltPSLType2Shader;
-        // private Shader rsltPSLType2StreamFunctionShader;
+
 
         // Vertex Buffer object and Vertex Array object 
         private VertexBuffer point_vbo;
         private VertexArray point_vao;
-
-
-        // PSL lines vertex buffer and vertex array object
-        private VertexBuffer psl_point_vbo;
-        private VertexArray psl_point_vao;
-
-        //// PSL lines vertex buffer and vertex array object
-        //private VertexBuffer psl2_point_vbo;
-        //private VertexArray psl2_point_vao;
-        //private IndexBuffer psl2_lines_ibo;
-
-        private VertexBuffer psl2_streamfunction_point_vbo;
-        private VertexArray psl2_streamfunction_point_vao;
-        private IndexBuffer psl2_streamfunction_tri_ibo;
-
 
 
 
@@ -161,8 +96,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private IndexBuffer wireframe_ibo;
         private IndexBuffer triangle_ibo;
 
-        // Result point selection index buffer for selected points
-        private IndexBuffer selected_resultpoint_ibo;
 
         // Result point label
         private label_list_store result_point_label;
@@ -202,54 +135,19 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
 
         public void add_point(int point_id, double x_coord, double y_coord,
-            double displ_x, double displ_y,
-            int constraint_type,
-            double constraint_angle,
-            double reaction_x, double reaction_y,
-            double sigma_x, double sigma_y,
-            double tau_xy,
-            double sigma_1, double sigma_2,
-            double von_mises,
-            double max_shear,
-            double theta_p,
-            double streamfunction_tension,
-            double streamfunction_compression)
+            List<double> field_values, 
+            List<double> first_derivative_field_values, 
+            List<double> second_derivative_field_values)
         {
-
-            if (constraint_type != 0)
-            {
-                reactions.Add(new reaction_store()
-                {
-                    point_id = point_id,
-                    x_coord = x_coord,
-                    y_coord = y_coord,
-                    constraint_type = constraint_type,
-                    constraint_angle = constraint_angle,
-                    reaction_x = reaction_x,
-                    reaction_y = reaction_y
-                });
-            }
-
-            double displ_magnitude = Math.Sqrt(displ_x * displ_x + displ_y * displ_y);
 
             points.Add(point_id, new point_store()
             {
                 point_id = point_id,
                 x_coord = x_coord,
                 y_coord = y_coord,
-                displ_x = displ_x,
-                displ_y = displ_y,
-                displ_magnitude = displ_magnitude,
-                sigma_x = sigma_x,
-                sigma_y = sigma_y,
-                tau_xy = tau_xy,
-                sigma_1 = sigma_1,
-                sigma_2 = sigma_2,
-                von_mises = von_mises,
-                max_shear = max_shear,
-                theta_p = theta_p,
-                streamfunction_tension = streamfunction_tension,
-                streamfunction_compression = streamfunction_compression
+                field_values = field_values,
+                first_derivative_field_values = first_derivative_field_values,
+                second_derivative_field_values = second_derivative_field_values
             });
 
         }
@@ -282,90 +180,48 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
             // Result extremes are calculated based on the points data
             _rslt_extremes = new result_extremes();
-            _rslt_extremes.max_displacement = 0.0;
-            _rslt_extremes.max_stressX = double.MinValue;
-            _rslt_extremes.min_stressX = double.MaxValue;
-            _rslt_extremes.max_stressY = double.MinValue;
-            _rslt_extremes.min_stressY = double.MaxValue;
-            _rslt_extremes.max_tauXY = double.MinValue;
-            _rslt_extremes.min_tauXY = double.MaxValue;
-            _rslt_extremes.max_principalStress1 = double.MinValue;
-            _rslt_extremes.min_principalStress1 = double.MaxValue;
-            _rslt_extremes.max_principalStress2 = double.MinValue;
-            _rslt_extremes.min_principalStress2 = double.MaxValue;
-            _rslt_extremes.max_vonMises = double.MinValue;
-            _rslt_extremes.min_vonMises = double.MaxValue;
-            _rslt_extremes.max_shearStress = double.MinValue;
-            _rslt_extremes.min_shearStress = double.MaxValue;
 
+            _rslt_extremes.max_fieldvalues = double.MinValue;
+            _rslt_extremes.min_fieldvalues = double.MaxValue;
+            _rslt_extremes.max_firstderivativefield = double.MinValue;
+            _rslt_extremes.min_firstderivativefield = double.MaxValue;
+            _rslt_extremes.max_secondderivativefield = double.MinValue;
+            _rslt_extremes.min_secondderivativefield = double.MaxValue;
+
+            int num_time_steps = timeVector.Count;
 
 
             foreach (var pt in points.Values)
             {
-                // Maximum displacement magnitude
-                _rslt_extremes.max_displacement = Math.Max(_rslt_extremes.max_displacement, pt.displ_magnitude);
+                // Maximum and minimum field values magnitude
+                _rslt_extremes.max_fieldvalues = Math.Max(_rslt_extremes.max_fieldvalues, pt.field_values.Max());
+                _rslt_extremes.min_fieldvalues = Math.Min(_rslt_extremes.min_fieldvalues, pt.field_values.Min());
 
-                // Maximum and minimum stress in X and Y directions
-                _rslt_extremes.max_stressX = Math.Max(_rslt_extremes.max_stressX, pt.sigma_x);
-                _rslt_extremes.min_stressX = Math.Min(_rslt_extremes.min_stressX, pt.sigma_x);
-                _rslt_extremes.max_stressY = Math.Max(_rslt_extremes.max_stressY, pt.sigma_y);
-                _rslt_extremes.min_stressY = Math.Min(_rslt_extremes.min_stressY, pt.sigma_y);
-
-                // Maximum and minimum shear stress
-                _rslt_extremes.max_tauXY = Math.Max(_rslt_extremes.max_tauXY, pt.tau_xy);
-                _rslt_extremes.min_tauXY = Math.Min(_rslt_extremes.min_tauXY, pt.tau_xy);
-
-                // Maximum and minimum principal stresses
-                _rslt_extremes.max_principalStress1 = Math.Max(_rslt_extremes.max_principalStress1, pt.sigma_1);
-                _rslt_extremes.min_principalStress1 = Math.Min(_rslt_extremes.min_principalStress1, pt.sigma_1);
-                _rslt_extremes.max_principalStress2 = Math.Max(_rslt_extremes.max_principalStress2, pt.sigma_2);
-                _rslt_extremes.min_principalStress2 = Math.Min(_rslt_extremes.min_principalStress2, pt.sigma_2);
-
-                // Maximum and minimum von Mises stress
-                _rslt_extremes.max_vonMises = Math.Max(_rslt_extremes.max_vonMises, pt.von_mises);
-                _rslt_extremes.min_vonMises = Math.Min(_rslt_extremes.min_vonMises, pt.von_mises);
-
-                // Maximum and minimum shear stress
-                _rslt_extremes.max_shearStress = Math.Max(_rslt_extremes.max_shearStress, pt.max_shear);
-                _rslt_extremes.min_shearStress = Math.Min(_rslt_extremes.min_shearStress, pt.max_shear);
+                // Maximum and minimum first derivative field values
+                _rslt_extremes.max_firstderivativefield = Math.Max(_rslt_extremes.max_firstderivativefield, pt.first_derivative_field_values.Max());
+                _rslt_extremes.min_firstderivativefield = Math.Min(_rslt_extremes.min_firstderivativefield, pt.first_derivative_field_values.Min());
+                
+                // Maximum and minimum second derivative field values   
+                _rslt_extremes.max_secondderivativefield = Math.Max(_rslt_extremes.max_secondderivativefield, pt.second_derivative_field_values.Max());
+                _rslt_extremes.min_secondderivativefield = Math.Min(_rslt_extremes.min_secondderivativefield, pt.second_derivative_field_values.Min());
 
             }
 
 
             // Validate the result extremes to ensure they are meaningful
-            if (_rslt_extremes.max_displacement <= 0 || !check_double(_rslt_extremes.max_displacement))
+            if (!check_double(_rslt_extremes.max_fieldvalues) || !check_double(_rslt_extremes.min_fieldvalues))
             {
                 return false;
             }
-            if (!check_double(_rslt_extremes.max_stressX) || !check_double(_rslt_extremes.min_stressX))
+            if (!check_double(_rslt_extremes.max_firstderivativefield) || !check_double(_rslt_extremes.min_firstderivativefield))
             {
                 return false;
             }
-            if (!check_double(_rslt_extremes.max_stressY) || !check_double(_rslt_extremes.min_stressY))
+            if (!check_double(_rslt_extremes.max_secondderivativefield) || !check_double(_rslt_extremes.min_secondderivativefield))
             {
                 return false;
             }
-            if (!check_double(_rslt_extremes.max_tauXY) || !check_double(_rslt_extremes.min_tauXY))
-            {
-                return false;
-            }
-            if (!check_double(_rslt_extremes.max_vonMises) || !check_double(_rslt_extremes.min_vonMises))
-            {
-                return false;
-            }
-            if (!check_double(_rslt_extremes.max_principalStress1) || !check_double(_rslt_extremes.min_principalStress1))
-            {
-                return false;
-            }
-            if (!check_double(_rslt_extremes.max_principalStress2) || !check_double(_rslt_extremes.min_principalStress2))
-            {
-                return false;
-            }
-            if (!check_double(_rslt_extremes.max_shearStress) || !check_double(_rslt_extremes.min_shearStress))
-            {
-                return false;
-            }
-
+           
             return true;
         }
 
@@ -475,51 +331,15 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         }
 
 
-        private void paint_selected_result_points()
-        {
-            if (!buffersInitialized)
-                return;
-
-            if (selected_resultpoint_ibo.BufferCount > 0)
-            {
-                // Paint the selected result points
-                rsltmeshShader.Bind();
-
-                point_vao.Bind();
-                selected_resultpoint_ibo.Bind();
-
-                GL.PointSize(5.0f);
-                GL.DrawElements(PrimitiveType.Points, selected_resultpoint_ibo.BufferCount, DrawElementsType.UnsignedInt, 0);
-                GL.PointSize(1.0f);
-
-                rsltmeshShader.UnBind();
-                point_vao.UnBind();
-                selected_resultpoint_ibo.UnBind();
-
-
-                // Paint the labels for the selected result points
-                result_point_label.paint_static_labels();
-
-            }
-        }
-
-
-
         public void switch_result_option()
         {
             // Switch the result option for visualization
-            // 1 = Displacement, 2 = StressX, 3 = StressY, 4 = Shear stress, 
-            // 5 = Von Mises stress, 6 = Principal stress 1, 7 = Principal stress 2, 
-            // 8 = Max shear stress
+            // 1 = Field Values (Displacement),
+            // 2 = First Derivative Field Values (Velocity),
+            // 3 = Second Derivative Field Values (Acceleration)
 
             int option = gvariables_static.result_option;
 
-            // Special case for PSL lines (option = 9 or 10)
-            if (option == 9 || option == 10)
-            {
-
-                return;
-            }
 
 
             List<float> vertexData = new List<float>();
@@ -553,12 +373,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             point_vbo.updateVertexBuffer(vertexData.ToArray());
 
 
-            // Update the result point labels for the selected points
-            if (selected_resultpoint_ids.Count > 0)
-            {
-                add_selected_result_point_labels();
-            }
-
         }
 
 
@@ -580,40 +394,14 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             switch (option)
             {
-                case 1: // Displacement
+                case 1: // Field Values (Displacement)
                     {
                         // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = 0.0f + ((float)_rslt_extremes.max_displacement - 0.0f) * zoomMin;
-                        float actualRangeMax = 0.0f + ((float)_rslt_extremes.max_displacement - 0.0f) * zoomMax;
-                        float actualRangeSpan = actualRangeMax - actualRangeMin;
+                        float actualRangeMin = (float)(_rslt_extremes.min_fieldvalues +
+                            ((_rslt_extremes.max_fieldvalues - _rslt_extremes.min_fieldvalues) * zoomMin));
 
-                        float normalizedValue = ((float)pt.displ_magnitude - actualRangeMin) / actualRangeSpan;
-
-                        if (normalizedValue < -EPSILON)
-                        {
-                            normalizedValue = -1.0f;
-                        }
-                        else if (normalizedValue > 1.0f + EPSILON)
-                        {
-                            normalizedValue = 2.0f;
-                        }
-                        else
-                        {
-                            // Clamp the normalized value to [0, 1] range
-                            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                        }
-
-                        return normalizedValue;
-
-                    }
-                case 2: // StressX
-                    {
-                        // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_stressX +
-                            ((_rslt_extremes.max_stressX - _rslt_extremes.min_stressX) * zoomMin));
-
-                        float actualRangeMax = (float)(_rslt_extremes.min_stressX +
-                            ((_rslt_extremes.max_stressX - _rslt_extremes.min_stressX) * zoomMax));
+                        float actualRangeMax = (float)(_rslt_extremes.min_fieldvalues +
+                            ((_rslt_extremes.max_fieldvalues - _rslt_extremes.min_fieldvalues) * zoomMax));
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
@@ -639,14 +427,14 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                         return normalizedValue;
 
                     }
-                case 3: // StressY
+                case 2: // First Derivative Field Values (Velocity)
                     {
                         // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_stressY +
-                            ((_rslt_extremes.max_stressY - _rslt_extremes.min_stressY) * zoomMin));
+                        float actualRangeMin = (float)(_rslt_extremes.min_firstderivativefield +
+                            ((_rslt_extremes.max_firstderivativefield - _rslt_extremes.min_firstderivativefield) * zoomMin));
 
-                        float actualRangeMax = (float)(_rslt_extremes.min_stressY +
-                            ((_rslt_extremes.max_stressY - _rslt_extremes.min_stressY) * zoomMax));
+                        float actualRangeMax = (float)(_rslt_extremes.min_firstderivativefield +
+                            ((_rslt_extremes.max_firstderivativefield - _rslt_extremes.min_firstderivativefield) * zoomMax));
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
@@ -671,14 +459,14 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                         return normalizedValue;
 
                     }
-                case 4: // Shear stress
+                case 3: // Second Derivative Field Values (Acceleration)
                     {
                         // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_tauXY +
-                            ((_rslt_extremes.max_tauXY - _rslt_extremes.min_tauXY) * zoomMin));
+                        float actualRangeMin = (float)(_rslt_extremes.min_secondderivativefield +
+                            ((_rslt_extremes.max_secondderivativefield - _rslt_extremes.min_secondderivativefield) * zoomMin));
 
-                        float actualRangeMax = (float)(_rslt_extremes.min_tauXY +
-                            ((_rslt_extremes.max_tauXY - _rslt_extremes.min_tauXY) * zoomMax));
+                        float actualRangeMax = (float)(_rslt_extremes.min_secondderivativefield +
+                            ((_rslt_extremes.max_secondderivativefield - _rslt_extremes.min_secondderivativefield) * zoomMax));
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
@@ -703,170 +491,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                         return normalizedValue;
 
                     }
-                case 5: // Von Mises stress
-                    {
-                        // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_vonMises +
-                            ((_rslt_extremes.max_vonMises - _rslt_extremes.min_vonMises) * zoomMin));
-
-                        float actualRangeMax = (float)(_rslt_extremes.min_vonMises +
-                            ((_rslt_extremes.max_vonMises - _rslt_extremes.min_vonMises) * zoomMax));
-
-                        float actualRangeSpan = actualRangeMax - actualRangeMin;
-
-                        float normalizedValue = ((float)pt.von_mises - actualRangeMin) / actualRangeSpan;
-
-                        if (normalizedValue < -EPSILON)
-                        {
-                            normalizedValue = -1.0f;
-                        }
-                        else if (normalizedValue > 1.0f + EPSILON)
-                        {
-                            normalizedValue = 2.0f;
-                        }
-                        else
-                        {
-                            // Clamp the normalized value to [0, 1] range
-                            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                        }
-
-                        normalizedValue = (normalizedValue * 2.0f) - 1.0f; // Scale to [-1, 1]
-
-                        return normalizedValue;
-
-                    }
-                case 6: // Principal stress 1
-                    {
-                        // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_principalStress1 +
-                            ((_rslt_extremes.max_principalStress1 - _rslt_extremes.min_principalStress1) * zoomMin));
-
-                        float actualRangeMax = (float)(_rslt_extremes.min_principalStress1 +
-                            ((_rslt_extremes.max_principalStress1 - _rslt_extremes.min_principalStress1) * zoomMax));
-
-                        float actualRangeSpan = actualRangeMax - actualRangeMin;
-
-                        float normalizedValue = ((float)pt.sigma_1 - actualRangeMin) / actualRangeSpan;
-
-                        if (normalizedValue < -EPSILON)
-                        {
-                            normalizedValue = -1.0f;
-                        }
-                        else if (normalizedValue > 1.0f + EPSILON)
-                        {
-                            normalizedValue = 2.0f;
-                        }
-                        else
-                        {
-                            // Clamp the normalized value to [0, 1] range
-                            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                        }
-
-                        normalizedValue = (normalizedValue * 2.0f) - 1.0f; // Scale to [-1, 1]
-
-                        return normalizedValue;
-
-                    }
-                case 7: // Principal stress 2
-                    {
-                        // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_principalStress2 +
-                            ((_rslt_extremes.max_principalStress2 - _rslt_extremes.min_principalStress2) * zoomMin));
-
-                        float actualRangeMax = (float)(_rslt_extremes.min_principalStress2 +
-                            ((_rslt_extremes.max_principalStress2 - _rslt_extremes.min_principalStress2) * zoomMax));
-
-                        float actualRangeSpan = actualRangeMax - actualRangeMin;
-
-                        float normalizedValue = ((float)pt.sigma_2 - actualRangeMin) / actualRangeSpan;
-
-                        if (normalizedValue < -EPSILON)
-                        {
-                            normalizedValue = -1.0f;
-                        }
-                        else if (normalizedValue > 1.0f + EPSILON)
-                        {
-                            normalizedValue = 2.0f;
-                        }
-                        else
-                        {
-                            // Clamp the normalized value to [0, 1] range
-                            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                        }
-
-                        normalizedValue = (normalizedValue * 2.0f) - 1.0f; // Scale to [-1, 1]
-
-                        return normalizedValue;
-
-                    }
-                case 8: // Max shear stress
-                    {
-                        // Calculate the actual values at zoom boundaries
-                        float actualRangeMin = (float)(_rslt_extremes.min_shearStress +
-                            ((_rslt_extremes.max_shearStress - _rslt_extremes.min_shearStress) * zoomMin));
-
-                        float actualRangeMax = (float)(_rslt_extremes.min_shearStress +
-                            ((_rslt_extremes.max_shearStress - _rslt_extremes.min_shearStress) * zoomMax));
-
-                        float actualRangeSpan = actualRangeMax - actualRangeMin;
-
-                        float normalizedValue = ((float)pt.max_shear - actualRangeMin) / actualRangeSpan;
-
-                        if (normalizedValue < -EPSILON)
-                        {
-                            normalizedValue = -1.0f;
-                        }
-                        else if (normalizedValue > 1.0f + EPSILON)
-                        {
-                            normalizedValue = 2.0f;
-                        }
-                        else
-                        {
-                            // Clamp the normalized value to [0, 1] range
-                            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                        }
-
-                        normalizedValue = (normalizedValue * 2.0f) - 1.0f; // Scale to [-1, 1]
-
-                        return normalizedValue;
-
-                    }
-                    //case 9: // PSL Lines
-                    //    {
-                    //        // For PSL lines, we can return a default value or handle it differently
-                    //        float pi2_value = (float)Math.PI * 0.5f;
-
-
-                    //        float c_value = (float)Math.Atan2(pt.tau_xy, pt.sigma_x - pt.sigma_y) / 2.0f;
-
-                    //        float actualRangeMin = (float)(-pi2_value +
-                    //          ((pi2_value + pi2_value) * zoomMin));
-
-                    //        float actualRangeMax = (float)(-pi2_value + +
-                    //            ((pi2_value + pi2_value) * zoomMax));
-
-                    //        float actualRangeSpan = actualRangeMax - actualRangeMin;
-
-                    //        float normalizedValue = ((float)c_value - actualRangeMin) / actualRangeSpan;
-
-                    //        if (normalizedValue < -EPSILON)
-                    //        {
-                    //            normalizedValue = -1.0f;
-                    //        }
-                    //        else if (normalizedValue > 1.0f + EPSILON)
-                    //        {
-                    //            normalizedValue = 2.0f;
-                    //        }
-                    //        else
-                    //        {
-                    //            // Clamp the normalized value to [0, 1] range
-                    //            normalizedValue = Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
-                    //        }
-
-                    //        normalizedValue = (normalizedValue * 2.0f) - 1.0f; // Scale to [-1, 1]
-
-                    //        return normalizedValue;
-                    //    }
+          
             }
 
             return 0.0f; // Default case, should not reach here
@@ -1050,193 +675,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         }
 
 
-        private void generate_PSL_mesh()
-        {
-            // Generate PSL mesh data based on the points and triangles
-            // This function should create the necessary vertex and index buffers for PSL visualization
-            // Implementation depends on how PSL data is structured and visualized
-
-            List<float> vertexData = new List<float>();
-
-
-            for (int i = 0; i < points.Count; i++)
-            {
-                point_store pt = points[i];
-                vertexData.Add((float)pt.x_coord);
-                vertexData.Add((float)pt.y_coord);
-
-                // Normalized displacement values for plotting
-                if (pt.displ_magnitude > 0)
-                {
-                    vertexData.Add((float)(pt.displ_x / pt.displ_magnitude));
-                    vertexData.Add((float)(pt.displ_y / pt.displ_magnitude));
-                }
-                else
-                {
-                    vertexData.Add(0);
-                    vertexData.Add(0);
-                }
-
-
-                // Calculate the magnitude of the displacement vector for color mapping
-                vertexData.Add((float)(pt.displ_magnitude / _rslt_extremes.max_displacement)); // normalized scalar value
-
-                // Sigma XX stress in X direction
-                float sigmaX_actualRangeSpan = (float)(_rslt_extremes.max_stressX - _rslt_extremes.min_stressX);
-
-                float aSigmaX = ((float)pt.sigma_x - (float)(_rslt_extremes.min_stressX)) / sigmaX_actualRangeSpan;
-
-
-                // Sigma YY stress in Y direction
-                float sigmaY_actualRangeSpan = (float)(_rslt_extremes.max_stressY - _rslt_extremes.min_stressY);
-
-                float aSigmaY = ((float)pt.sigma_y - (float)(_rslt_extremes.min_stressY)) / sigmaY_actualRangeSpan;
-
-                // Tau XY shear stress in XY direction
-
-
-
-
-
-                // Principal stress angle for PSL lines
-                float aPrincipalStressAngle = (float)Math.Atan2(2.0 * pt.tau_xy, pt.sigma_x - pt.sigma_y) / 2.0f;
-
-                // Principal stresses 1
-                float aPrincipalStress_sigma1 = (float)((pt.sigma_x + pt.sigma_y) / 2.0f +
-                                Math.Sqrt(Math.Pow((pt.sigma_x - pt.sigma_y) / 2.0f, 2) +
-                                Math.Pow(pt.tau_xy, 2)));
-
-                float sigma1_actualRangeSpan = (float)(_rslt_extremes.max_principalStress1 - _rslt_extremes.min_principalStress1);
-
-                // Normalize principal stress 1 (pt.sigma_1)
-                aPrincipalStress_sigma1 = ((float)pt.sigma_1 - (float)(_rslt_extremes.min_principalStress1)) / sigma1_actualRangeSpan;
-
-
-                // Principal stress 2
-                float aPrincipalStress_sigma2 = (float)((pt.sigma_x + pt.sigma_y) / 2.0f -
-                                Math.Sqrt(Math.Pow((pt.sigma_x - pt.sigma_y) / 2.0f, 2) +
-                                Math.Pow(pt.tau_xy, 2)));
-
-                float sigma2_actualRangeSpan = (float)(_rslt_extremes.max_principalStress2 - _rslt_extremes.min_principalStress2);
-
-                // Normalize principal stress 2 (pt.sigma_2)
-                aPrincipalStress_sigma2 = ((float)pt.sigma_2 - (float)(_rslt_extremes.min_principalStress2)) / sigma2_actualRangeSpan;
-
-
-                // vertexData.Add(aPrincipalStressAngle); // Principal stress angle for PSL lines
-                vertexData.Add(aPrincipalStress_sigma1); // Principal stress 1
-                vertexData.Add(aPrincipalStress_sigma2); // Principal stress 2
-
-                // // Line length (scale with stress magnitude or fixed)
-                // float lineLength = 0.5f; // or scale with magnitude
-
-                // Principal direction 1 (major principal stress)
-                Vector2 dir1 = new Vector2((float)Math.Cos(aPrincipalStressAngle), (float)Math.Sin(aPrincipalStressAngle));
-                Vector2 dir2 = new Vector2((float)Math.Cos(aPrincipalStressAngle + Math.PI / 2),
-                                           (float)Math.Sin(aPrincipalStressAngle + Math.PI / 2));
-
-                dir1 = Vector2.Normalize(dir1);
-                dir2 = Vector2.Normalize(dir2);
-
-                vertexData.Add((float)dir1.X);
-                vertexData.Add((float)dir1.Y);
-
-
-                vertexData.Add((float)dir2.X);
-                vertexData.Add((float)dir2.Y);
-
-
-            }
-
-
-
-
-            // Create VAO and VBO for points
-            psl_point_vao = new VertexArray();
-            psl_point_vbo = new VertexBuffer(Math.Max(10, vertexData.Count));
-
-
-            VertexBufferLayout pointLayout = new VertexBufferLayout();
-            pointLayout.AddFloat(2);  // x and y coordinates
-            pointLayout.AddFloat(2); // displ_x and displ_y
-            pointLayout.AddFloat(1); // displacement magnitude
-            pointLayout.AddFloat(1); // sigma1 principal stress value 1
-            pointLayout.AddFloat(1); // sigma2 principal stress value 2
-            pointLayout.AddFloat(2); // direction1 of principal stress 1
-            pointLayout.AddFloat(2); // direction2 of principal stress 2
-
-
-            psl_point_vao.Add_vertexBuffer(psl_point_vbo, pointLayout);
-
-            psl_point_vbo.AppendVertexBuffer(vertexData.ToArray());
-
-        }
-
-
-
-
-        private void get_PSL_streamfunction_mesh()
-        {
-
-            //____________________________________________________________________________________________________
-
-            List<float> vertexData = new List<float>();
-            List<int> triIndexData = new List<int>();
-
-            // Create a node id map to index mapping for the streamfunction mesh
-            Dictionary<int, int> nodeIdToIndexMap = new Dictionary<int, int>();
-
-            int pt_id = 0;
-
-            foreach (point_store pt in points.Values)
-            {
-                // Map the point ID to the current index
-                nodeIdToIndexMap[pt.point_id] = pt_id;
-                pt_id++;
-
-                // Add vertices for stream function mesh
-                vertexData.Add((float)pt.x_coord);
-                vertexData.Add((float)pt.y_coord);
-                vertexData.Add((float)pt.streamfunction_tension);
-                vertexData.Add((float)pt.streamfunction_compression);
-
-            }
-
-
-            // Add triangle indices for the streamfunction mesh
-            foreach (tri_store tri in tris)
-            {
-                // Map the point IDs to their corresponding indices
-                int index1 = nodeIdToIndexMap[tri.pt_id1];
-                int index2 = nodeIdToIndexMap[tri.pt_id2];
-                int index3 = nodeIdToIndexMap[tri.pt_id3];
-
-                triIndexData.Add(index1);
-                triIndexData.Add(index2);
-                triIndexData.Add(index3);
-            }
-
-
-            //____________________________________________________________________________________________________
-            // Create VAO and VBO for points
-            psl2_streamfunction_point_vao = new VertexArray();
-            psl2_streamfunction_point_vbo = new VertexBuffer(Math.Max(10, vertexData.Count));
-            psl2_streamfunction_tri_ibo = new IndexBuffer(Math.Max(10, triIndexData.Count));
-
-            VertexBufferLayout pointLayout = new VertexBufferLayout();
-            pointLayout.AddFloat(2);  // x and y coordinates
-            pointLayout.AddFloat(1); // Streamfunction value for tension
-            pointLayout.AddFloat(1); // Streamfunction value for compression
-
-
-            psl2_streamfunction_point_vao.Add_vertexBuffer(psl2_streamfunction_point_vbo, pointLayout);
-
-            psl2_streamfunction_point_vbo.AppendVertexBuffer(vertexData.ToArray());
-            psl2_streamfunction_tri_ibo.AppendIndexBuffer(triIndexData.ToArray());
-
-        }
-
-
 
         public void update_openTK_uniforms(drawing_events graphic_events_control)
         {
@@ -1317,270 +755,11 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
 
 
-        public void select_result_nodes(Vector2 corner_pt1, Vector2 corner_pt2, bool isRightButton, drawing_events graphic_events_control)
-        {
-            // Select the result nodes for load or constraint update
-            List<int> selected_result_point_ids = new List<int>();
-
-            // Pre-compute MVP matrix
-            Matrix4 mvp = graphic_events_control.projectionMatrix *
-                          graphic_events_control.viewMatrix *
-                          graphic_events_control.modelMatrix;
-
-
-            Matrix4 invMVP = Matrix4.Invert(mvp);
-
-            // Transform rectangle corners from screen space to model space
-            Vector2 modelCorner1 = TransformToModelSpace(corner_pt1, invMVP);
-            Vector2 modelCorner2 = TransformToModelSpace(corner_pt2, invMVP);
-
-            // Loop through all node in nodeMap
-            foreach (point_store pt in points.Values)
-            {
-                //______________________________
-                Vector2 pt_coord = new Vector2((float)pt.x_coord, (float)pt.y_coord);
-
-                Vector2 aDisplacement = new Vector2((float)(pt.displ_x / pt.displ_magnitude),
-                    (float)(pt.displ_y / pt.displ_magnitude));
-
-
-                float model_percent = (float)(gvariables_static.displacement_scale / 1000.0);
-                float aDisplacementMagnitude = (float)(pt.displ_magnitude / _rslt_extremes.max_displacement);
-
-                float scalevalue = gvariables_static.geom_size * model_percent * aDisplacementMagnitude;
-                Vector2 scaledDisplacement = aDisplacement * scalevalue; // * sinevalue; sinevalue is not used here, as it's for animation
-
-                // Find the displaced point location in model space
-                Vector2 displaced_pt_loc = pt_coord + scaledDisplacement;
-
-                // Check whether the point inside a rectangle
-                if (gvariables_static.isPointSelected(modelCorner1, modelCorner2, displaced_pt_loc) == true)
-                {
-                    selected_result_point_ids.Add(pt.point_id);
-
-                }
-
-            }
-
-            if (selected_result_point_ids.Count > 0)
-            {
-                add_selected_result_points(selected_result_point_ids, isRightButton);
-            }
-
-        }
-
-
-        private void add_selected_result_points(List<int> selected_result_point_ids, bool IsRemove)
-        {
-            bool is_selection_changed = false;
-
-            if (IsRemove == false)
-            {
-                // Add to the selected result point list
-                // Add all points at once
-                int initialCount = this.selected_resultpoint_ids.Count;
-                this.selected_resultpoint_ids.UnionWith(selected_result_point_ids);
-                is_selection_changed = this.selected_resultpoint_ids.Count != initialCount;
-            }
-            else
-            {
-                // Remove from the selected result point list
-                // Remove all points at once
-                int initialCount = this.selected_resultpoint_ids.Count;
-                this.selected_resultpoint_ids.ExceptWith(selected_result_point_ids);
-                is_selection_changed = this.selected_resultpoint_ids.Count != initialCount;
-            }
-
-
-            if (is_selection_changed == true)
-            {
-                // Add the selected result points
-                selected_resultpoint_ibo.ClearIndexBuffer();
-                selected_resultpoint_ibo.AppendIndexBuffer(this.selected_resultpoint_ids.ToArray());
-
-                add_selected_result_point_labels();
-
-            }
-            //
-        }
-
-
-        public void clear_selected_result_points()
-        {
-            this.selected_resultpoint_ids.Clear();
-            selected_resultpoint_ibo.ClearIndexBuffer();
-            result_point_label.clear_labels();
-
-        }
-
-
-        public List<string> get_selected_result_points_string()
-        {
-            // return the selected result points as a list of strings for data grid view display
-            List<string> resultPoints = new List<string>();
-
-            foreach (int point_id in this.selected_resultpoint_ids)
-            {
-                point_store rslt_pt = points[point_id];
-
-                double displ_magnitude = rslt_pt.displ_magnitude;
-                double sigma_x = rslt_pt.sigma_x;
-                double sigma_y = rslt_pt.sigma_y;
-                double tau_xy = rslt_pt.tau_xy;
-                double principal_1 = rslt_pt.sigma_1;
-                double principal_2 = rslt_pt.sigma_2;
-                double von_mises = rslt_pt.von_mises;
-                double max_shear = rslt_pt.max_shear;
-
-                resultPoints.Add($"{point_id} , {displ_magnitude} , " +
-                    $"{sigma_x} , {sigma_y} , {tau_xy} , " +
-                    $"{principal_1} , {principal_2} , " +
-                    $"{von_mises} , {max_shear}");
-            }
-
-            return resultPoints;
-
-        }
-
-
-        private void add_selected_result_point_labels()
-        {
-            // Add labels for the selected result points
-            result_point_label.clear_labels();
-            int label_id = 0;
-
-            foreach (int point_id in this.selected_resultpoint_ids)
-            {
-
-                // Create the result label
-                point_store rslt_pt = points[point_id];
-
-                //_______________________________________________________________________________________________________________
-                // result label location
-                Vector2 pt_coord = new Vector2((float)rslt_pt.x_coord, (float)rslt_pt.y_coord);
-
-                Vector2 aDisplacement = new Vector2((float)(rslt_pt.displ_x / rslt_pt.displ_magnitude),
-                    (float)(rslt_pt.displ_y / rslt_pt.displ_magnitude));
-
-
-                float model_percent = (float)(gvariables_static.displacement_scale / 1000.0);
-                float aDisplacementMagnitude = (float)(rslt_pt.displ_magnitude / _rslt_extremes.max_displacement);
-
-                float scalevalue = gvariables_static.geom_size * model_percent * aDisplacementMagnitude;
-                Vector2 scaledDisplacement = aDisplacement * scalevalue; // * sinevalue; sinevalue is not used here, as it's for animation
-
-                // Find the displaced point location in model space
-                Vector2 displaced_pt_loc = pt_coord + scaledDisplacement;
-                //_______________________________________________________________________________________________________________
-
-                int option = gvariables_static.result_option;
-                float colorValue = scaled_contourColorValue(rslt_pt, option);
-                float labelValue = (float)rslt_pt.displ_magnitude;
-
-                switch (option)
-                {
-                    case 1:
-                        labelValue = (float)rslt_pt.displ_magnitude;
-                        break;
-                    case 2:
-                        labelValue = (float)rslt_pt.sigma_x;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 3:
-                        labelValue = (float)rslt_pt.sigma_y;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 4:
-                        labelValue = (float)rslt_pt.tau_xy;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 5:
-                        labelValue = (float)rslt_pt.von_mises;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 6:
-                        labelValue = (float)rslt_pt.sigma_1;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 7:
-                        labelValue = (float)rslt_pt.sigma_2;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                    case 8:
-                        labelValue = (float)rslt_pt.max_shear;
-                        colorValue = (colorValue + 1.0f) * 0.5f; // Adjust color value for stressX to be in [0, 1] range
-                        break;
-                }
-
-                Vector3 LabelColor = gvariables_static.GetJetColorClamped(colorValue);
-                string rsltlabel_string = FormatResultLabelValue(labelValue);
-
-
-                result_point_label.add_label(label_id + 0, rsltlabel_string, displaced_pt_loc, LabelColor);
-
-                label_id++;
-
-            }
-
-            // Update the label buffer
-            result_point_label.update_buffer(gvariables_static.geom_size * 0.5f);
-
-
-        }
-
-
-
-        private string FormatResultLabelValue(float value)
-        {
-            // Determine precision based on value magnitude
-            float absValue = Math.Abs(value);
-
-            if (absValue < 0.001f)
-                return value.ToString("F6");
-            else if (absValue < 0.01f)
-                return value.ToString("F5");
-            else if (absValue < 0.1f)
-                return value.ToString("F4");
-            else if (absValue < 1.0f)
-                return value.ToString("F3");
-            else if (absValue < 10.0f)
-                return value.ToString("F2");
-            else if (absValue < 100.0f)
-                return value.ToString("F1");
-            else
-                return value.ToString("F0");
-        }
-
-
-
-        // Helper method to transform screen point to model space
-        private Vector2 TransformToModelSpace(Vector2 screenPoint, Matrix4 invMVP)
-        {
-            // Convert to homogeneous coordinates
-            Vector4 clipPoint = new Vector4(screenPoint.X, screenPoint.Y, 0.0f, 1.0f);
-
-            // Transform to model space
-            Vector4 modelPoint = invMVP * clipPoint;
-
-            // Perspective division (if using perspective projection)
-            if (Math.Abs(modelPoint.W) > float.Epsilon)
-            {
-                modelPoint.X /= modelPoint.W;
-                modelPoint.Y /= modelPoint.W;
-            }
-
-            return new Vector2(modelPoint.X, modelPoint.Y);
-        }
-
-
         public void Dispose()
         {
             point_vbo?.Dispose();
             point_vao?.Dispose();
             point_ibo?.Dispose();
-            psl_point_vao?.Dispose();
-            psl_point_vbo?.Dispose();
-            selected_resultpoint_ibo?.Dispose();
             wireframe_ibo?.Dispose();
             triangle_ibo?.Dispose();
             // meshShader?.Dispose();

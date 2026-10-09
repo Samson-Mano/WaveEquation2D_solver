@@ -148,20 +148,14 @@ namespace WaveEquation2D_solver.src.global_variables
         public static float contourLevel_rangeMin = 0.0f;
 
         public static int result_option = 0;
-        // 1 = displacement, 2 = stressX, 3 = stressY, 4 = tauXY, 5 = vonMises,
-        // 6 = principalStress1, 7 = principalStress2, 8 = maxShearStress, 9 = PSL
+        // 1 = Field values (Displacement), 2 = first derivative field (Velocity),
+        // 3 = second derivative field (Acceleration)
+        // 0 = None (Hide Results)
 
-        public static bool is_paint_result_displacement = false; // option 1
-        public static bool is_paint_result_stressX = false; // option 2
-        public static bool is_paint_result_stressY = false; // option 3
-        public static bool is_paint_result_tauXY = false; // option 4
-        public static bool is_paint_result_vonMises = false; // option 5
-        public static bool is_paint_result_principalStress1 = false; // option 6
-        public static bool is_paint_result_principalStress2 = false; // option 7
-        public static bool is_paint_result_maxShearStress = false; // option 8
-        public static bool is_paint_result_PSL = false; // option 9
-
-
+        public static bool is_paint_fieldvalues= false; // option 1
+        public static bool is_paint_firstderivativefield = false; // option 2
+        public static bool is_paint_secondderivativefield = false; // option 3
+        
 
         public static double displacement_scale = Properties.Settings.Default.Sett_displ_scale;
         public static double resp_animation_speed = Properties.Settings.Default.Sett_resp_animation_speed; // real-time speed
@@ -199,15 +193,10 @@ namespace WaveEquation2D_solver.src.global_variables
 
         public static bool is_paint_result()
         {
-            return gvariables_static.is_paint_result_displacement == true ||
-                      gvariables_static.is_paint_result_stressX == true ||
-                      gvariables_static.is_paint_result_stressY == true ||
-                      gvariables_static.is_paint_result_tauXY == true ||
-                      gvariables_static.is_paint_result_vonMises == true ||
-                      gvariables_static.is_paint_result_principalStress1 == true ||
-                      gvariables_static.is_paint_result_principalStress2 == true ||
-                      gvariables_static.is_paint_result_maxShearStress == true ||
-                      gvariables_static.is_paint_result_PSL == true;
+            return gvariables_static.is_paint_fieldvalues == true ||
+                      gvariables_static.is_paint_firstderivativefield == true ||
+                      gvariables_static.is_paint_secondderivativefield == true;
+
         }
 
 
