@@ -74,6 +74,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private List<tri_store> tris = new List<tri_store>();
 
         private List<double> timeVector = new List<double>();
+        private int timeStepIndex = 0;
+
 
         public result_extremes rslt_extremes { get { return _rslt_extremes; } }
         private result_extremes _rslt_extremes;
@@ -97,8 +99,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private IndexBuffer triangle_ibo;
 
 
-        // Result point label
-        private label_list_store result_point_label;
+        //// Result point label
+        //private label_list_store result_point_label;
 
 
         // // Shrunk mesh data
@@ -113,7 +115,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
             InitializeShader();
 
-            result_point_label = new label_list_store();
+            // result_point_label = new label_list_store();
         }
 
 
@@ -242,7 +244,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             paint_result_mesh_points();
 
-            paint_selected_result_points();
+            // paint_selected_result_points();
 
         }
 
@@ -536,7 +538,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             point_vao = new VertexArray();
             point_vbo = new VertexBuffer(Math.Max(10, vertexData.Count));
             point_ibo = new IndexBuffer(Math.Max(10, pointIndexData.Count));
-            selected_resultpoint_ibo = new IndexBuffer(10);
 
 
             VertexBufferLayout pointLayout = new VertexBufferLayout();
@@ -588,15 +589,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 triangle_ibo.AppendIndexBuffer(triangleIndexData.ToArray());
             }
 
-
-            // PSL Mesh buffers
-            generate_PSL_mesh();
-
-            // Create the Type 2 PSL mesh buffers
-            // generate_PSL_type2_line_mesh();
-            // generate_PSL_type2_streamfunction_mesh();
-
-            get_PSL_streamfunction_mesh();
 
             // Shrunk Mesh buffers
             generate_shrunk_mesh();
@@ -682,22 +674,16 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 graphic_events_control.viewMatrix * graphic_events_control.modelMatrix;
 
             rsltmeshShader.SetMatrix4("uMVP", uMVP);
-            rsltmeshShader.SetFloat("geomscale", gvariables_static.geom_size);
-
-            float model_percent = (float)(gvariables_static.displacement_scale / 1000.0);
-
-            rsltmeshShader.SetFloat("modelpercent", model_percent);
 
             rsltmeshShader.SetFloat("vertexTransparency", gvariables_static.rslt_transparency);
 
-            rsltmeshShader.SetFloat("rsltoption", 0);
+            rsltmeshShader.SetInt("CmapOption", 0);
 
-            if (gvariables_static.result_option != 1)
-            {
-                rsltmeshShader.SetFloat("rsltoption", 1);
-            }
+
 
             //____________________________________________________________________________________________
+
+            float model_percent = (float)(gvariables_static.displacement_scale / 1000.0);
 
             rsltmeshwireframeShader.SetMatrix4("uMVP", uMVP);
             rsltmeshwireframeShader.SetFloat("geomscale", gvariables_static.geom_size);
@@ -710,46 +696,32 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             // rsltmeshwireframeShader.SetVector3("wireframeColor", customColor);
             rsltmeshwireframeShader.SetFloat("wireframeAlpha", 0.5f);
 
-            //____________________________________________________________________________________________
-            // Contour data update
-            rsltmeshShader.SetFloat("uNumContours", gvariables_static.contourline_level);
-            rsltmeshShader.SetFloat("uLineOpacity", 0.0f);
-
-            if (gvariables_static.is_paint_result_contourlines)
-            {
-                rsltmeshShader.SetFloat("uLineOpacity", 1.0f);
-            }
-
-            // Update the result label uniforms
-            float zoomscale = (float)graphic_events_control.zoom_val;
-            result_point_label.update_openTK_uniforms(uMVP, zoomscale, 1.0f);
-
 
         }
 
         public void update_animation(float sine_oscillation)
         {
-            // Update the sine oscillation value in the shader for animation
-            rsltmeshShader.SetFloat("sinevalue", sine_oscillation);
+            //// Update the sine oscillation value in the shader for animation
+            //rsltmeshShader.SetFloat("sinevalue", sine_oscillation);
 
-            rsltmeshwireframeShader.SetFloat("sinevalue", sine_oscillation);
+            //rsltmeshwireframeShader.SetFloat("sinevalue", sine_oscillation);
 
-            if (gvariables_static.is_paint_result_contourlines)
-            {
-                rsltmeshShader.SetFloat("uLineOpacity", 1.0f);
-            }
+            //if (gvariables_static.is_paint_result_contourlines)
+            //{
+            //    rsltmeshShader.SetFloat("uLineOpacity", 1.0f);
+            //}
 
-            // rsltPSLShader.SetFloat("sinevalue", sine_oscillation);
-            // rsltPSLType2Shader.SetFloat("sinevalue", sine_oscillation);
-            // rsltPSLShader.SetFloat("uLineOpacity", 1.0f);
+            //// rsltPSLShader.SetFloat("sinevalue", sine_oscillation);
+            //// rsltPSLType2Shader.SetFloat("sinevalue", sine_oscillation);
+            //// rsltPSLShader.SetFloat("uLineOpacity", 1.0f);
 
 
-            if (sine_oscillation < 0.1)
-            {
-                rsltmeshShader.SetFloat("uLineOpacity", 0.0f);
+            //if (sine_oscillation < 0.1)
+            //{
+            //    rsltmeshShader.SetFloat("uLineOpacity", 0.0f);
 
-                // rsltPSLShader.SetFloat("uLineOpacity", 0.0f);
-            }
+            //    // rsltPSLShader.SetFloat("uLineOpacity", 0.0f);
+            //}
 
         }
 
