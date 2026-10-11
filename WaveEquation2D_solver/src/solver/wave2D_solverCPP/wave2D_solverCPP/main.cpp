@@ -41,16 +41,20 @@ int main()
 
 
 	// Read the solver settings
-	int SolverType = 0;
-	// int HRefinement = 0; // 0, 1, 2
+	int SolverType = 1; // 0: Modal Superposition, 1: Direct Time Integration
+	int HRefinement = 0; // 0, 1, 2
 	int SpectralOrderN = 3; // 3, 4, 5, 6, 7, 8, 9, 10
 
 	double TotalSimulationTime = 10.0; // Total simulation time
 	double TimeIncrement = 0.01;         // Time increment for the simulation
+	double DampingRatio = 0.0; // Global Damping ratio for the analysis
+
 	int NumberOfModes = 100;          // Number of modes to consider in the analysis
+	int IntermediateSteps = 100; 	// Number of intermediate steps
+
 
 	int ExtendConstraints = 0; // 0 or 1
-	// int SaveHRefinedModel = 0; // 0 or 1
+	int SaveHRefinedModel = 0; // 0 or 1
 
 	stopwatch.start();
 

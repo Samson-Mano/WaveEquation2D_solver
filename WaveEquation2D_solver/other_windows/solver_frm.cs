@@ -376,53 +376,8 @@ namespace WaveEquation2D_solver.other_windows
                             int node_id = reader.ReadInt32();
                             double node_xcoord = reader.ReadDouble();
                             double node_ycoord = reader.ReadDouble();
-
-                            // Displacement at the node
-                            double displ_x = reader.ReadDouble();
-                            double displ_y = reader.ReadDouble();
-
-                            // Reaction at the node
-                            int constraint_type = reader.ReadInt32(); // 0 = free, 1 = pinned, 2 = roller
-                            double constraint_value = reader.ReadDouble();
-                            double reaction_x = reader.ReadDouble();
-                            double reaction_y = reader.ReadDouble();
-
-                            // Stress results at the node
-                            double sigma_x = reader.ReadDouble();
-                            double sigma_y = reader.ReadDouble();
-                            double tau_xy = reader.ReadDouble();
-
-                            double sigma_1 = reader.ReadDouble();
-                            double sigma_2 = reader.ReadDouble();
-
-                            double von_mises = reader.ReadDouble();
-                            double max_shear = reader.ReadDouble();
-                            double theta_p = reader.ReadDouble();
-
-                            double streamfunction_tension = reader.ReadDouble();
-                            double streamfunction_compression = reader.ReadDouble();
-
-
-                            //modeldata.rslt_data.add_point(node_id,
-                            //    node_xcoord, 
-                            //    node_ycoord,
-                            //    displ_x,
-                            //    displ_y,
-                            //    constraint_type,
-                            //    constraint_value,
-                            //    reaction_x,
-                            //    reaction_y,
-                            //    sigma_x,
-                            //    sigma_y,
-                            //    tau_xy,
-                            //    sigma_1,
-                            //    sigma_2,
-                            //    von_mises,
-                            //    max_shear,
-                            //    theta_p,
-                            //    streamfunction_tension,
-                            //    streamfunction_compression
-                            //    );
+                            
+                            modeldata.rslt_data.add_point(node_id, node_xcoord, node_ycoord);
 
                         }
 
@@ -458,6 +413,59 @@ namespace WaveEquation2D_solver.other_windows
                         }
 
                         AppendStatus($"Reading results for {triangles_count} triangles complete \n");
+
+
+                        // Read number of time steps
+                        int time_steps_count = reader.ReadInt32();
+
+                        for (int t = 0; t < time_steps_count; t++)
+                        {
+                            double time_value = reader.ReadDouble();
+                            modeldata.rslt_data.add_time_step(time_value);
+                    
+                        }
+
+                        AppendStatus($"Reading results for {time_steps_count} time steps complete \n");
+
+
+                        for (int i = 0; i < node_points_count; i++)
+                        {
+                            int node_id = reader.ReadInt32();
+
+                            // Nodal field values
+                            List<double> field_values = new List<double>();
+
+                            for(int t = 0; t < time_steps_count; t++)
+                            {
+                                double f_value = reader.ReadDouble();
+                                field_values.Add(f_value);
+                            }
+
+                            // Nodal first derivative field values
+                            List<double> first_derivative_field_values = new List<double>();
+
+                            for (int t = 0; t < time_steps_count; t++)
+                            {
+                                double f1_value = reader.ReadDouble();
+                                first_derivative_field_values.Add(f1_value);
+                            }
+
+                            // Nodal second derivative field values
+                            List<double> second_derivative_field_values = new List<double>();
+
+                            for (int t = 0; t < time_steps_count; t++)
+                            {
+                                double f2_value = reader.ReadDouble();
+                                second_derivative_field_values.Add(f2_value);
+                            }
+
+
+                            modeldata.rslt_data.add_result_values(node_id, field_values, first_derivative_field_values, second_derivative_field_values);
+                        }
+
+
+                        AppendStatus($"Reading field value results complete \n");
+
 
                         // Set the Result mesh
                         bool isValid = modeldata.rslt_data.set_result_extremes();

@@ -136,10 +136,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
 
 
-        public void add_point(int point_id, double x_coord, double y_coord,
-            List<double> field_values,
-            List<double> first_derivative_field_values,
-            List<double> second_derivative_field_values)
+        public void add_point(int point_id, double x_coord, double y_coord)
         {
 
             points.Add(point_id, new point_store()
@@ -147,9 +144,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 point_id = point_id,
                 x_coord = x_coord,
                 y_coord = y_coord,
-                field_values = field_values,
-                first_derivative_field_values = first_derivative_field_values,
-                second_derivative_field_values = second_derivative_field_values
+                field_values = new List<double>(),
+                first_derivative_field_values = new List<double>(),
+                second_derivative_field_values = new List<double>()
             });
 
         }
@@ -176,6 +173,29 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             });
 
         }
+
+        public void add_time_step(double time_value)
+        {
+            timeVector.Add(time_value);
+        }
+
+
+        public void add_result_values(int point_id, List<double> field_values, 
+            List<double> first_derivative_field_values, 
+            List<double> second_derivative_field_values)
+        {
+            if (points.ContainsKey(point_id))
+            {
+                points[point_id].field_values.AddRange(field_values);
+                points[point_id].first_derivative_field_values.AddRange(first_derivative_field_values);
+                points[point_id].second_derivative_field_values.AddRange(second_derivative_field_values);
+            }
+            else
+            {
+                throw new ArgumentException($"Point ID {point_id} does not exist in the points dictionary.");
+            }
+        }
+
 
 
         public bool set_result_extremes()
@@ -631,7 +651,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             rsltmeshShader.SetFloat("vertexTransparency", gvariables_static.rslt_transparency);
 
-            rsltmeshShader.SetInt("CmapOption", 0);
+            rsltmeshShader.SetInt("CmapOption", gvariables_static.contourOption);
 
 
 

@@ -342,7 +342,11 @@ namespace WaveEquation2D_solver.other_windows
         {
             gvariables_static.contourOption = comboBox_contourType.SelectedIndex;
 
-            modeldata.switch_result_option(true);
+            if (this.Owner is main_frm mainForm1)
+            {
+                mainForm1.CallFrom_rsltoption_frm();
+            }
+
         }
     }
 }
