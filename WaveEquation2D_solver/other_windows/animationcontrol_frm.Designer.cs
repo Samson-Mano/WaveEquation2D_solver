@@ -44,6 +44,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.button_ok = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox_contourType = new System.Windows.Forms.ComboBox();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -141,6 +143,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.comboBox_contourType);
+            this.groupBox4.Controls.Add(this.label1);
             this.groupBox4.Controls.Add(this.button_updaterange);
             this.groupBox4.Controls.Add(this.textBox_contourmin);
             this.groupBox4.Controls.Add(this.textBox_contourmax);
@@ -148,7 +152,7 @@
             this.groupBox4.Controls.Add(this.label2);
             this.groupBox4.Location = new System.Drawing.Point(12, 283);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(379, 118);
+            this.groupBox4.Size = new System.Drawing.Size(379, 165);
             this.groupBox4.TabIndex = 42;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Contour Range";
@@ -199,7 +203,7 @@
             // 
             // button_ok
             // 
-            this.button_ok.Location = new System.Drawing.Point(132, 418);
+            this.button_ok.Location = new System.Drawing.Point(132, 482);
             this.button_ok.Name = "button_ok";
             this.button_ok.Size = new System.Drawing.Size(131, 52);
             this.button_ok.TabIndex = 43;
@@ -207,18 +211,59 @@
             this.button_ok.UseVisualStyleBackColor = true;
             this.button_ok.Click += new System.EventHandler(this.button_ok_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(21, 121);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(107, 16);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Contour Type: ";
+            // 
+            // comboBox_contourType
+            // 
+            this.comboBox_contourType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_contourType.FormattingEnabled = true;
+            this.comboBox_contourType.Items.AddRange(new object[] {
+            "Rainbow",
+            "Jet",
+            "Turbo",
+            "Viridis",
+            "Plasma",
+            "Inferno",
+            "Magma",
+            "Cividis",
+            "Twilight",
+            "TwilightShifted",
+            "Sinebow",
+            "Hot",
+            "Cool",
+            "Spring",
+            "Summer",
+            "Autumn",
+            "Winter",
+            "Gray",
+            "Bone",
+            "Copper",
+            "Pink"});
+            this.comboBox_contourType.Location = new System.Drawing.Point(134, 118);
+            this.comboBox_contourType.Name = "comboBox_contourType";
+            this.comboBox_contourType.Size = new System.Drawing.Size(200, 24);
+            this.comboBox_contourType.TabIndex = 6;
+            this.comboBox_contourType.SelectedIndexChanged += new System.EventHandler(this.comboBox_contourType_SelectedIndexChanged);
+            // 
             // animationcontrol_frm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(404, 496);
+            this.ClientSize = new System.Drawing.Size(404, 546);
             this.Controls.Add(this.button_ok);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Font = new System.Drawing.Font("Verdana", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.MaximumSize = new System.Drawing.Size(430, 545);
+            this.MaximumSize = new System.Drawing.Size(430, 585);
             this.MinimumSize = new System.Drawing.Size(420, 535);
             this.Name = "animationcontrol_frm";
             this.Opacity = 0.85D;
@@ -251,5 +296,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button_ok;
+        private System.Windows.Forms.ComboBox comboBox_contourType;
+        private System.Windows.Forms.Label label1;
     }
 }

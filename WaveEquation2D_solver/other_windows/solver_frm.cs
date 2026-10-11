@@ -403,26 +403,26 @@ namespace WaveEquation2D_solver.other_windows
                             double streamfunction_compression = reader.ReadDouble();
 
 
-                            modeldata.rslt_data.add_point(node_id,
-                                node_xcoord, 
-                                node_ycoord,
-                                displ_x,
-                                displ_y,
-                                constraint_type,
-                                constraint_value,
-                                reaction_x,
-                                reaction_y,
-                                sigma_x,
-                                sigma_y,
-                                tau_xy,
-                                sigma_1,
-                                sigma_2,
-                                von_mises,
-                                max_shear,
-                                theta_p,
-                                streamfunction_tension,
-                                streamfunction_compression
-                                );
+                            //modeldata.rslt_data.add_point(node_id,
+                            //    node_xcoord, 
+                            //    node_ycoord,
+                            //    displ_x,
+                            //    displ_y,
+                            //    constraint_type,
+                            //    constraint_value,
+                            //    reaction_x,
+                            //    reaction_y,
+                            //    sigma_x,
+                            //    sigma_y,
+                            //    tau_xy,
+                            //    sigma_1,
+                            //    sigma_2,
+                            //    von_mises,
+                            //    max_shear,
+                            //    theta_p,
+                            //    streamfunction_tension,
+                            //    streamfunction_compression
+                            //    );
 
                         }
 

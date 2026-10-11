@@ -12,6 +12,7 @@ using WaveEquation2D_solver.src.global_variables;
 using WaveEquation2D_solver.src.model_store.geom_objects;
 using WaveEquation2D_solver.src.opentk_control.opentk_buffer;
 using WaveEquation2D_solver.src.opentk_control.shader_compiler;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 
 
@@ -103,8 +104,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         //private label_list_store result_point_label;
 
 
-        // // Shrunk mesh data
-        // private shrunkrsltdata_store shrunk_rsltmesh_data = new shrunkrsltdata_store();
+        // Shrunk mesh data
+        private shrunkrsltdata_store shrunk_rsltmesh_data = new shrunkrsltdata_store();
 
         public HashSet<int> selected_resultpoint_ids { get; } = new HashSet<int>();
 
@@ -115,7 +116,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
             InitializeShader();
 
-            // result_point_label = new label_list_store();
         }
 
 
@@ -137,8 +137,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
 
         public void add_point(int point_id, double x_coord, double y_coord,
-            List<double> field_values, 
-            List<double> first_derivative_field_values, 
+            List<double> field_values,
+            List<double> first_derivative_field_values,
             List<double> second_derivative_field_values)
         {
 
@@ -202,7 +202,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 // Maximum and minimum first derivative field values
                 _rslt_extremes.max_firstderivativefield = Math.Max(_rslt_extremes.max_firstderivativefield, pt.first_derivative_field_values.Max());
                 _rslt_extremes.min_firstderivativefield = Math.Min(_rslt_extremes.min_firstderivativefield, pt.first_derivative_field_values.Min());
-                
+
                 // Maximum and minimum second derivative field values   
                 _rslt_extremes.max_secondderivativefield = Math.Max(_rslt_extremes.max_secondderivativefield, pt.second_derivative_field_values.Max());
                 _rslt_extremes.min_secondderivativefield = Math.Min(_rslt_extremes.min_secondderivativefield, pt.second_derivative_field_values.Min());
@@ -223,7 +223,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             {
                 return false;
             }
-           
+
             return true;
         }
 
@@ -352,21 +352,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 vertexData.Add((float)pt.x_coord);
                 vertexData.Add((float)pt.y_coord);
 
-                // Normalized displacement values for plotting
-                if (pt.displ_magnitude > 0)
-                {
-                    vertexData.Add((float)(pt.displ_x / pt.displ_magnitude));
-                    vertexData.Add((float)(pt.displ_y / pt.displ_magnitude));
-                }
-                else
-                {
-                    vertexData.Add(0);
-                    vertexData.Add(0);
-                }
-
-                vertexData.Add((float)(pt.displ_magnitude / _rslt_extremes.max_displacement));
-
                 float normalized_contourValue = scaled_contourColorValue(pt, option);
+
                 vertexData.Add(normalized_contourValue);
 
             }
@@ -407,7 +394,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
-                        float normalizedValue = ((float)pt.sigma_x - actualRangeMin) / actualRangeSpan;
+                        float normalizedValue = ((float)pt.field_values[this.timeStepIndex] - actualRangeMin) / actualRangeSpan;
 
                         if (normalizedValue < -EPSILON)
                         {
@@ -440,7 +427,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
-                        float normalizedValue = ((float)pt.sigma_y - actualRangeMin) / actualRangeSpan;
+                        float normalizedValue = ((float)pt.first_derivative_field_values[this.timeStepIndex] - actualRangeMin) / actualRangeSpan;
 
                         if (normalizedValue < -EPSILON)
                         {
@@ -472,7 +459,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
                         float actualRangeSpan = actualRangeMax - actualRangeMin;
 
-                        float normalizedValue = ((float)pt.tau_xy - actualRangeMin) / actualRangeSpan;
+                        float normalizedValue = ((float)pt.second_derivative_field_values[this.timeStepIndex] - actualRangeMin) / actualRangeSpan;
 
                         if (normalizedValue < -EPSILON)
                         {
@@ -493,7 +480,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                         return normalizedValue;
 
                     }
-          
+
             }
 
             return 0.0f; // Default case, should not reach here
@@ -514,21 +501,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 vertexData.Add((float)pt.x_coord);
                 vertexData.Add((float)pt.y_coord);
 
-                // Normalized displacement values for plotting
-                if (pt.displ_magnitude > 0)
-                {
-                    vertexData.Add((float)(pt.displ_x / pt.displ_magnitude));
-                    vertexData.Add((float)(pt.displ_y / pt.displ_magnitude));
-                }
-                else
-                {
-                    vertexData.Add(0);
-                    vertexData.Add(0);
-                }
+                float normalized_contourValue = scaled_contourColorValue(pt, 1);
 
-                // Calculate the magnitude of the displacement vector for color mapping
-                vertexData.Add((float)(pt.displ_magnitude / _rslt_extremes.max_displacement)); // normalized scalar value
-                vertexData.Add((float)(pt.displ_magnitude / _rslt_extremes.max_displacement)); // Contour value for color mapping
+                vertexData.Add(normalized_contourValue);
 
                 pointIndexData.Add(i);
             }
@@ -542,8 +517,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             VertexBufferLayout pointLayout = new VertexBufferLayout();
             pointLayout.AddFloat(2);  // x and y coordinates
-            pointLayout.AddFloat(2); // displ_x and displ_y
-            pointLayout.AddFloat(1); // displacement magnitude
             pointLayout.AddFloat(1); // Contour value
 
             point_vao.Add_vertexBuffer(point_vbo, pointLayout);
@@ -604,58 +577,39 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
 
             // Generate shrunk vertices for triangles
+            float normalized_contourValue = -1.0f;
+
             foreach (tri_store tri in tris)
             {
                 var p1 = points[tri.pt_id1];
                 var p2 = points[tri.pt_id2];
                 var p3 = points[tri.pt_id3];
 
-                float[] pt1_values = new float[5];
+                float[] pt1_values = new float[3];
                 pt1_values[0] = (float)p1.x_coord;
                 pt1_values[1] = (float)p1.y_coord;
-                if (p1.displ_magnitude > 0)
-                {
-                    pt1_values[2] = (float)(p1.displ_x / p1.displ_magnitude);
-                    pt1_values[3] = (float)(p1.displ_y / p1.displ_magnitude);
-                }
-                else
-                {
-                    pt1_values[2] = 0;
-                    pt1_values[3] = 0;
-                }
-                pt1_values[4] = (float)(p1.displ_magnitude / _rslt_extremes.max_displacement);
+
+                normalized_contourValue = scaled_contourColorValue(p1, 1);
+
+                pt1_values[2] = normalized_contourValue;
 
 
-                float[] pt2_values = new float[5];
+                float[] pt2_values = new float[3];
                 pt2_values[0] = (float)p2.x_coord;
                 pt2_values[1] = (float)p2.y_coord;
-                if (p2.displ_magnitude > 0)
-                {
-                    pt2_values[2] = (float)(p2.displ_x / p2.displ_magnitude);
-                    pt2_values[3] = (float)(p2.displ_y / p2.displ_magnitude);
-                }
-                else
-                {
-                    pt2_values[2] = 0;
-                    pt2_values[3] = 0;
-                }
-                pt2_values[4] = (float)(p2.displ_magnitude / _rslt_extremes.max_displacement);
+
+                normalized_contourValue = scaled_contourColorValue(p2, 1);
+
+                pt2_values[2] = normalized_contourValue;
 
 
-                float[] pt3_values = new float[5];
+                float[] pt3_values = new float[3];
                 pt3_values[0] = (float)p3.x_coord;
                 pt3_values[1] = (float)p3.y_coord;
-                if (p3.displ_magnitude > 0)
-                {
-                    pt3_values[2] = (float)(p3.displ_x / p3.displ_magnitude);
-                    pt3_values[3] = (float)(p3.displ_y / p3.displ_magnitude);
-                }
-                else
-                {
-                    pt3_values[2] = 0;
-                    pt3_values[3] = 0;
-                }
-                pt3_values[4] = (float)(p3.displ_magnitude / _rslt_extremes.max_displacement);
+
+                normalized_contourValue = scaled_contourColorValue(p3, 1);
+
+                pt3_values[2] = normalized_contourValue;
 
                 // shrunk_rsltmesh_data.add_shrunk_triangle(tri.tri_id, pt1_values, pt2_values, pt3_values);
             }
@@ -699,8 +653,56 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         }
 
-        public void update_animation(float sine_oscillation)
+        public void update_animation(double elapsedRealTime)
         {
+
+            if (elapsedRealTime < 0)
+            {
+                // Animation is stopped
+                // Reset to the first time step 
+                this.timeStepIndex = 0;
+                return;
+            }
+
+            int count = timeVector.Count;
+
+            if (this.timeStepIndex >= count)
+            {
+                this.timeStepIndex = count - 1; // Ensure the index is within bounds
+            }
+
+
+            // Animation: Update the time step index based on elapsed real time
+            double animationTime = elapsedRealTime * gvariables_static.resp_animation_speed; // Adjust speed with a multiplier
+            double totalSimulationTime = timeVector[count - 1]; // Total simulation time based on the last time step
+
+
+            if (animationTime > totalSimulationTime)
+            {
+                animationTime = animationTime % totalSimulationTime; // Loop the animation
+            }
+
+
+            // Move to the next time step if the animation time exceeds the current time step
+            int i = this.timeStepIndex;
+
+            while ((i + 1) < count && timeVector[i + 1] <= animationTime)
+            {
+                i++;
+            }
+
+
+            // Move to the previous time step if the animation time is less than the current time step
+            while (i > 0 && timeVector[i] > animationTime)
+            {
+                i--;
+            }
+
+            this.timeStepIndex = i;
+
+
+
+
             //// Update the sine oscillation value in the shader for animation
             //rsltmeshShader.SetFloat("sinevalue", sine_oscillation);
 

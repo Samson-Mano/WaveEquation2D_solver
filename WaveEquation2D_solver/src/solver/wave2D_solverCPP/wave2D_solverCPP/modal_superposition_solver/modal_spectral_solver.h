@@ -301,7 +301,6 @@ private:
 		Eigen::MatrixXd& eigenvectors);
 
 
-	void store_results_with_index(double geom_min_x, double geom_min_y, double scale_value);
 
 	void perform_modal_superposition_of_globalmatrices();
 

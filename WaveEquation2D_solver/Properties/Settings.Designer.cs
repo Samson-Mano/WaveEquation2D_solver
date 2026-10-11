@@ -154,5 +154,17 @@ namespace WaveEquation2D_solver.Properties {
                 this["Sett_globaldampratio"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int Sett_contourOption {
+            get {
+                return ((int)(this["Sett_contourOption"]));
+            }
+            set {
+                this["Sett_contourOption"] = value;
+            }
+        }
     }
 }

@@ -153,6 +153,7 @@
     <Compile Include="src\model_store\geom_objects\shrunkmeshdata_store.cs" />
     <Compile Include="src\model_store\modeldata_store.cs" />
     <Compile Include="src\model_store\rslt_objects\rsltdata_store.cs" />
+    <Compile Include="src\model_store\rslt_objects\shrunkrsltdata_store.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\GDIFontAtlas.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\IndexBuffer.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexArray.cs" />

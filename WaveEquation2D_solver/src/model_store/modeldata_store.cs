@@ -327,8 +327,8 @@ namespace WaveEquation2D_solver.src.model_store
             stopwatch.Reset();
             stopwatch.Stop();
 
-            // Set the animation sine value to 1.0f
-            rslt_data.update_animation(1.0f);
+            // Set the animation to -1.0 to indicate that the animation is stopped
+            rslt_data.update_animation(-1.0f);
 
         }
 
@@ -339,23 +339,14 @@ namespace WaveEquation2D_solver.src.model_store
                 return;
 
 
-            // Results are stored, animate the modal results
-            double elapsedRealTime = stopwatch.Elapsed.TotalSeconds;
-
-
             if (gvariables_static.animate_play == true)
             {
-                // Oscillation: -1 to 1
-                float oscillation = (float)Math.Sin(2.0 * Math.PI * elapsedRealTime * gvariables_static.resp_animation_speed);
+                // Results are stored, animate the time step results based on the elapsed time
+                double elapsedRealTime = stopwatch.Elapsed.TotalSeconds;
 
-                // Convert to the range of 0 to 1
-                oscillation = (oscillation + 1.0f) / 2.0f;
-
-                rslt_data.update_animation(oscillation);
+                rslt_data.update_animation(elapsedRealTime);
 
             }
-
-
             //
         }
 

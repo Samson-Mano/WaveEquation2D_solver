@@ -1100,13 +1100,6 @@ bool modal_spectral_solver::solveWithARPACK(int num_modes,
 
 
 
-void modal_spectral_solver::store_results_with_index(double geom_min_x, double geom_min_y, double scale_value)
-{
-	// Not USED
-
-}
-
-
 void modal_spectral_solver::perform_modal_superposition_of_globalmatrices()
 {
 

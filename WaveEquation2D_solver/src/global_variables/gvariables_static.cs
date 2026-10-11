@@ -142,7 +142,32 @@ namespace WaveEquation2D_solver.src.global_variables
         public static bool is_paint_result_shrunk_triangle = false;
 
         public static bool is_paint_result_contourlines = true;
-        public static int contourline_level = Properties.Settings.Default.Sett_contourlevel_option; // 0 = 5, 1 = 10, 2 = 20, 3 = 40, 4 = 80
+        // public static int contourline_level = Properties.Settings.Default.Sett_contourlevel_option; // 0 = 5, 1 = 10, 2 = 20, 3 = 40, 4 = 80
+
+        public static int contourOption = 1;
+
+        //  case 0: color = rainbowHeatmap(x); break;
+        //  case 1: color = jetHeatmap(x); break;
+        //  case 2: color = turboHeatmap(x); break;
+        //  case 3: color = viridisHeatmap(x); break;
+        //  case 4: color = plasmaHeatmap(x); break;
+        //  case 5: color = infernoHeatmap(x); break;
+        //  case 6: color = magmaHeatmap(x); break;
+        //  case 7: color = cividisHeatmap(x); break;
+        //  case 8: color = twilightHeatmap(x); break;
+        //  case 9: color = twilightShiftedHeatmap(x); break;
+        //  case 10: color = sinebowHeatmap(x); break;
+        //  case 11: color = hotHeatmap(x); break;
+        //  case 12: color = coolHeatmap(x); break;
+        //  case 13: color = springHeatmap(x); break;
+        //  case 14: color = summerHeatmap(x); break;
+        //  case 15: color = autumnHeatmap(x); break;
+        //  case 16: color = winterHeatmap(x); break;
+        //  case 17: color = grayHeatmap(x); break;
+        //  case 18: color = boneHeatmap(x); break;
+        //  case 19: color = copperHeatmap(x); break;
+        //  case 20: color = pinkHeatmap(x); break;
+
 
         public static float contourLevel_rangeMax = 1.0f;
         public static float contourLevel_rangeMin = 0.0f;
@@ -152,10 +177,10 @@ namespace WaveEquation2D_solver.src.global_variables
         // 3 = second derivative field (Acceleration)
         // 0 = None (Hide Results)
 
-        public static bool is_paint_fieldvalues= false; // option 1
+        public static bool is_paint_fieldvalues = false; // option 1
         public static bool is_paint_firstderivativefield = false; // option 2
         public static bool is_paint_secondderivativefield = false; // option 3
-        
+
 
         public static double displacement_scale = Properties.Settings.Default.Sett_displ_scale;
         public static double resp_animation_speed = Properties.Settings.Default.Sett_resp_animation_speed; // real-time speed

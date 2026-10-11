@@ -114,19 +114,23 @@ namespace WaveEquation2D_solver.other_windows
             textBox_contourmin.Text = gvariables_static.contourLevel_rangeMin.ToString(CultureInfo.InvariantCulture);
 
 
-          //  // === Track bar control ===
-          //  trackBar_deformation_scale.Minimum = 0;
-          //  trackBar_deformation_scale.Maximum = 199;
+            gvariables_static.contourOption = Properties.Settings.Default.Sett_contourOption;
 
-          //  // Update the scale labels based on current global variable values
-          //  trackBar_deformation_scale.Value = ComputeTrackBarFromScale(gvariables_static.displacement_scale);
+            comboBox_contourType.SelectedIndex = gvariables_static.contourOption;
 
-          //  UpdateScale(
-          //    trackBar_deformation_scale,
-          //    label_deformation_scale,
-          //    "Deformation scale",
-          //    v => v = gvariables_static.displacement_scale
-          //);
+            //  // === Track bar control ===
+            //  trackBar_deformation_scale.Minimum = 0;
+            //  trackBar_deformation_scale.Maximum = 199;
+
+            //  // Update the scale labels based on current global variable values
+            //  trackBar_deformation_scale.Value = ComputeTrackBarFromScale(gvariables_static.displacement_scale);
+
+            //  UpdateScale(
+            //    trackBar_deformation_scale,
+            //    label_deformation_scale,
+            //    "Deformation scale",
+            //    v => v = gvariables_static.displacement_scale
+            //);
 
 
             //____________________________________________________________________________________________________
@@ -327,12 +331,18 @@ namespace WaveEquation2D_solver.other_windows
             // Update the settings
             // Properties.Settings.Default.Sett_displ_scale = gvariables_static.displacement_scale;
             Properties.Settings.Default.Sett_resp_animation_speed = gvariables_static.resp_animation_speed;
+            Properties.Settings.Default.Sett_contourOption = gvariables_static.contourOption;
 
             // Properties.Settings.Default.Sett_contourlevel_option = gvariables_static.contourline_level;
 
             Properties.Settings.Default.Save(); // Save the settings
         }
 
+        private void comboBox_contourType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            gvariables_static.contourOption = comboBox_contourType.SelectedIndex;
 
+            modeldata.switch_result_option(true);
+        }
     }
 }

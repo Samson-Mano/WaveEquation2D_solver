@@ -441,6 +441,7 @@ void modal_superposition_solver::store_results(const modal_spectral_solver& moda
 		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
 		bin_file.write(reinterpret_cast<const char*>(&scaled_x), sizeof(double));
 		bin_file.write(reinterpret_cast<const char*>(&scaled_y), sizeof(double));
+
 	}
 
 	report("Results: Nodes written");
