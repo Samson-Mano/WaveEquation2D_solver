@@ -465,8 +465,8 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes, double geom
 	msg = "Modal analysis completed in " + std::to_string(duration.count()) + " ms";
 	report(msg.c_str());
 
-	// Store results
-	store_results_with_index(geom_min_x, geom_min_y, scale_value);
+	// // Store results
+	// store_results_with_index(geom_min_x, geom_min_y, scale_value);
 
 	// Perfrom modal superposition of global matrices
 	perform_modal_superposition_of_globalmatrices();
@@ -1055,7 +1055,7 @@ bool modal_spectral_solver::solveWithARPACK(int num_modes,
 
 
 	// Check if eigenvectors were computed
-	if (!solver.eigenvectors().size() == 0)
+	if (solver.eigenvectors().size() == 0)
 	{
 		solver_msg = "Eigenvectors not computed." + solver.info();
 		report(solver_msg.c_str());

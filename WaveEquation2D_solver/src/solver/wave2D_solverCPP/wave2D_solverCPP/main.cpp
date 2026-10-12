@@ -10,7 +10,7 @@
 #include "h_refinement/h_refinement_store.h"
 #include "system_store/wave2d_system_store.h"
 #include "system_store/stopwatch_events.h"
-// #include "solver/stress2d_solver.h"
+#include "modal_superposition_solver/modal_superposition_solver.h"
 
 
 int main()
@@ -49,7 +49,7 @@ int main()
 	double TimeIncrement = 0.01;         // Time increment for the simulation
 	double DampingRatio = 0.0; // Global Damping ratio for the analysis
 
-	int NumberOfModes = 100;          // Number of modes to consider in the analysis
+	int NumberOfModes = 10;          // Number of modes to consider in the analysis
 	int IntermediateSteps = 100; 	// Number of intermediate steps
 
 
@@ -347,12 +347,10 @@ int main()
 	h_refinement_model.create_edge_wireframe();
 
 	// Preform refinement
-	int HRefinement = 1;
 	h_refinement_model.perform_refinement(HRefinement, ExtendConstraints, &stopwatch, m_callback);
 
 
 	// Print the H Refined binary file for testing
-	int SaveHRefinedModel = 1;
 	if (SaveHRefinedModel == 1 && HRefinement > 0)
 	{
 		h_refinement_model.save_hrefined_model();
@@ -378,11 +376,56 @@ int main()
 	wave_system.node_edge_map = std::move(h_refinement_model.node_edge_map);
 
 
+	// Set the maximum geometry bound for scaling
+	wave_system.max_geom_bound = max_bound;
+
+	// Normalize the material wave speeds
+	wave_system.normalize_material_wave_speeds();
 
 
-		// Perform modal analysis
+	const char* output_file_char = "test_model_output.bin";
+	bool isAnalysisSuccess = false;
 
 
+	// Perform modal analysis
+	if (SolverType == 0)
+	{
+		// Direct Time Integration Solver
+
+
+
+		isAnalysisSuccess = false;
+
+	}
+	else if (SolverType == 1)
+	{
+
+		try
+		{
+			//_________________________________________________________
+			// Modal Superposition Solver
+
+			modal_superposition_solver modal_superposition_solver;
+
+			modal_superposition_solver.init(&wave_system, output_file_char, &stopwatch, m_callback);
+
+			// Perform modal superposition solve
+			isAnalysisSuccess = modal_superposition_solver.perform_modal_superposition_solve(NumberOfModes,
+				DampingRatio, TotalSimulationTime, TimeIncrement, geom_min_x, geom_min_y, scale_value);
+
+		}
+		catch (const std::exception& e)
+		{
+			std::cout << "Error during modal superposition analysis: " + std::string(e.what()) << std::endl;
+			isAnalysisSuccess = false;
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error during modal superposition analysis." << std::endl;
+			isAnalysisSuccess  = false;
+		}
+
+	}
 
 
 
@@ -393,7 +436,7 @@ int main()
 	//_________________________________________________________
 	// Close the files
 	infile.close();
-
+	// outfile.close();
 
 
 

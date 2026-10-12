@@ -46,6 +46,7 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 	// Create spectral mesh and global matrices
 	modal_spec_solver.create_global_matrices();
 
+
 	// Perform ARPACK modal analysis solve
 	bool modalAnalysisStatus = modal_spec_solver.solve_modal_analysis(inpt_num_modes, geom_min_x, geom_min_y, scale_value);
 	

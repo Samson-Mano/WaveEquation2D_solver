@@ -238,6 +238,20 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libarpack.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libgcc_s_seh-1.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libgfortran-5.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\liblapack.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libquadmath-0.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libwinpthread-1.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\openblas.dll" "$(TargetDir)" /Y /I
 rmdir /S /Q "$(TargetDir)src"</PostBuildEvent>
   </PropertyGroup>
 </Project>

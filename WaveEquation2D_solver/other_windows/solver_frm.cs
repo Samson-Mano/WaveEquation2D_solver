@@ -304,11 +304,14 @@ namespace WaveEquation2D_solver.other_windows
                 solver_settings.SolverType = comboBox_solvertype.SelectedIndex; // 0 = Direct Time Integration, 1 = Modal Superposition
                 solver_settings.HRefinement = comboBox_HRefinement.SelectedIndex; // 0, 1, 2
                 solver_settings.SpectralOrderN = comboBox_spectralorderN.SelectedIndex + 3; // 3, 4, 5, 6, ...
+                
                 solver_settings.TotalSimulationTime = totalsimulationtime; // 0, 1
                 solver_settings.TimeIncrement = timestep;
                 solver_settings.DampingRatio = dampingratio;
+                
                 solver_settings.NumberOfModes = numberofmodes;
                 solver_settings.IntermediateSteps = numberofintermediatesteps;
+                
                 solver_settings.ExtendConstraints = checkBox_extendconstraints.Checked == false ? 0 : 1;
                 solver_settings.SaveHRefinedModel = checkBox_saveHrefinedmodel.Checked == false ? 0 : 1;
           
