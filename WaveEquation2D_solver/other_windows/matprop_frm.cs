@@ -40,11 +40,7 @@ namespace WaveEquation2D_solver.other_windows
                 int rowIndex = dataGridView_MaterialList.Rows.Add(
                     mat.material_id.ToString(),
                     mat.material_name,
-                    mat.youngs_modulus.ToString("G"),
-                    mat.material_density.ToString("G"),
-                    mat.poissons_ratio.ToString("G"),
-                    mat.yield_point.ToString("G"),
-                    mat.thickness.ToString("G")
+                    mat.material_wave_speed.ToString("G")
                 );
 
                 // Get the newly added row
@@ -53,14 +49,10 @@ namespace WaveEquation2D_solver.other_windows
                 // Set the color for the material color column (Column6_materialcolor)
                 Color materialColor = gvariables_static.ColorUtils.GetRandomColor(mat.material_id);
 
-                // row.DefaultCellStyle.BackColor = materialColor;
-                // row.DefaultCellStyle.ForeColor = Color.Black; // Text color
 
                 row.Cells["Column8_materialcolor"].Style.BackColor = materialColor;
                 row.Cells["Column8_materialcolor"].Style.SelectionBackColor = materialColor;
 
-                // Optional: Store the material_id in the row's Tag for later use
-               // row.Tag = mat.material_id;
             }
 
         }
@@ -90,11 +82,7 @@ namespace WaveEquation2D_solver.other_windows
                 }
 
                 textBox_materialname.Text = selectedRow.Cells["Column2_materialname"].Value?.ToString();
-                textBox_youngsmodulus.Text = selectedRow.Cells["Column3_youngsmodulus"].Value?.ToString();
-                textBox_density.Text = selectedRow.Cells["Column4_density"].Value?.ToString();
-                textBox_poissonsratio.Text = selectedRow.Cells["Column5_poissonsratio"].Value?.ToString();
-                textBox_yieldpoint.Text = selectedRow.Cells["Column6_yieldpoint"].Value?.ToString();
-                textBox_thickness.Text = selectedRow.Cells["Column7_thickness"].Value?.ToString();
+                textBox_matwavespeed.Text = selectedRow.Cells["Column3_matwavespeed"].Value?.ToString();
 
             }
 
@@ -105,6 +93,8 @@ namespace WaveEquation2D_solver.other_windows
         {
             // Initialize selection state from global variable
             SetSelectionMode(gvariables_static.is_RectangleSelection);
+
+            label_XYextent.Text = $"X: {modeldata.geom_bounds.X}, Y: {modeldata.geom_bounds.Y}";
         }
 
 
@@ -123,13 +113,9 @@ namespace WaveEquation2D_solver.other_windows
             }
 
             // Test the data
-            if (!double.TryParse(textBox_youngsmodulus.Text, out double youngsmodulus) ||
-                !double.TryParse(textBox_density.Text, out double density) ||
-                !double.TryParse(textBox_poissonsratio.Text, out double poissonsratio) ||
-                !double.TryParse(textBox_yieldpoint.Text, out double yieldpoint) ||
-                !double.TryParse(textBox_thickness.Text, out double thickness))
+            if (!double.TryParse(textBox_matwavespeed.Text, out double material_wave_speed))
             {
-                MessageBox.Show("Please enter valid numeric values for youngs modulus, density, and poissons ratio.");
+                MessageBox.Show("Please enter valid numeric values for material wave speed.");
                 return;
             }
 
@@ -137,11 +123,7 @@ namespace WaveEquation2D_solver.other_windows
             int rowIndex = dataGridView_MaterialList.Rows.Add(
                 material_id,
                 material_name,
-                youngsmodulus.ToString("G"),
-                density.ToString("G"),
-                poissonsratio.ToString("G"),
-                yieldpoint.ToString("G"),
-                thickness.ToString("G")
+                material_wave_speed.ToString("G")
             );
 
             // Get the newly added row
@@ -149,11 +131,6 @@ namespace WaveEquation2D_solver.other_windows
 
             // Set the color for the material color column (Column6_materialcolor)
             Color materialColor = gvariables_static.ColorUtils.GetRandomColor(material_id);
-
-            //// Option A: Set entire row color
-            // row.DefaultCellStyle.BackColor = materialColor;
-            // row.DefaultCellStyle.ForeColor = Color.Black; // Text color
-
 
             row.Cells["Column8_materialcolor"].Style.BackColor = materialColor;
             row.Cells["Column8_materialcolor"].Style.SelectionBackColor = materialColor;
@@ -165,17 +142,11 @@ namespace WaveEquation2D_solver.other_windows
             {
                 material_id = material_id,
                 material_name = material_name,
-                youngs_modulus = youngsmodulus,
-                material_density = density,
-                poissons_ratio = poissonsratio,
-                yield_point = yieldpoint,
-                thickness = thickness
+                material_wave_speed = material_wave_speed
             };
 
             modeldata.fe_data.fe_materials[material_id] = newMaterial;
             modeldata.fe_data.materialids.Add(material_id);
-
-            // modeldata.fe_data.updateMaterialIDLabels();
 
             // Call the main form for refresh
             if (this.Owner is main_frm mainForm)
@@ -211,45 +182,26 @@ namespace WaveEquation2D_solver.other_windows
                 }
 
                 // Test the data
-                if (!double.TryParse(textBox_youngsmodulus.Text, out double youngsmodulus) ||
-                    !double.TryParse(textBox_density.Text, out double density) ||
-                    !double.TryParse(textBox_poissonsratio.Text, out double poissonsratio) ||
-                    !double.TryParse(textBox_yieldpoint.Text, out double yieldpoint) ||
-                    !double.TryParse(textBox_thickness.Text, out double thickness))
+                if (!double.TryParse(textBox_matwavespeed.Text, out double material_wave_speed))
                 {
-                    MessageBox.Show("Please enter valid numeric values for youngs modulus, density, and poissons ratio.");
+                    MessageBox.Show("Please enter a valid numeric value for material wave speed.");
+
                     return;
                 }
 
                 // update the material data in the dictionary
                 modeldata.fe_data.fe_materials[material_id].material_name = material_name;
-                modeldata.fe_data.fe_materials[material_id].youngs_modulus = youngsmodulus;
-                modeldata.fe_data.fe_materials[material_id].material_density = density;
-                modeldata.fe_data.fe_materials[material_id].poissons_ratio = poissonsratio;
-                modeldata.fe_data.fe_materials[material_id].yield_point = yieldpoint;
-                modeldata.fe_data.fe_materials[material_id].thickness = thickness;
+                modeldata.fe_data.fe_materials[material_id].material_wave_speed = material_wave_speed;
              
                 // Update the DataGridView row
                 selectedRow.Cells["Column2_materialname"].Value = material_name;
-                selectedRow.Cells["Column3_youngsmodulus"].Value = youngsmodulus.ToString("G");
-                selectedRow.Cells["Column4_density"].Value = density.ToString("G");
-                selectedRow.Cells["Column5_poissonsratio"].Value = poissonsratio.ToString("G");
-                selectedRow.Cells["Column6_yieldpoint"].Value = yieldpoint.ToString("G");
-                selectedRow.Cells["Column7_thickness"].Value = thickness.ToString("G");
+                selectedRow.Cells["Column3_materialwavespeed"].Value = material_wave_speed.ToString("G");
 
 
                 // Set the row background color
                 Color rowColor = gvariables_static.ColorUtils.GetRandomColor(material_id);
 
-                //// Option A: Set entire row color
-                // selectedRow.DefaultCellStyle.BackColor = rowColor;
-                // selectedRow.DefaultCellStyle.ForeColor = Color.Black; // Text color
-
-                //// Option B: Set only the material color cell
-                //selectedRow.Cells["Column6_materialcolor"].Style.BackColor = rowColor;
-                //selectedRow.Cells["Column6_materialcolor"].Style.ForeColor = Color.Black;
-
-                // Option C: If you want to show the color as a colored box in the cell
+                // Option C: Show the color as a colored box in the cell
                 selectedRow.Cells["Column8_materialcolor"].Style.BackColor = rowColor;
                 selectedRow.Cells["Column8_materialcolor"].Style.SelectionBackColor = rowColor;
 

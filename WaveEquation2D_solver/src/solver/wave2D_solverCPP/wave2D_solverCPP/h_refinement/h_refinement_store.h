@@ -53,12 +53,7 @@ public:
 
 
 	void add_material(const int& materialid,
-		const double& youngsmodulus,
-		const double& matdensity,
-		const double& poissonsratio,
-		const double& yieldpoint, 
-		const double& thickness,
-		const double& wave_speed);
+		const double& material_wave_speed);
 
 
 	void add_nodeconstraint(const int& node_constraint_set_id,

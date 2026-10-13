@@ -190,8 +190,7 @@ int main()
 	for (int i = 0; i < matCount; i++)
 	{
 		int32_t materialid = 0, numelement = 0;
-		double material_density = 0.0, youngs_modulus = 0.0, poissons_ratio = 0.0;
-		double yield_point = 0.0, thickness = 0.0;
+		double material_wave_speed = 0.0;
 
 		infile.read(reinterpret_cast<char*>(&materialid), 4);
 
@@ -201,26 +200,16 @@ int main()
 		std::string matname(nameLen, '\0');
 		infile.read(&matname[0], nameLen);
 
-		infile.read(reinterpret_cast<char*>(&material_density), 8);
-		infile.read(reinterpret_cast<char*>(&youngs_modulus), 8);
-		infile.read(reinterpret_cast<char*>(&poissons_ratio), 8);
-		infile.read(reinterpret_cast<char*>(&yield_point), 8);
-		infile.read(reinterpret_cast<char*>(&thickness), 8);
-
-
+		infile.read(reinterpret_cast<char*>(&material_wave_speed), 8);
+		
 		if (materialid == 0)
 		{
 			// Perfectly matched layer (PML) material properties
-			material_density = 1.0; // to avoid division by zero
+			material_wave_speed = 1.0; // to avoid division by zero
 		}
 
-		double wave_speed_squared = youngs_modulus / (material_density * (1 - poissons_ratio * poissons_ratio));
-		double wave_speed = std::sqrt(wave_speed_squared);
-
-
 		// Add material to the H Refinement system store
-		h_refinement_model.add_material(materialid, youngs_modulus, material_density, poissons_ratio,
-			yield_point, thickness, wave_speed);
+		h_refinement_model.add_material(materialid, material_wave_speed);
 
 	}
 

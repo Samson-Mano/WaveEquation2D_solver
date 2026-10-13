@@ -146,6 +146,7 @@
     <Compile Include="src\model_store\fe_objects\node_list_store.cs" />
     <Compile Include="src\model_store\geom_objects\axisdata_store.cs" />
     <Compile Include="src\model_store\geom_objects\contourlevelbar_store.cs" />
+    <Compile Include="src\model_store\geom_objects\dynamiclabel_store.cs" />
     <Compile Include="src\model_store\geom_objects\label_list_store.cs" />
     <Compile Include="src\model_store\geom_objects\meshdata_store.cs" />
     <Compile Include="src\model_store\geom_objects\selectcircle_store.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="src\model_store\modeldata_store.cs" />
     <Compile Include="src\model_store\rslt_objects\rsltdata_store.cs" />
     <Compile Include="src\model_store\rslt_objects\shrunkrsltdata_store.cs" />
+    <Compile Include="src\model_store\rslt_objects\timerlabel_store.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\GDIFontAtlas.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\IndexBuffer.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexArray.cs" />

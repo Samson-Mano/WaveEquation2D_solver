@@ -99,6 +99,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private IndexBuffer wireframe_ibo;
         private IndexBuffer triangle_ibo;
 
+        // Timer label for displaying the current time step
+        timerlabel_store timer_label = new timerlabel_store();
+
 
         //// Result point label
         //private label_list_store result_point_label;
@@ -131,6 +134,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 ShaderLibrary.get_vertex_shader(ShaderLibrary.ShaderType.RsltWireframeShader),
                 ShaderLibrary.get_fragment_shader(ShaderLibrary.ShaderType.RsltWireframeShader)
                 );
+
 
         }
 
@@ -265,6 +269,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             paint_result_mesh_points();
 
             // paint_selected_result_points();
+
+            timer_label.paint_timer_label();
 
         }
 
@@ -589,6 +595,9 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             buffersInitialized = true;
 
+            // Initialize the timer labels
+            timer_label.InitializeTimerLabelData(10, 10);
+
         }
 
 
@@ -670,6 +679,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             // rsltmeshwireframeShader.SetVector3("wireframeColor", customColor);
             rsltmeshwireframeShader.SetFloat("wireframeAlpha", 0.5f);
 
+            //____________________________________________________________________________________________
+            timer_label.UpdateTimerLabelCenter(graphic_events_control.window_width, graphic_events_control.window_height);
 
         }
 
@@ -690,6 +701,12 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             {
                 this.timeStepIndex = count - 1; // Ensure the index is within bounds
             }
+
+
+            TimeSpan ts = TimeSpan.FromSeconds(timeVector[this.timeStepIndex]);
+            string text = $"Time = {ts:mm\\:ss\\.fff} s".PadRight(18);
+            timer_label.UpdateVertexBuffers(text);
+
 
 
             // Animation: Update the time step index based on elapsed real time

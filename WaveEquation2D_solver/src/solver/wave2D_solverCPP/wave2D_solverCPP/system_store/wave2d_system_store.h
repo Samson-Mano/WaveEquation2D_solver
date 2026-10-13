@@ -171,12 +171,7 @@ struct edge_constraint_store
 struct material_store
 {
 	int materialid = 0;
-	double youngsmodulus = 0.0;
-	double matdensity = 0.0;
-	double poissonsratio = 0.0;
-	double yieldpoint = 0.0;
-	double thickness = 0.0;
-	double wave_speed = 0.0;
+	double material_wave_speed = 0.0;
 	double norm_wave_speed = 0.0;
 };
 

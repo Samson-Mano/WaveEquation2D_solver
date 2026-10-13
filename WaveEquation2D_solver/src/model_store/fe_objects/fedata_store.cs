@@ -17,13 +17,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         public int material_id = 0;
         public string material_name = "";
 
-        public double youngs_modulus = 0.0; // E
-        public double poissons_ratio = 0.0; // G
-        public double material_density = 0.0; // Rho
-        public double yield_point = 0.0; // Y
-        public double thickness = 0.0; // tk
-
-        // public int number_of_elements_appliedto = 0;
+        public double material_wave_speed = 0.0; // Wave speed c
 
     }
 

@@ -176,7 +176,7 @@ namespace WaveEquation2D_solver.src.events_handler
 
                         int numValues = splitValues.Length;
 
-                        if (numValues == 7)
+                        if (numValues == 4)
                         {
                             // Create a temporary materials
                             var tempMaterial = new material_data
@@ -184,11 +184,7 @@ namespace WaveEquation2D_solver.src.events_handler
 
                                 material_id = int.Parse(splitValues[0]),
                                 material_name = splitValues[1].Trim(),
-                                youngs_modulus = double.Parse(splitValues[2]),
-                                poissons_ratio = double.Parse(splitValues[3]),
-                                material_density = double.Parse(splitValues[4]),
-                                yield_point = double.Parse(splitValues[5]),
-                                thickness = double.Parse(splitValues[6]),
+                                material_wave_speed = double.Parse(splitValues[2]),
                             };
 
                             // Add to material list
@@ -451,11 +447,7 @@ namespace WaveEquation2D_solver.src.events_handler
                 {
                     material_id = 0, // material id
                     material_name = "PML Sponge", // Default material name
-                    material_density = 0.0, // Density
-                    youngs_modulus = 0.0, // Youngs modulus
-                    poissons_ratio = 0.0,
-                    yield_point = 0.0,
-                    thickness = 0.0,
+                    material_wave_speed = 0.0, // Wave speed
                 };
 
 
@@ -466,12 +458,8 @@ namespace WaveEquation2D_solver.src.events_handler
                 var tempMaterial2 = new material_data
                 {
                     material_id = 1, // material id
-                    material_name = "Aluminum", // Default material name
-                    material_density = 2.9e-9, // Density
-                    youngs_modulus = 69.5e+5, // Youngs modulus
-                    poissons_ratio = 0.33,
-                    yield_point = 110.0,
-                    thickness = 10.0,
+                    material_name = "Medium1", // Default material name
+                    material_wave_speed = 1.0, // Wave speed
                 };
 
                 fedata.fe_materials[tempMaterial2.material_id] = tempMaterial2; // Add the material to the list
@@ -568,11 +556,7 @@ namespace WaveEquation2D_solver.src.events_handler
                     writer.Write(bytes.Length);
                     writer.Write(bytes);
 
-                    writer.Write(mat.material_density);
-                    writer.Write(mat.youngs_modulus);
-                    writer.Write(mat.poissons_ratio);
-                    writer.Write(mat.yield_point);
-                    writer.Write(mat.thickness);
+                    writer.Write(mat.material_wave_speed);
 
                 }
 
@@ -744,11 +728,7 @@ namespace WaveEquation2D_solver.src.events_handler
                     byte[] nameBytes = reader.ReadBytes(nameLength);
                     mat.material_name = System.Text.Encoding.UTF8.GetString(nameBytes);
 
-                    mat.material_density = reader.ReadDouble();
-                    mat.youngs_modulus = reader.ReadDouble();
-                    mat.poissons_ratio = reader.ReadDouble();
-                    mat.yield_point = reader.ReadDouble();
-                    mat.thickness = reader.ReadDouble();
+                    mat.material_wave_speed = reader.ReadDouble();
 
                     fedata.fe_materials[mat.material_id] = mat;
                     fedata.materialids.Add(mat.material_id);

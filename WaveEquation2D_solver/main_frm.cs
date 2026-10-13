@@ -523,6 +523,7 @@ namespace WaveEquation2D_solver
 
         #endregion
 
+
         #region "Load and Boundary Conditions Menu"
 
         private void addNodalConstraintsToolStripMenuItem_Click(object sender, EventArgs e)

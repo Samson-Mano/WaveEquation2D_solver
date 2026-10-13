@@ -14,9 +14,9 @@ void wave2d_system_store::normalize_material_wave_speeds()
 	for (const auto& material_pair : material_list)
 	{
 		const material_store& material = material_pair.second;
-		if (material.wave_speed > this->max_wave_speed)
+		if (material.material_wave_speed > this->max_wave_speed)
 		{
-			this->max_wave_speed = material.wave_speed;
+			this->max_wave_speed = material.material_wave_speed;
 		}
 	}
 
@@ -24,7 +24,7 @@ void wave2d_system_store::normalize_material_wave_speeds()
 	for (auto& material_pair : material_list)
 	{
 		material_store& material = material_pair.second;
-		material.norm_wave_speed = material.wave_speed / this->max_wave_speed;
+		material.norm_wave_speed = material.material_wave_speed / this->max_wave_speed;
 	}
 
 }
@@ -99,11 +99,7 @@ uint64_t wave2d_system_store::get_model_signature() const
 	for (const auto& [key, material] : material_list)
 	{
 		material_h = fnv_mix(material_h, material.materialid);
-		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.matdensity));
-		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.youngsmodulus));
-		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.poissonsratio));
-		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.yieldpoint));
-		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.thickness));
+		material_h = fnv_mix(material_h, std::bit_cast<std::uint64_t>(material.material_wave_speed));
 	}
 
 

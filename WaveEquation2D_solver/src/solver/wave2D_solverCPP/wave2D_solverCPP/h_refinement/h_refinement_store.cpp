@@ -123,12 +123,10 @@ void h_refinement_store::add_quadelement(const int& quad_id,
 
 
 void h_refinement_store::add_material(const int& materialid,
-	const double& youngsmodulus, const double& matdensity, const double& poissonsratio,
-	const double& yieldpoint, const double& thickness,
-	const double& wave_speed)
+	const double& material_wave_speed)
 {
 	// Material addition
-	material_store temp_material(materialid, youngsmodulus, matdensity, poissonsratio, yieldpoint, thickness, wave_speed);
+	material_store temp_material(materialid, material_wave_speed);
 
 	// Insert to the material list
 	material_list.insert({ materialid, temp_material });
@@ -1261,11 +1259,7 @@ void h_refinement_store::save_hrefined_model()
 		// Write the raw bytes
 		bin_file.write(mat_name.c_str(), length);
 
-		bin_file.write(reinterpret_cast<const char*>(&mat.matdensity), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.youngsmodulus), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.poissonsratio), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.yieldpoint), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&mat.thickness), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&mat.material_wave_speed), sizeof(double));
 
 	}
 
