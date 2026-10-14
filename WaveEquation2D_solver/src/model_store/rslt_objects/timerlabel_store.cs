@@ -17,7 +17,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         private dynamiclabel_store timer_label; // = new label_list_store();
 
         // Drawing area rectangle point
-        private Vector2 _leftCornerPoint = Vector2.Zero;
+        private Vector2 _lefttopCornerPoint = Vector2.Zero;
 
 
         private bool _disposed = false;
@@ -37,18 +37,18 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             // 12345678901234567
             // Time = 00:00:00 s
 
-            timer_label = new dynamiclabel_store(1.4f, 18, new Vector2(0), new Vector3(0.862745f, 0.078431f, 0.23529f), 0.0, false);
+            timer_label = new dynamiclabel_store(1.4f, 18, new Vector2(0), new Vector3(0.862745f, 0.078431f, 0.23529f), 0.0, true);
 
             // Initialize axis data here
             IsInitialized = true;
 
 
-            UpdateTimerLabelCenter(window_width, window_height);
+            UpdateTimerLabelPosition(window_width, window_height);
         }
 
     
 
-        public void UpdateTimerLabelCenter(int window_width, int window_height)
+        public void UpdateTimerLabelPosition(int window_width, int window_height)
         {
             if (!IsInitialized)
                 return;
@@ -65,10 +65,10 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             double normalizedScreenHeight = 2.0d * ((double)window_height / (double)max_drawing_area_size);
 
             float leftX = -(float)normalizedScreenWidth * 0.5f;
-            float leftY = -(float)normalizedScreenHeight * 0.5f;
+            float leftY = (float)normalizedScreenHeight * 0.5f;
 
             // Assign to private rectangle points
-            this._leftCornerPoint = new Vector2(leftX, leftY);
+            this._lefttopCornerPoint = new Vector2(leftX, leftY);
 
 
             UpdateVertexBuffers("Time = 00:00.000 s");
@@ -84,11 +84,11 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         public void UpdateVertexBuffers(string label)
         {
           
-            float OriginX = _leftCornerPoint.X + 0.06f;
-            float OriginY = _leftCornerPoint.Y + 0.06f;
+            float OriginX = _lefttopCornerPoint.X + 0.06f;
+            float OriginY = _lefttopCornerPoint.Y - 0.06f;
 
             // Add the labels for the X and Y axes
-            timer_label.update_label(label, new Vector2(OriginX + 0.11f, OriginY - 0.001f));
+            timer_label.update_label(label, new Vector2(OriginX + 0.2f, OriginY - 0.001f));
 
         }
 
@@ -107,7 +107,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
             if (!_disposed)
             {
-                // _shader?.Dispose();
                 _disposed = true;
             }
         }

@@ -293,14 +293,14 @@ bool modal_spectral_solver::solve_modal_analysis(int inpt_num_modes, double geom
 
 	// 2) Extract reduced matrices Kff, Mff
 	int n_free = static_cast<int>(free_dofs.size());
-	int num_modes = std::min(inpt_num_modes, n_free);
+	int num_modes = std::min(inpt_num_modes, n_free - 1);
 
 	std::string msg = "Number of free DOFs: " + std::to_string(n_free);
 	report(msg.c_str());
 	msg = "Number of modes to compute: " + std::to_string(num_modes);
 	report(msg.c_str());
 
-	if (num_modes == 0)
+	if (num_modes <= 0)
 	{
 		report("Warning: No free DOFs found!");
 		return false;

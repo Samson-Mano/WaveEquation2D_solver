@@ -24,7 +24,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         private const int LINE_INDEX_COUNT = 12;  // 6 lines * 2 indices
 
         // Drawing area rectangle point
-        private Vector2 _leftCornerPoint = Vector2.Zero;
+        private Vector2 _leftbottomCornerPoint = Vector2.Zero;
 
 
         // Rendering resources
@@ -117,7 +117,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
             float leftY = -(float)normalizedScreenHeight * 0.5f;
 
             // Assign to private rectangle points
-            this._leftCornerPoint = new Vector2(leftX, leftY);
+            this._leftbottomCornerPoint = new Vector2(leftX, leftY);
 
 
             UpdateVertexBuffers();
@@ -135,8 +135,8 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
             // Define the 4 corners of the rectangle
             float[] vertices = new float[VERTEX_COUNT * 5];
 
-            float OriginX = _leftCornerPoint.X + 0.06f;
-            float OriginY = _leftCornerPoint.Y + 0.06f;
+            float OriginX = _leftbottomCornerPoint.X + 0.06f;
+            float OriginY = _leftbottomCornerPoint.Y + 0.06f;
 
             // Arrow 1 (X-axis) - Red
             // Arrow 1 Origin Point (0,0) - This is the origin of the arrow
@@ -245,7 +245,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
                 _axisarrowVAO?.Dispose();
                 _axisarrowVBO?.Dispose();
                 _axisarrowIBO?.Dispose();
-                // _shader?.Dispose();
+                _axisshader?.Dispose();
                 _disposed = true;
             }
         }

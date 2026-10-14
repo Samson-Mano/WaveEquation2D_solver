@@ -220,7 +220,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
                 _interiorVAO?.Dispose();
                 _interiorVBO?.Dispose();
                 _interiorIBO?.Dispose();
-                // _shader?.Dispose();
+                _shader?.Dispose();
                 _disposed = true;
             }
         }

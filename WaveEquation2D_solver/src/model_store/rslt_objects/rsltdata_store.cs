@@ -112,7 +112,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         public HashSet<int> selected_resultpoint_ids { get; } = new HashSet<int>();
 
-
+        private bool _disposed = false;
         private bool buffersInitialized = false;
 
         public rsltdata_store()
@@ -680,7 +680,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             rsltmeshwireframeShader.SetFloat("wireframeAlpha", 0.5f);
 
             //____________________________________________________________________________________________
-            timer_label.UpdateTimerLabelCenter(graphic_events_control.window_width, graphic_events_control.window_height);
+            timer_label.UpdateTimerLabelPosition(graphic_events_control.window_width, graphic_events_control.window_height);
 
         }
 
@@ -768,13 +768,17 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
         public void Dispose()
         {
-            point_vbo?.Dispose();
-            point_vao?.Dispose();
-            point_ibo?.Dispose();
-            wireframe_ibo?.Dispose();
-            triangle_ibo?.Dispose();
-            // meshShader?.Dispose();
-
+            if (!_disposed)
+            {
+                point_vbo?.Dispose();
+                point_vao?.Dispose();
+                point_ibo?.Dispose();
+                wireframe_ibo?.Dispose();
+                triangle_ibo?.Dispose();
+                rsltmeshShader?.Dispose();
+                rsltmeshwireframeShader?.Dispose();
+                _disposed = true;
+            }
         }
 
 

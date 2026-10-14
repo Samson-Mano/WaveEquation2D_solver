@@ -28,7 +28,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
     }
 
 
-    public class label_list_store
+    public class label_list_store : IDisposable
     {
 
         public Dictionary<int, label_store> labelMap { get; } = new Dictionary<int, label_store>();
@@ -44,6 +44,8 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         private IndexBuffer _labelIBO;
 
         public Shader _labelshader;
+
+        private bool _disposed = false;
 
 
         public label_list_store()
@@ -398,7 +400,17 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
         }
 
 
-
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _labelVAO?.Dispose();
+                _labelVBO?.Dispose();
+                _labelIBO?.Dispose();
+                _labelshader?.Dispose();
+                _disposed = true;
+            }
+        }
 
     }
 }

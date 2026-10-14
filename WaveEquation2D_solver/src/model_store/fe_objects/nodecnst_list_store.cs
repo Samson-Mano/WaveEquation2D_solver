@@ -48,7 +48,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
     }
 
 
-    public class nodecnst_list_store
+    public class nodecnst_list_store : IDisposable
     {
 
 
@@ -69,6 +69,8 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         private VertexBuffer constraint_vbo;
         private VertexArray constraint_vao;
         private IndexBuffer constraint_ibo;
+
+        private bool _disposed = false;
 
 
         public nodecnst_list_store()
@@ -374,6 +376,20 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             }
 
         }
+
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                constraint_vao?.Dispose();
+                constraint_vbo?.Dispose();
+                constraint_ibo?.Dispose();
+                constraintShader?.Dispose();
+                _disposed = true;
+            }
+        }
+
 
         //___________________________________________________________
 

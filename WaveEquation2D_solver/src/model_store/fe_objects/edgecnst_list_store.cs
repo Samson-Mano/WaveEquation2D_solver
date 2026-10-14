@@ -63,7 +63,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
 
 
 
-    public class edgecnst_list_store
+    public class edgecnst_list_store : IDisposable
     {
         public Dictionary<int, edgecnst_store> edgecnstMap = new Dictionary<int, edgecnst_store>();
         public int edgecnst_count = 0;
@@ -82,7 +82,7 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
         private VertexArray constraint_vao;
         private IndexBuffer constraint_ibo;
 
-
+        private bool _disposed = false;
 
         public edgecnst_list_store()
         {
@@ -412,6 +412,21 @@ namespace WaveEquation2D_solver.src.model_store.fe_objects
             }
 
         }
+
+
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                constraint_vao?.Dispose();
+                constraint_vbo?.Dispose();
+                constraint_ibo?.Dispose();
+                constraintShader?.Dispose();
+                _disposed = true;
+            }
+        }
+
 
         //___________________________________________________________
 

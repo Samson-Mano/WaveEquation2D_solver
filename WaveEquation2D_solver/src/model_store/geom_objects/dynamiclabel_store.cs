@@ -14,7 +14,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace WaveEquation2D_solver.src.model_store.geom_objects
 {
-    public class dynamiclabel_store
+    public class dynamiclabel_store : IDisposable
     {
 
         label_store label = new label_store();
@@ -31,7 +31,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
         public Shader _dynlabelshader;
 
-
+        private bool _disposed = false;
 
         public dynamiclabel_store(float geom_size, int char_count,
                                 Vector2 label_loc, Vector3 label_color,
@@ -354,6 +354,18 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
                 t_id = t_id + 4;
             }
 
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _dynlabelVAO?.Dispose();
+                _dynlabelVBO?.Dispose();
+                _dynlabelIBO?.Dispose();
+                _dynlabelshader?.Dispose();
+                _disposed = true;
+            }
         }
 
 

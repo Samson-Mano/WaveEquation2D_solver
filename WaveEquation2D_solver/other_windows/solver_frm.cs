@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using WaveEquation2D_solver.src.model_store.fe_objects;
+using WaveEquation2D_solver.src.global_variables;
 
 namespace WaveEquation2D_solver.other_windows
 {
@@ -490,8 +491,15 @@ namespace WaveEquation2D_solver.other_windows
                         // Call the main form
                         if (this.Owner is main_frm mainForm)
                         {
-                            // mainForm.set_ResultOption(1);
+                            mainForm.set_ResultOption(1);
                         }
+
+                        // Start the animation timer
+                        gvariables_static.animate_play = true;
+                        gvariables_static.animate_pause = false;
+                        gvariables_static.animate_stop = false;
+
+                        modeldata.start_animation();
 
                         AppendStatus("Results read complete!\n");
 

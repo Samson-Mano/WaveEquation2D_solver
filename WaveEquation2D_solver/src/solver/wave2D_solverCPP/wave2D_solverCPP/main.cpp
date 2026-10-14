@@ -49,7 +49,7 @@ int main()
 	double TimeIncrement = 0.01;         // Time increment for the simulation
 	double DampingRatio = 0.0; // Global Damping ratio for the analysis
 
-	int NumberOfModes = 10;          // Number of modes to consider in the analysis
+	int NumberOfModes = 100;          // Number of modes to consider in the analysis
 	int IntermediateSteps = 100; 	// Number of intermediate steps
 
 

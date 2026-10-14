@@ -592,7 +592,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
                 _contourtriVAO?.Dispose();
                 _contourtriVBO?.Dispose();
                 _contourtriIBO?.Dispose();
-                // _shader?.Dispose();
+                _contourbarshader?.Dispose();
                 _disposed = true;
             }
         }

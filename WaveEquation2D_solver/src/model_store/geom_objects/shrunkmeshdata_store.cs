@@ -15,7 +15,7 @@ using WaveEquation2D_solver.src.opentk_control.shader_compiler;
 
 namespace WaveEquation2D_solver.src.model_store.geom_objects
 {
-    public class shrunkmeshdata_store
+    public class shrunkmeshdata_store : IDisposable
     {
 
         private struct point_store
@@ -83,6 +83,9 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
         // Selected mesh flag
         bool isMeshSelected = false;
+
+        private bool _disposed = false;
+
 
         public shrunkmeshdata_store()
         {
@@ -564,6 +567,26 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
 
         }
+
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                shrunk_point_vbo?.Dispose();
+                shrunk_point_vao?.Dispose();
+                selected_triangle_ibo?.Dispose();
+                selected_quadrilateral_ibo?.Dispose();  
+
+                foreach (var matMesh in mat_shrunkmesh_data.Values)
+                {
+                    matMesh.shrunk_triangle_ibo?.Dispose();
+                    matMesh.shrunk_quadrilateral_ibo?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
 
 
         //_______________________________________________________________

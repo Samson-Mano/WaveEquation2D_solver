@@ -14,9 +14,10 @@ using System.Threading.Tasks;
 
 namespace WaveEquation2D_solver.src.opentk_control.shader_compiler
 {
-    public class Shader
+    public class Shader : IDisposable
     {
         public readonly int Handle;
+        private bool _disposed = false;
 
         private readonly Dictionary<string, int> _uniformLocations;
 
@@ -216,6 +217,20 @@ namespace WaveEquation2D_solver.src.opentk_control.shader_compiler
         }
 
         //_____________________________________
+
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                // Delete the OpenGL program
+                GL.DeleteProgram(Handle);
+
+                _disposed = true;
+            }
+        }
+
+
 
     }
 }

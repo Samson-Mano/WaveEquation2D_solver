@@ -17,6 +17,7 @@ using WaveEquation2D_solver.other_windows;
 using WaveEquation2D_solver.src.global_variables;
 using WaveEquation2D_solver.src.model_store;
 using WaveEquation2D_solver.src.model_store.geom_objects;
+using WaveEquation2D_solver.src.model_store.rslt_objects;
 
 
 
@@ -53,7 +54,6 @@ namespace WaveEquation2D_solver
 
         // Drawing area Axis data store
         public axisdata_store axisdata;
-
 
 
         public main_frm()
@@ -166,6 +166,7 @@ namespace WaveEquation2D_solver
 
             axisdata.UpdateAxisArrowCenter(glControl_main_panel.Width, glControl_main_panel.Height);
             modeldata.update_contour_bar_position(glControl_main_panel.Width, glControl_main_panel.Height);
+            
 
             toolStripStatusLabel_zoom_value.Text = "Zoom: " + (gvariables_static.RoundOff((int)(1.0f * 100))).ToString() + "%";
 

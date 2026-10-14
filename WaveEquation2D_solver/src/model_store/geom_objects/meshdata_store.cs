@@ -98,6 +98,7 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
         private bool buffersInitialized = false;
 
+        private bool _disposed = false;
 
         // public List<line_store> get_wireframe_lines { get { return this.wireframe_lines; } }
 
@@ -819,18 +820,22 @@ namespace WaveEquation2D_solver.src.model_store.geom_objects
 
         public void Dispose()
         {
-            point_vbo?.Dispose();
-            point_vao?.Dispose();
-            point_ibo?.Dispose();
-            selected_point_ibo?.Dispose();
-            selected_edge_ibo?.Dispose();
-            wireframe_ibo?.Dispose();
-            // meshShader?.Dispose();
-
-            foreach (var matMesh in mat_mesh_data.Values)
+            if (!_disposed)
             {
-                matMesh.triangle_ibo?.Dispose();
-                matMesh.quadrilateral_ibo?.Dispose();
+                point_vbo?.Dispose();
+                point_vao?.Dispose();
+                point_ibo?.Dispose();
+                selected_point_ibo?.Dispose();
+                selected_edge_ibo?.Dispose();
+                wireframe_ibo?.Dispose();
+                meshShader?.Dispose();
+
+                foreach (var matMesh in mat_mesh_data.Values)
+                {
+                    matMesh.triangle_ibo?.Dispose();
+                    matMesh.quadrilateral_ibo?.Dispose();
+                }
+                _disposed = true;
             }
         }
 
