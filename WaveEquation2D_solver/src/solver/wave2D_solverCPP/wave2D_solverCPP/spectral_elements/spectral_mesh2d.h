@@ -32,7 +32,6 @@ struct renderer_node
 {
 	int n_id;
 	double x, y;
-	double r1, r2, r3, r4; // Scalar Result data
 };
 
 

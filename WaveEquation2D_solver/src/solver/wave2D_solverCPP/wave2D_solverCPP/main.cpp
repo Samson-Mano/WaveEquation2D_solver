@@ -16,7 +16,7 @@
 int main()
 {
 
-	const char* input_file = "test_four_square.bin";   // Adjust path here
+	const char* input_file = "test_two_rect.bin";  // "test_four_square.bin";   // Adjust path here
 	// const char* output_file = "model_output.bin"; // Optional
 
 	// Example placeholder

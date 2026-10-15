@@ -1861,7 +1861,7 @@ void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadele
 
 		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
 
-		if (edge.isboundaryedge == true && edge.isFieldBC == true && edge.fieldvalue != 0.0)
+		if (edge.isboundaryedge == true && edge.isSource == true)
 		{
 			// --- Assembly ---
 			// Dirichlet (field) BC contribution
@@ -1903,7 +1903,7 @@ void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadele
 			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
 			global_idx = elem_nodes[local_idx];
 
-			if (nd1.isFieldBC == true && nd1.fieldvalue != 0.0)
+			if (nd1.isSource == true)
 			{
 				// Apply field value at the node
 				add_sources(global_idx, nd1.source_values);
@@ -1923,7 +1923,7 @@ void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadele
 				local_idx = edge_node_local_ids[j];
 				global_idx = elem_nodes[local_idx];
 
-				if (edge_nd.isFieldBC == true && edge_nd.fieldvalue != 0.0)
+				if (edge_nd.isSource == true)
 				{
 					// Apply field value at the node
 					add_sources(global_idx, edge_nd.source_values);
@@ -1942,7 +1942,7 @@ void modal_spectral_solver::get_quadelement_source_vector(const spectral_quadele
 			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
 			global_idx = elem_nodes[local_idx];
 
-			if (nd2.isFieldBC == true && nd2.fieldvalue != 0.0)
+			if (nd2.isSource == true)
 			{
 				// Apply field value at the node
 				add_sources(global_idx, nd2.source_values);

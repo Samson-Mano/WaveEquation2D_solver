@@ -268,8 +268,6 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             paint_result_mesh_points();
 
-            // paint_selected_result_points();
-
             timer_label.paint_timer_label();
 
         }
@@ -284,8 +282,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             if (gvariables_static.is_paint_shrunk_triangle)
             {
-                // // Paint the shrunk mesh 
-                // shrunk_rsltmesh_data.paint_shrunk_rsltmesh();
+                // Paint the shrunk mesh 
+                shrunk_rsltmesh_data.paint_shrunk_rsltmesh();
                 rsltmeshShader.UnBind();
                 return;
             }
@@ -640,12 +638,12 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
                 pt3_values[2] = normalized_contourValue;
 
-                // shrunk_rsltmesh_data.add_shrunk_triangle(tri.tri_id, pt1_values, pt2_values, pt3_values);
+                shrunk_rsltmesh_data.add_shrunk_triangle(tri.tri_id, pt1_values, pt2_values, pt3_values);
             }
 
 
-            // // Initialize the buffer
-            // shrunk_rsltmesh_data.create_shrunkrsltmesh_buffer_data();
+            // Initialize the buffer
+            shrunk_rsltmesh_data.create_shrunkrsltmesh_buffer_data();
 
         }
 
@@ -738,29 +736,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             this.timeStepIndex = i;
 
 
-
-
-            //// Update the sine oscillation value in the shader for animation
-            //rsltmeshShader.SetFloat("sinevalue", sine_oscillation);
-
-            //rsltmeshwireframeShader.SetFloat("sinevalue", sine_oscillation);
-
-            //if (gvariables_static.is_paint_result_contourlines)
-            //{
-            //    rsltmeshShader.SetFloat("uLineOpacity", 1.0f);
-            //}
-
-            //// rsltPSLShader.SetFloat("sinevalue", sine_oscillation);
-            //// rsltPSLType2Shader.SetFloat("sinevalue", sine_oscillation);
-            //// rsltPSLShader.SetFloat("uLineOpacity", 1.0f);
-
-
-            //if (sine_oscillation < 0.1)
-            //{
-            //    rsltmeshShader.SetFloat("uLineOpacity", 0.0f);
-
-            //    // rsltPSLShader.SetFloat("uLineOpacity", 0.0f);
-            //}
+            switch_result_option();
 
         }
 

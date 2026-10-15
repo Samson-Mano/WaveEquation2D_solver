@@ -520,7 +520,7 @@ namespace WaveEquation2D_solver.src.opentk_control.shader_compiler
                 // Need to implement 1D color mapping texture lookup for better performance, 
                 // but for now we can use the function directly in the shader
 
-                vec3 vertexColor = getColor(CmapOption, v_deflscale);
+                vec3 vertexColor = getColor(CmapOption, (v_deflscale + 1.0) * 0.5);
     
                 f_Color = vec4(vertexColor, vertexTransparency); // Set the final color
             }
