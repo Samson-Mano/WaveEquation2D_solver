@@ -64,19 +64,14 @@ namespace WaveEquation2D_solver.src.opentk_control.opentk_buffer
 
         }
 
-        public void Bind()
-        {
-            // Binds the vertex array object for use with subsequent OpenGL calls.
-            GL.BindVertexArray(this._m_renderer_id);
 
-        }
+        // Binds the vertex array object for use with subsequent OpenGL calls.
+        public void Bind() => GL.BindVertexArray(this._m_renderer_id);
 
-        public void UnBind()
-        {
-            // Unbinds the currently bound vertex array object.
-            GL.BindVertexArray(0);
 
-        }
+        // Unbinds the currently bound vertex array object.
+        public void UnBind() => GL.BindVertexArray(0);
+
 
 
         public void Dispose()

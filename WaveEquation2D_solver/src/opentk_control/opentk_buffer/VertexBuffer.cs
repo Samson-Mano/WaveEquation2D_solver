@@ -21,7 +21,7 @@ namespace WaveEquation2D_solver.src.opentk_control.opentk_buffer
 
         private int _rendererId;
         private int _capacity;  // Current capacity in bytes
-        private int _size;      // Current used size in bytes
+        private int _size;      // Current used count
         private bool _disposed = false;
         private List<float> _localBuffer = new List<float>();  // Local copy of all vertex data
 

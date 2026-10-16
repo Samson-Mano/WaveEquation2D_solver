@@ -158,6 +158,8 @@
     <Compile Include="src\model_store\rslt_objects\timerlabel_store.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\GDIFontAtlas.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\IndexBuffer.cs" />
+    <Compile Include="src\opentk_control\opentk_buffer\SubVertexArray.cs" />
+    <Compile Include="src\opentk_control\opentk_buffer\SubVertexBuffer.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexArray.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexBuffer.cs" />
     <Compile Include="src\opentk_control\opentk_buffer\VertexBufferLayout.cs" />
