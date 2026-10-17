@@ -89,9 +89,12 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
 
         // Vertex Buffer object and Vertex Array object 
-        private VertexBuffer point_vbo;
-        private VertexArray point_vao;
+        //private VertexBuffer point_vbo;
+        //private VertexArray point_vao;
 
+        private SubVertexBuffer rslt_point_vbo;
+
+        private SubVertexArray rslt_point_vao;
 
 
         // Index buffer for the points, wireframe lines, and triangles (EBO)
@@ -289,7 +292,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             }
 
 
-            point_vao.Bind();
+            rslt_point_vao.Bind();
 
             if (triangle_ibo.BufferCount > 0)
             {
@@ -300,7 +303,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 triangle_ibo.UnBind();
             }
 
-            point_vao.UnBind();
+            rslt_point_vao.UnBind();
             rsltmeshShader.UnBind();
 
 
@@ -317,13 +320,13 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
             {
                 rsltmeshwireframeShader.Bind();
 
-                point_vao.Bind();
+                rslt_point_vao.Bind();
                 wireframe_ibo.Bind();
 
                 GL.DrawElements(PrimitiveType.Lines, wireframe_ibo.BufferCount, DrawElementsType.UnsignedInt, 0);
 
                 rsltmeshwireframeShader.UnBind();
-                point_vao.UnBind();
+                rslt_point_vao.UnBind();
                 wireframe_ibo.UnBind();
             }
 
@@ -341,7 +344,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 // Paint the result mesh points
                 rsltmeshShader.Bind();
 
-                point_vao.Bind();
+                rslt_point_vao.Bind();
                 point_ibo.Bind();
 
                 GL.PointSize(2.0f);
@@ -349,7 +352,7 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
                 GL.PointSize(1.0f);
 
                 rsltmeshShader.UnBind();
-                point_vao.UnBind();
+                rslt_point_vao.UnBind();
                 point_ibo.UnBind();
 
             }
@@ -366,25 +369,22 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             int option = gvariables_static.result_option;
 
-
-
-            List<float> vertexData = new List<float>();
+            List<float> dynamic_vertexData = new List<float>();
 
             for (int i = 0; i < points.Count; i++)
             {
                 point_store pt = points[i];
-                vertexData.Add((float)pt.x_coord);
-                vertexData.Add((float)pt.y_coord);
+                // vertexData.Add((float)pt.x_coord);
+                // vertexData.Add((float)pt.y_coord);
 
                 float normalized_contourValue = scaled_contourColorValue(pt, option);
 
-                vertexData.Add(normalized_contourValue);
+                dynamic_vertexData.Add(normalized_contourValue);
 
             }
 
 
-            point_vbo.updateVertexBuffer(vertexData.ToArray());
-
+            rslt_point_vbo.updateDynamicVertexBuffer(dynamic_vertexData.ToArray());
 
         }
 
@@ -516,37 +516,41 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
 
             //_______________________________________________________________
             // prepare the Vertex data for openGL
-            List<float> vertexData = new List<float>();
+            List<float> static_vertexData = new List<float>();
+            List<float> dynamic_vertexData = new List<float>();
+
+
             List<int> pointIndexData = new List<int>();
 
             for (int i = 0; i < points.Count; i++)
             {
                 point_store pt = points[i];
-                vertexData.Add((float)pt.x_coord);
-                vertexData.Add((float)pt.y_coord);
+                static_vertexData.Add((float)pt.x_coord);
+                static_vertexData.Add((float)pt.y_coord);
 
                 float normalized_contourValue = scaled_contourColorValue(pt, 1);
 
-                vertexData.Add(normalized_contourValue);
+                dynamic_vertexData.Add(normalized_contourValue);
 
                 pointIndexData.Add(i);
             }
 
 
             // Create VAO and VBO for points
-            point_vao = new VertexArray();
-            point_vbo = new VertexBuffer(Math.Max(10, vertexData.Count));
+            rslt_point_vao = new SubVertexArray();
+            rslt_point_vbo = new SubVertexBuffer(Math.Max(10, static_vertexData.Count), Math.Max(10, dynamic_vertexData.Count));
             point_ibo = new IndexBuffer(Math.Max(10, pointIndexData.Count));
 
 
-            VertexBufferLayout pointLayout = new VertexBufferLayout();
-            pointLayout.AddFloat(2);  // x and y coordinates
-            pointLayout.AddFloat(1); // Contour value
+            VertexBufferLayout static_pointLayout = new VertexBufferLayout();
+            static_pointLayout.AddFloat(2);  // x and y coordinates
 
-            point_vao.Add_vertexBuffer(point_vbo, pointLayout);
+            VertexBufferLayout dynamic_pointLayout = new VertexBufferLayout();
+            dynamic_pointLayout.AddFloat(1); // Contour value
 
+            rslt_point_vao.Add_subVertexBuffer(rslt_point_vbo, static_pointLayout, dynamic_pointLayout);
 
-            point_vbo.AppendVertexBuffer(vertexData.ToArray());
+            rslt_point_vbo.AppendVertexBuffer(static_vertexData.ToArray(), dynamic_vertexData.ToArray());
             point_ibo.AppendIndexBuffer(pointIndexData.ToArray());
 
             //_______________________________________________________________
@@ -746,8 +750,8 @@ namespace WaveEquation2D_solver.src.model_store.rslt_objects
         {
             if (!_disposed)
             {
-                point_vbo?.Dispose();
-                point_vao?.Dispose();
+                rslt_point_vbo?.Dispose();
+                rslt_point_vao?.Dispose();
                 point_ibo?.Dispose();
                 wireframe_ibo?.Dispose();
                 triangle_ibo?.Dispose();

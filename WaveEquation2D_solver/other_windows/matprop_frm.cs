@@ -195,7 +195,7 @@ namespace WaveEquation2D_solver.other_windows
              
                 // Update the DataGridView row
                 selectedRow.Cells["Column2_materialname"].Value = material_name;
-                selectedRow.Cells["Column3_materialwavespeed"].Value = material_wave_speed.ToString("G");
+                selectedRow.Cells["Column3_matwavespeed"].Value = material_wave_speed.ToString("G");
 
 
                 // Set the row background color
