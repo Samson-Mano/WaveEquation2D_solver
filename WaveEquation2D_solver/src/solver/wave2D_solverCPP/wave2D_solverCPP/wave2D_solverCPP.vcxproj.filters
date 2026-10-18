@@ -60,6 +60,12 @@
     <ClCompile Include="modal_superposition_solver\shm_solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="direct_integration_solver\direct_integration_solver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="direct_integration_solver\direct_integration_matrices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="h_refinement\h_refinement_store.h">
@@ -102,6 +108,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modal_superposition_solver\shm_solver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="direct_integration_solver\direct_integration_solver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="direct_integration_solver\direct_integration_matrices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

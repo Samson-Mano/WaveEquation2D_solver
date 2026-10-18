@@ -143,6 +143,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="direct_integration_solver\direct_integration_matrices.cpp" />
+    <ClCompile Include="direct_integration_solver\direct_integration_solver.cpp" />
     <ClCompile Include="h_refinement\h_refinement_store.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modal_superposition_solver\MinvKOp.cpp" />
@@ -160,6 +162,8 @@
     <ClCompile Include="system_store\wave2d_system_store.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="direct_integration_solver\direct_integration_matrices.h" />
+    <ClInclude Include="direct_integration_solver\direct_integration_solver.h" />
     <ClInclude Include="h_refinement\h_refinement_store.h" />
     <ClInclude Include="modal_superposition_solver\MinvKOp.h" />
     <ClInclude Include="modal_superposition_solver\modal_spectral_solver.h" />
