@@ -77,7 +77,21 @@ public:
 	}
 
 
+	const Eigen::VectorXd& getGlobalInitialFieldVector() const
+	{
+		return global_initial_field_vector;
+	}
+
+	
+	const Eigen::VectorXd& getGlobalInitialDerivFieldVector() const
+	{
+		return global_initial_derivfield_vector;
+	}
+
+
 	void create_global_matrices();
+
+	void create_initialcondition_vector();
 
 
 private:
@@ -94,7 +108,8 @@ private:
 
 	Eigen::VectorXi global_dirichlet_BC_flags_vector; // Global boundary condition Vector (To track the nodes where prescribed field is applied)
 
-
+	Eigen::VectorXd global_initial_field_vector; // Global initial condition field vector 
+	Eigen::VectorXd global_initial_derivfield_vector; // Global initial condition derivative field vector
 
 
 	// Quadrature points for triangle element
@@ -163,6 +178,41 @@ private:
 
 
 	//________________________________________________________________________________________________
+
+
+
+	void get_trielement_field_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		Eigen::VectorXd& initial_field_vector,
+		Eigen::VectorXi& initial_BC_fieldcount_vector);
+
+
+
+	void get_trielement_normderivfield_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		Eigen::VectorXd& initial_derivfield_vector,
+		Eigen::VectorXi& initial_BC_derivfieldcount_vector);
+
+
+
+
+	void get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		Eigen::VectorXd& initial_field_vector,
+		Eigen::VectorXi& initial_BC_fieldcount_vector);
+
+
+
+	void get_quadelement_normderivfield_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		Eigen::VectorXd& initial_derivfield_vector,
+		Eigen::VectorXi& initial_BC_derivfieldcount_vector);
+
+
+
+
 
 	void(*m_callback)(const char*) = nullptr;
 
