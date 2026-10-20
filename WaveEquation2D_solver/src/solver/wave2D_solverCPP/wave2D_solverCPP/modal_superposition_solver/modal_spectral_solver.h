@@ -99,7 +99,7 @@ using namespace Spectra;
 
 struct load_map_store
 {
-	int node_id = 0;
+	int node_id = -1;
 
 	// Initial condition values for the node
 	std::vector<double> initial_field_values; // Initial field value for the node

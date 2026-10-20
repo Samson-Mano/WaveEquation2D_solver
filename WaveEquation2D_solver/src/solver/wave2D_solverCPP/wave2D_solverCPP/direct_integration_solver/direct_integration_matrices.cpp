@@ -251,7 +251,7 @@ void direct_integration_matrices::create_global_matrices()
 }
 
 
-void direct_integration_matrices::create_initialcondition_vector()
+void direct_integration_matrices::create_initialcondition_load_vector()
 {
 
 	// Global initial field Vector [d0]
@@ -264,6 +264,9 @@ void direct_integration_matrices::create_initialcondition_vector()
 
 	Eigen::VectorXi initial_BC_fieldcount_vector(numDOF);
 	Eigen::VectorXi initial_BC_derivfieldcount_vector(numDOF);
+
+	// Clear the load maps
+	load_maps.clear();
 
 
 	if (static_cast<int>(spec_mesh2d.spectral_trielement_list.size()) > 0)
@@ -299,10 +302,10 @@ void direct_integration_matrices::create_initialcondition_vector()
 			get_trielement_normderivfield_vector(tri_elm, elem_nodes, elem_coords, global_initial_derivfield_vector, initial_BC_derivfieldcount_vector);
 
 
-			////________________________________________________________________________________________________
-			//// Element source term vector
+			//________________________________________________________________________________________________
+			// Element source term vector
 
-			//get_trielement_source_vector(tri_elm, elem_nodes, load_maps);
+			get_trielement_source_vector(tri_elm, elem_nodes, load_maps);
 
 		}
 
@@ -345,10 +348,10 @@ void direct_integration_matrices::create_initialcondition_vector()
 			get_quadelement_normderivfield_vector(quad_elm, elem_nodes, elem_coords, global_initial_derivfield_vector, initial_BC_derivfieldcount_vector);
 
 
-			////________________________________________________________________________________________________
-			//// Element source term vector
+			//________________________________________________________________________________________________
+			// Element source term vector
 
-			//get_quadelement_source_vector(quad_elm, elem_nodes, load_maps);
+			get_quadelement_source_vector(quad_elm, elem_nodes, load_maps);
 
 		}
 
@@ -871,7 +874,7 @@ void direct_integration_matrices::report_vandermondematrix_conditioning(const Ei
 
 
 
-
+//_______________________________________________________________________________________________________________________
 
 
 void direct_integration_matrices::get_trielement_field_vector(const spectral_trielement_store& tri_elm,
@@ -1090,6 +1093,132 @@ void direct_integration_matrices::get_trielement_normderivfield_vector(const spe
 
 
 
+void direct_integration_matrices::get_trielement_source_vector(const spectral_trielement_store& tri_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, nodal_load_store>& load_maps)
+{
+	int local_idx = -1;
+	int global_idx = -1;
+
+	auto add_sources = [&](int global_idx,
+		const std::unordered_map<int, load_vector_store>& src)
+		{
+			if (src.empty()) return;
+			auto& lm = load_maps[global_idx];
+			lm.node_id = global_idx;
+			for (const auto& [set_id, lv] : src)
+			{
+				lm.add_loads(set_id, lv);
+
+				// Policy: same set_id at same node should assert.
+				// auto [it, inserted] = lm.source_values.try_emplace(set_id, lv);
+				//if (!inserted) 
+				//{
+				//	// either accumulate, or assert:
+				//	// it->second.sourceamplitude += lv.sourceamplitude;
+				//	assert(false && "duplicate source set on node");
+				//}
+			}
+		};
+
+	// Edge Boundary Condition 
+	for (int i = 0; i < 3; i++)
+	{
+		// Get the edge id
+		int edge_id = tri_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isSource == true)
+		{
+			// --- Assembly ---
+			// Dirichlet (field) BC contribution
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+			for (const int& j : spec_mesh2d.tri_element_id_structure.edge_node_ids[i])
+			{
+				local_idx = j;
+				global_idx = elem_nodes[local_idx];
+
+				add_sources(global_idx, edge.source_values);
+
+			}
+
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+		}
+	}
+	// ___________________________________________________
+
+	// Node Boundary Condition
+	const std::vector<int>& corner_nodes = tri_elm.corner_nodes;
+
+	for (int i = 0; i < 3; i++)
+	{
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+
+		// Corner 1
+		if (nd1.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd1.isSource == true)
+			{
+				// Apply source value at the node
+				add_sources(global_idx, nd1.source_values);
+			}
+		}
+
+		// edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.tri_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : tri_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
+			{
+				local_idx = edge_node_local_ids[j];
+				global_idx = elem_nodes[local_idx];
+
+				if (edge_nd.isSource == true)
+				{
+					// Apply source value at the node
+					add_sources(global_idx, edge_nd.source_values);
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 3]];
+		if (nd2.isboundarynode == true)
+		{
+			local_idx = spec_mesh2d.tri_element_id_structure.corner_nodes[(i + 1) % 3];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd2.isSource == true)
+			{
+				// Apply source value at the node
+				add_sources(global_idx, nd2.source_values);
+			}
+		}
+	}
+	//
+
+}
+
 
 void direct_integration_matrices::get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
 	const std::vector<int>& elem_nodes,
@@ -1306,6 +1435,240 @@ void direct_integration_matrices::get_quadelement_normderivfield_vector(const sp
 }
 
 
+void direct_integration_matrices::get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
+	const std::vector<int>& elem_nodes,
+	std::unordered_map<int, nodal_load_store>& load_maps)
+{
+	int local_idx = -1;
+	int global_idx = -1;
+
+	auto add_sources = [&](int global_idx,
+		const std::unordered_map<int, load_vector_store>& src)
+		{
+			if (src.empty()) return;
+			auto& lm = load_maps[global_idx];
+			lm.node_id = global_idx;
+			for (const auto& [set_id, lv] : src)
+			{
+				lm.add_loads(set_id, lv);
+
+				// Policy: same set_id at same node should assert.
+				// auto [it, inserted] = lm.source_values.try_emplace(set_id, lv);
+				//if (!inserted) 
+				//{
+				//	// either accumulate, or assert:
+				//	// it->second.sourceamplitude += lv.sourceamplitude;
+				//	assert(false && "duplicate source set on node");
+				//}
+			}
+		};
+
+	// Edge Boundary Condition 
+	for (int i = 0; i < 4; i++)
+	{
+		// Get the edge id
+		int edge_id = quad_elm.edge_ids[i];
+
+		const spectral_edge_store& edge = spec_mesh2d.spectral_edge_list[edge_id];
+
+		if (edge.isboundaryedge == true && edge.isSource == true)
+		{
+			// --- Assembly ---
+			// Dirichlet (field) BC contribution
+
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+			for (const int& j : spec_mesh2d.quad_element_id_structure.edge_node_ids[i])
+			{
+				local_idx = j;
+				global_idx = elem_nodes[local_idx];
+
+				add_sources(global_idx, edge.source_values);
+
+			}
+
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
+			global_idx = elem_nodes[local_idx];
+
+			add_sources(global_idx, edge.source_values);
+
+		}
+	}
+	// ___________________________________________________
+
+	// Node Boundary Condition
+	const std::vector<int>& corner_nodes = quad_elm.corner_nodes;
+
+	for (int i = 0; i < 4; i++)
+	{
+		// Corner 1
+		const spectral_node_store& nd1 = spec_mesh2d.spectral_node_list[corner_nodes[i]];
+
+		if (nd1.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[i];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd1.isSource == true)
+			{
+				// Apply field value at the node
+				add_sources(global_idx, nd1.source_values);
+			}
+		}
+
+		// Edge nodes
+		const std::vector<int>& edge_node_local_ids = spec_mesh2d.quad_element_id_structure.edge_node_ids[i];
+		int j = 0;
+		for (const int& edge_nd_id : quad_elm.edge_node_ids[i])
+		{
+
+			const spectral_node_store& edge_nd = spec_mesh2d.spectral_node_list[edge_nd_id];
+
+			if (edge_nd.isboundarynode == true)
+			{
+				local_idx = edge_node_local_ids[j];
+				global_idx = elem_nodes[local_idx];
+
+				if (edge_nd.isSource == true)
+				{
+					// Apply field value at the node
+					add_sources(global_idx, edge_nd.source_values);
+				}
+			}
+
+			j++;
+		}
+
+		// Corner 2
+		const spectral_node_store& nd2 = spec_mesh2d.spectral_node_list[corner_nodes[(i + 1) % 4]];
+
+		if (nd2.isboundarynode == true)
+		{
+			// int local_idx = (i * spec_mesh2d.spectral_order);
+			local_idx = spec_mesh2d.quad_element_id_structure.corner_nodes[(i + 1) % 4];
+			global_idx = elem_nodes[local_idx];
+
+			if (nd2.isSource == true)
+			{
+				// Apply field value at the node
+				add_sources(global_idx, nd2.source_values);
+			}
+		}
+
+	}
+	//
+
+}
+
+
+const Eigen::VectorXd& direct_integration_matrices::getGlobalLoadVector(double time) const
+{
+	Eigen::VectorXd global_load_vector(numDOF);
+	global_load_vector.setZero();
+
+	for (const auto& [i, load_store] : load_maps)
+	{
+		double amplitude = load_store.get_load_amplitude_at_time(time);
+		global_load_vector(i) += amplitude;
+	}
+
+	return global_load_vector;
+}
+
+
+
+void nodal_load_store::add_loads(int load_set_id, const load_vector_store& load_values)
+{
+
+	// Emplace the load values into the source_values map
+	source_values.emplace(load_set_id, load_values);
+
+}
+
+
+
+double nodal_load_store::get_load_amplitude_at_time(double time) const
+{
+	// Source term types
+	// 0 = Half sine pulse
+	// 1 = Rectangular pulse
+	// 2 = Triangular pulse
+	// 3 = Step force with finite rise
+	// 4 = Full sine pulse
+	// 5 = Harmonic/ periodic excitation
+	double source_amplitude = 0.0;
+
+	for (const auto& [set_id, load] : source_values)
+	{
+		if (time < load.sourcestarttime)
+		{
+			continue; // Skip this load if the current time is before the load's start time
+		}
+
+		// Time since the load started
+		double time_sst = time - load.sourcestarttime;
+		double amplitude = load.sourceamplitude;
+		double frequency = load.sourcefrequency;
+		double duration = 1.0 / frequency;
+
+		if (load.sourcetype == 0)
+		{
+			// Half sine pulse
+			if (time_sst <= duration)
+			{
+				source_amplitude += amplitude * std::sin(M_PI * time_sst * frequency);
+			}
+		}
+		else if (load.sourcetype == 1)
+		{
+			// Rectangular pulse
+			if (time_sst <= duration)
+			{
+				source_amplitude += amplitude;
+			}
+		}
+		else if (load.sourcetype == 2)
+		{
+			// Triangular pulse
+			if (time_sst <= duration)
+			{
+				source_amplitude += amplitude * (1.0 - std::abs(2.0 * time_sst / duration - 1.0));
+			}
+		}
+		else if (load.sourcetype == 3)
+		{
+			// Step force with finite rise
+			if (time_sst <= duration)
+			{
+				source_amplitude += amplitude * (time_sst / duration);
+			}
+			else
+			{
+				source_amplitude += amplitude;
+			}
+		}
+		else if (load.sourcetype == 4)
+		{
+			// Full sine pulse
+			if (time_sst <= duration)
+			{
+				source_amplitude += amplitude * std::sin(2.0 * M_PI * frequency * time_sst);
+			}
+		}
+		else if (load.sourcetype == 5)
+		{
+			// Harmonic/ periodic excitation
+			source_amplitude += amplitude * std::sin(2.0 * M_PI * frequency * time_sst);
+
+		}
+	}
+
+	return source_amplitude;
+}
 
 
 

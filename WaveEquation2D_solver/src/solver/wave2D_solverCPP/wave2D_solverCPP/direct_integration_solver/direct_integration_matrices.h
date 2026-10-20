@@ -44,6 +44,33 @@ typedef Eigen::SparseMatrix<double> SparseMatrix;
 #include "../spectral_elements/spectral_lib/spectral_tri_element.h"
 
 
+class nodal_load_store
+{
+
+public:
+	nodal_load_store() = default;
+	~nodal_load_store() = default;
+
+	int node_id = -1;
+
+	bool isSource = false;
+
+
+	void add_loads(int load_set_id, const load_vector_store& load_values);
+
+	double get_load_amplitude_at_time(double time) const;
+
+private:
+	const double M_PI = 3.1415926535897932384626433;
+
+	// Source information for the node
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node
+
+
+
+
+};
+
 
 
 class direct_integration_matrices
@@ -88,14 +115,15 @@ public:
 		return global_initial_derivfield_vector;
 	}
 
+	const Eigen::VectorXd& getGlobalLoadVector(double time) const;
+
 
 	void create_global_matrices();
 
-	void create_initialcondition_vector();
+	void create_initialcondition_load_vector();
 
 
 private:
-
 	wave2d_system_store* wave_2dsystem_ptr;
 	spectral_mesh2d spec_mesh2d;
 
@@ -110,6 +138,8 @@ private:
 
 	Eigen::VectorXd global_initial_field_vector; // Global initial condition field vector 
 	Eigen::VectorXd global_initial_derivfield_vector; // Global initial condition derivative field vector
+
+	std::unordered_map<int, nodal_load_store> load_maps; // Load maps for the nodes
 
 
 	// Quadrature points for triangle element
@@ -195,6 +225,9 @@ private:
 		Eigen::VectorXi& initial_BC_derivfieldcount_vector);
 
 
+	void get_trielement_source_vector(const spectral_trielement_store& tri_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, nodal_load_store>& load_maps);
 
 
 	void get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
@@ -209,6 +242,17 @@ private:
 		const std::vector<Eigen::Vector2d>& elem_coords,
 		Eigen::VectorXd& initial_derivfield_vector,
 		Eigen::VectorXi& initial_BC_derivfieldcount_vector);
+
+
+	void get_quadelement_source_vector(const spectral_quadelement_store& quad_elm,
+		const std::vector<int>& elem_nodes,
+		std::unordered_map<int, nodal_load_store>& load_maps);
+
+
+
+	//________________________________________________________________________________________________
+
+
 
 
 
