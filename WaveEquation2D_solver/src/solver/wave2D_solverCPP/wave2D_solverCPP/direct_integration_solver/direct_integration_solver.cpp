@@ -52,8 +52,8 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	// Create the initial condition field vector
 	direct_integration_matrices_solver.create_initialcondition_load_vector();
 
-
-
+	// Create the global damping matrix
+	direct_integration_matrices_solver.create_global_damping_matrix(global_damping_ratio);
 
 
 

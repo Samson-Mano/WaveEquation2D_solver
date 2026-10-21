@@ -373,6 +373,34 @@ void direct_integration_matrices::create_initialcondition_load_vector()
 }
 
 
+void direct_integration_matrices::create_global_damping_matrix(double global_damping_ratio)
+{
+
+	// Create the global damping matrix
+	// Rayleigh damping model: C = alpha * M + beta * K
+
+	// Get the maximum wave speed in the domain
+	double max_wave_speed = wave_2dsystem_ptr->max_wave_speed;
+
+	// Get the maximum domain length in the domain
+	double geometry_length = wave_2dsystem_ptr->max_geom_bound;
+
+
+	double omega_n1 = (3.141592 * max_wave_speed) / geometry_length; // Natural frequency (rad/s)
+	double omega_n2 = 10.0 * omega_n1; 
+
+
+	double alpha = (2.0 * global_damping_ratio * omega_n1 * omega_n2) / (omega_n1 + omega_n2);
+	double beta = (2.0 * global_damping_ratio) / (omega_n1 + omega_n2);
+
+	global_c_matrix.resize(numDOF, numDOF);
+
+	global_c_matrix = alpha * global_m_matrix + beta * global_k_matrix;
+
+
+}
+
+
 
 void direct_integration_matrices::get_trielement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
 	const std::vector<Eigen::Vector2d>& elem_coords,

@@ -97,6 +97,11 @@ public:
 		return global_k_matrix;
 	}
 
+	const Eigen::SparseMatrix<double>& getGlobalCMatrix() const
+	{
+		return global_c_matrix;
+	}
+
 
 	const Eigen::VectorXi& getGlobalDirichletBCFlagsVector() const
 	{
@@ -122,6 +127,8 @@ public:
 
 	void create_initialcondition_load_vector();
 
+	void create_global_damping_matrix(double global_damping_ratio);
+
 
 private:
 	wave2d_system_store* wave_2dsystem_ptr;
@@ -133,6 +140,7 @@ private:
 	int numDOF = 0;
 	Eigen::SparseMatrix<double> global_k_matrix; // Global ke Matrix [Ke]
 	Eigen::SparseMatrix<double> global_m_matrix; // Global Me Matrix [Me]
+	Eigen::SparseMatrix<double> global_c_matrix; // Global Ce Matrix [Ce]
 
 	Eigen::VectorXi global_dirichlet_BC_flags_vector; // Global boundary condition Vector (To track the nodes where prescribed field is applied)
 
