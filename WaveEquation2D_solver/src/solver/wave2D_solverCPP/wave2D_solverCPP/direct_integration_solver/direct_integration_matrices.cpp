@@ -193,12 +193,34 @@ void direct_integration_matrices::create_global_matrices()
 
 			if (material_id == 0)
 			{
-				// Perfectly matched layer (PML) material, set the normalized wave speed to default material id 1
-				material_id = 1;
-			}
+				// Perfectly matched layer (PML) material
 
-			double wave_speed = spec_mesh2d.material_list[material_id].material_wave_speed; // get the normalized material wave speed
-			element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+				// Step 0: Find the centroid of the element
+				Eigen::Vector2d element_centroid = Eigen::Vector2d::Zero();
+
+				for (Eigen::Vector2d coord : elem_coords)
+				{
+					element_centroid += coord;
+				}
+
+				element_centroid /= static_cast<double>(elem_coords.size());
+
+				// Step 1: Get the nearest non-PML element to the centroid
+
+
+
+				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
+				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+
+				Eigen::dcomplex sxy = 1.0 - i * sigma_x / (omega * wave_speed);
+				element_m_matrix = sxy * sxy * element_m_matrix;
+			}
+			else
+			{
+				double wave_speed = spec_mesh2d.material_list[material_id].material_wave_speed; // get the material wave speed
+				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+			}
+			
 
 
 			//________________________________________________________________________________________________
@@ -1697,6 +1719,104 @@ double nodal_load_store::get_load_amplitude_at_time(double time) const
 
 	return source_amplitude;
 }
+
+double direct_integration_matrices::get_nearest_nonPML_element(Eigen::Vector2d element_centroid)
+{
+	double min_distance = std::numeric_limits<double>::max();
+
+	// ---- Precompute once ----
+	struct InterfaceSegment {
+		Eigen::Vector2d a, b;
+		Eigen::Vector2d normal;   // unit outward normal pointing into PML
+		bool is_vertical;         // |normal.x()| > |normal.y()|
+	};
+	std::vector<InterfaceSegment> iface;
+
+	// Build: for each edge shared by a PML quad and a non-PML quad,
+	// store the segment with normal pointing from non-PML into PML.
+
+	// ---- Per PML element ----
+	Eigen::Vector2d c = element_centroid;
+	double d_x = INF, d_y = INF;
+	for (const auto& s : iface) {
+		double dist = point_segment_distance(c, s.a, s.b);   // true perpendicular distance
+		if (s.is_vertical)      d_x = std::min(d_x, dist);
+		else if (is_horizontal) d_y = std::min(d_y, dist);
+	}
+
+
+
+	// Quadrilateral elements
+	for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
+	{
+
+		// get the element
+		const spectral_quadelement_store& quad_elm = quad_elm_m.second;
+		
+		if (quad_elm.materialid == 0)
+		{
+			continue; // Skip PML elements
+		}
+
+		//________________________________________________________________________________________________
+		// Step 1: Create local node & node coordinate list
+		// Build local node list _______________________________________________
+		std::vector<int> elem_nodes = quad_elm.row_ordered_node_ids;
+
+		// Get node coordinates ________________________________________________
+		std::vector<Eigen::Vector2d> elem_coords;
+
+		for (int nid : elem_nodes)
+		{
+			const auto& node = spec_mesh2d.spectral_node_list.at(nid);
+			elem_coords.emplace_back(node.x_coord, node.y_coord);
+		}
+
+		// Edge 1 centroid
+		Eigen::Vector2d edge1_centroid = 0.5 * (elem_coords[0] + elem_coords[1]);
+
+		// Edge 2 centroid
+		Eigen::Vector2d edge2_centroid = 0.5 * (elem_coords[1] + elem_coords[2]);
+
+		// Edge 3 centroid
+		Eigen::Vector2d edge3_centroid = 0.5 * (elem_coords[2] + elem_coords[3]);
+
+		// Edge 4 centroid
+		Eigen::Vector2d edge4_centroid = 0.5 * (elem_coords[3] + elem_coords[0]);
+
+		// Compute the distance from the element centroid to the input element_centroid
+		double distance = (edge1_centroid - element_centroid).norm();
+		if (distance < min_distance)
+		{
+			min_distance = distance;
+		}
+		
+		distance = (edge2_centroid - element_centroid).norm();
+		if (distance < min_distance)
+		{
+			min_distance = distance;
+		}
+
+		distance = (edge3_centroid - element_centroid).norm();
+		if (distance < min_distance)
+		{
+			min_distance = distance;
+		}
+
+		distance = (edge4_centroid - element_centroid).norm();
+		if (distance < min_distance)
+		{
+			min_distance = distance;
+		}
+
+	}
+
+
+	return min_distance;
+
+
+}
+
 
 
 
