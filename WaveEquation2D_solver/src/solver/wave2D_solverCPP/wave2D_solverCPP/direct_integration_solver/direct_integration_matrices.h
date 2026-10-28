@@ -149,7 +149,6 @@ private:
 
 	std::unordered_map<int, nodal_load_store> load_maps; // Load maps for the nodes
 
-
 	// Quadrature points for triangle element
 	std::vector<spectral_point> triangle_quadrature_points;
 
@@ -166,7 +165,9 @@ private:
 
 	// Quadrature points for quadrilateral element
 	std::vector<spectral_point> quadrilateral_quadrature_points;
-
+	
+	// Perfectly Matched Layer (PML) information
+	std::unordered_map<int, double> pml_element_dist; // PML element id and distance from the nearest non-PML element
 
 	//________________________________________________________________________________________________
 
@@ -259,6 +260,9 @@ private:
 
 
 	//________________________________________________________________________________________________
+
+	void set_PML_element_distances();
+
 
 	double get_nearest_nonPML_element(Eigen::Vector2d element_centroid);
 

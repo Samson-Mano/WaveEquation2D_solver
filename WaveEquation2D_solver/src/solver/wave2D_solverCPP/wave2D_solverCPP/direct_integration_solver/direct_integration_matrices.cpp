@@ -35,6 +35,9 @@ void direct_integration_matrices::create_global_matrices()
 	report("Spectral mesh created");
 
 
+	set_PML_element_distances();
+	report("PML element distances set");
+
 
 	// Set the number of DOF
 	this->numDOF = static_cast<int>(spec_mesh2d.spectral_node_list.size());
@@ -1719,6 +1722,122 @@ double nodal_load_store::get_load_amplitude_at_time(double time) const
 
 	return source_amplitude;
 }
+
+
+
+void direct_integration_matrices::set_PML_element_distances()
+{
+	// Set the distance from each PML element to the nearest non-PML element
+
+	// Renderer Edge
+	struct mesh_edge
+	{
+		int nstart, nend;
+
+		bool operator==(const mesh_edge& other) const
+		{
+			return nstart == other.nstart && nend == other.nend;
+		}
+	};
+
+
+
+	auto create_mesh_element_edges = [](std::vector<mesh_edge>& edges,
+		const std::vector<int>& corner_nodes)
+		{
+			struct EdgeHash
+			{
+				size_t operator()(const mesh_edge& e) const
+				{
+					return std::hash<int>()(e.nstart) ^ (std::hash<int>()(e.nend) << 1);
+				}
+			};
+
+			// Store the local edge
+			std::unordered_set<mesh_edge, EdgeHash> edge_set;
+
+			auto make_edge = [](int a, int b)
+				{
+					return (a < b) ? mesh_edge{ a, b } : mesh_edge{ b, a };
+				};
+
+			for (size_t i = 0; i < corner_nodes.size(); ++i)
+			{
+				int n1 = corner_nodes[i];
+				int n2 = corner_nodes[(i + 1) % corner_nodes.size()];
+				mesh_edge edge = make_edge(n1, n2);
+				if (edge_set.find(edge) == edge_set.end())
+				{
+					edge_set.insert(edge);
+					edges.push_back(edge);
+				}
+			}
+		};
+
+
+	if (static_cast<int>(spec_mesh2d.spectral_trielement_list.size()) > 0)
+	{
+		// Triangle elements
+		for (auto& tri_elm_m : spec_mesh2d.spectral_trielement_list)
+		{
+			// get the element
+			const spectral_trielement_store& tri_elm = tri_elm_m.second;
+
+			//________________________________________________________________________________________________
+			// Step 1: Create local node & node coordinate list
+			// Build local node list _______________________________________________
+			std::vector<int> elem_nodes = tri_elm.lexi_ordered_node_ids;
+
+
+			// Get node coordinates ________________________________________________
+			std::vector<Eigen::Vector2d> elem_coords;
+
+			for (int nid : elem_nodes)
+			{
+				const auto& node = spec_mesh2d.spectral_node_list.at(nid);
+				elem_coords.emplace_back(node.x_coord, node.y_coord);
+			}
+		}
+
+	}
+
+
+
+	if (static_cast<int>(spec_mesh2d.spectral_quadelement_list.size()) > 0)
+	{
+		// Quadrilateral elements
+		for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
+		{
+			// get the element
+			const spectral_quadelement_store& quad_elm = quad_elm_m.second;
+
+			//________________________________________________________________________________________________
+			// Step 1: Create local node & node coordinate list
+			// Build local node list _______________________________________________
+			std::vector<int> elem_nodes = quad_elm.row_ordered_node_ids;
+
+			// Get node coordinates ________________________________________________
+			std::vector<Eigen::Vector2d> elem_coords;
+
+			for (int nid : elem_nodes)
+			{
+				const auto& node = spec_mesh2d.spectral_node_list.at(nid);
+				elem_coords.emplace_back(node.x_coord, node.y_coord);
+			}
+
+
+		}
+	}
+
+
+
+
+
+
+}
+
+
+
 
 double direct_integration_matrices::get_nearest_nonPML_element(Eigen::Vector2d element_centroid)
 {
