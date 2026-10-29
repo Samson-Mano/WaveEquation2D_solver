@@ -35,7 +35,11 @@ void direct_integration_matrices::create_global_matrices()
 	report("Spectral mesh created");
 
 
-	set_PML_element_distances();
+	// Perfectly Matched Layer (PML) information
+	std::unordered_map<int, double> pml_element_dist; // PML element id and distance from the nearest non-PML element
+	pml_distance_calculator pml_dist_calculator;
+	pml_dist_calculator.calculate_pml_distances(spec_mesh2d, pml_element_dist);
+
 	report("PML element distances set");
 
 
@@ -197,20 +201,6 @@ void direct_integration_matrices::create_global_matrices()
 			if (material_id == 0)
 			{
 				// Perfectly matched layer (PML) material
-
-				// Step 0: Find the centroid of the element
-				Eigen::Vector2d element_centroid = Eigen::Vector2d::Zero();
-
-				for (Eigen::Vector2d coord : elem_coords)
-				{
-					element_centroid += coord;
-				}
-
-				element_centroid /= static_cast<double>(elem_coords.size());
-
-				// Step 1: Get the nearest non-PML element to the centroid
-
-
 
 				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
 				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
@@ -1721,219 +1711,6 @@ double nodal_load_store::get_load_amplitude_at_time(double time) const
 	}
 
 	return source_amplitude;
-}
-
-
-
-void direct_integration_matrices::set_PML_element_distances()
-{
-	// Set the distance from each PML element to the nearest non-PML element
-
-	// Renderer Edge
-	struct mesh_edge
-	{
-		int nstart, nend;
-
-		bool operator==(const mesh_edge& other) const
-		{
-			return nstart == other.nstart && nend == other.nend;
-		}
-	};
-
-
-
-	auto create_mesh_element_edges = [](std::vector<mesh_edge>& edges,
-		const std::vector<int>& corner_nodes)
-		{
-			struct EdgeHash
-			{
-				size_t operator()(const mesh_edge& e) const
-				{
-					return std::hash<int>()(e.nstart) ^ (std::hash<int>()(e.nend) << 1);
-				}
-			};
-
-			// Store the local edge
-			std::unordered_set<mesh_edge, EdgeHash> edge_set;
-
-			auto make_edge = [](int a, int b)
-				{
-					return (a < b) ? mesh_edge{ a, b } : mesh_edge{ b, a };
-				};
-
-			for (size_t i = 0; i < corner_nodes.size(); ++i)
-			{
-				int n1 = corner_nodes[i];
-				int n2 = corner_nodes[(i + 1) % corner_nodes.size()];
-				mesh_edge edge = make_edge(n1, n2);
-				if (edge_set.find(edge) == edge_set.end())
-				{
-					edge_set.insert(edge);
-					edges.push_back(edge);
-				}
-			}
-		};
-
-
-	if (static_cast<int>(spec_mesh2d.spectral_trielement_list.size()) > 0)
-	{
-		// Triangle elements
-		for (auto& tri_elm_m : spec_mesh2d.spectral_trielement_list)
-		{
-			// get the element
-			const spectral_trielement_store& tri_elm = tri_elm_m.second;
-
-			//________________________________________________________________________________________________
-			// Step 1: Create local node & node coordinate list
-			// Build local node list _______________________________________________
-			std::vector<int> elem_nodes = tri_elm.lexi_ordered_node_ids;
-
-
-			// Get node coordinates ________________________________________________
-			std::vector<Eigen::Vector2d> elem_coords;
-
-			for (int nid : elem_nodes)
-			{
-				const auto& node = spec_mesh2d.spectral_node_list.at(nid);
-				elem_coords.emplace_back(node.x_coord, node.y_coord);
-			}
-		}
-
-	}
-
-
-
-	if (static_cast<int>(spec_mesh2d.spectral_quadelement_list.size()) > 0)
-	{
-		// Quadrilateral elements
-		for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
-		{
-			// get the element
-			const spectral_quadelement_store& quad_elm = quad_elm_m.second;
-
-			//________________________________________________________________________________________________
-			// Step 1: Create local node & node coordinate list
-			// Build local node list _______________________________________________
-			std::vector<int> elem_nodes = quad_elm.row_ordered_node_ids;
-
-			// Get node coordinates ________________________________________________
-			std::vector<Eigen::Vector2d> elem_coords;
-
-			for (int nid : elem_nodes)
-			{
-				const auto& node = spec_mesh2d.spectral_node_list.at(nid);
-				elem_coords.emplace_back(node.x_coord, node.y_coord);
-			}
-
-
-		}
-	}
-
-
-
-
-
-
-}
-
-
-
-
-double direct_integration_matrices::get_nearest_nonPML_element(Eigen::Vector2d element_centroid)
-{
-	double min_distance = std::numeric_limits<double>::max();
-
-	// ---- Precompute once ----
-	struct InterfaceSegment {
-		Eigen::Vector2d a, b;
-		Eigen::Vector2d normal;   // unit outward normal pointing into PML
-		bool is_vertical;         // |normal.x()| > |normal.y()|
-	};
-	std::vector<InterfaceSegment> iface;
-
-	// Build: for each edge shared by a PML quad and a non-PML quad,
-	// store the segment with normal pointing from non-PML into PML.
-
-	// ---- Per PML element ----
-	Eigen::Vector2d c = element_centroid;
-	double d_x = INF, d_y = INF;
-	for (const auto& s : iface) {
-		double dist = point_segment_distance(c, s.a, s.b);   // true perpendicular distance
-		if (s.is_vertical)      d_x = std::min(d_x, dist);
-		else if (is_horizontal) d_y = std::min(d_y, dist);
-	}
-
-
-
-	// Quadrilateral elements
-	for (auto& quad_elm_m : spec_mesh2d.spectral_quadelement_list)
-	{
-
-		// get the element
-		const spectral_quadelement_store& quad_elm = quad_elm_m.second;
-		
-		if (quad_elm.materialid == 0)
-		{
-			continue; // Skip PML elements
-		}
-
-		//________________________________________________________________________________________________
-		// Step 1: Create local node & node coordinate list
-		// Build local node list _______________________________________________
-		std::vector<int> elem_nodes = quad_elm.row_ordered_node_ids;
-
-		// Get node coordinates ________________________________________________
-		std::vector<Eigen::Vector2d> elem_coords;
-
-		for (int nid : elem_nodes)
-		{
-			const auto& node = spec_mesh2d.spectral_node_list.at(nid);
-			elem_coords.emplace_back(node.x_coord, node.y_coord);
-		}
-
-		// Edge 1 centroid
-		Eigen::Vector2d edge1_centroid = 0.5 * (elem_coords[0] + elem_coords[1]);
-
-		// Edge 2 centroid
-		Eigen::Vector2d edge2_centroid = 0.5 * (elem_coords[1] + elem_coords[2]);
-
-		// Edge 3 centroid
-		Eigen::Vector2d edge3_centroid = 0.5 * (elem_coords[2] + elem_coords[3]);
-
-		// Edge 4 centroid
-		Eigen::Vector2d edge4_centroid = 0.5 * (elem_coords[3] + elem_coords[0]);
-
-		// Compute the distance from the element centroid to the input element_centroid
-		double distance = (edge1_centroid - element_centroid).norm();
-		if (distance < min_distance)
-		{
-			min_distance = distance;
-		}
-		
-		distance = (edge2_centroid - element_centroid).norm();
-		if (distance < min_distance)
-		{
-			min_distance = distance;
-		}
-
-		distance = (edge3_centroid - element_centroid).norm();
-		if (distance < min_distance)
-		{
-			min_distance = distance;
-		}
-
-		distance = (edge4_centroid - element_centroid).norm();
-		if (distance < min_distance)
-		{
-			min_distance = distance;
-		}
-
-	}
-
-
-	return min_distance;
-
-
 }
 
 

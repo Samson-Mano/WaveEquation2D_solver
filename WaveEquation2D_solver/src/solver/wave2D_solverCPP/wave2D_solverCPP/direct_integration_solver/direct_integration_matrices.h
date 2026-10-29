@@ -43,6 +43,8 @@ typedef Eigen::SparseMatrix<double> SparseMatrix;
 #include "../spectral_elements/spectral_lib/spectral_quad_element.h"
 #include "../spectral_elements/spectral_lib/spectral_tri_element.h"
 
+#include "pml_distance_calculator.h"
+
 
 class nodal_load_store
 {
@@ -166,8 +168,6 @@ private:
 	// Quadrature points for quadrilateral element
 	std::vector<spectral_point> quadrilateral_quadrature_points;
 	
-	// Perfectly Matched Layer (PML) information
-	std::unordered_map<int, double> pml_element_dist; // PML element id and distance from the nearest non-PML element
 
 	//________________________________________________________________________________________________
 
@@ -260,13 +260,6 @@ private:
 
 
 	//________________________________________________________________________________________________
-
-	void set_PML_element_distances();
-
-
-	double get_nearest_nonPML_element(Eigen::Vector2d element_centroid);
-
-
 
 
 
