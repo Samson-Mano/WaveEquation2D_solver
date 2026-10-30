@@ -91,7 +91,7 @@ void pml_distance_calculator::calculate_pml_distances(const spectral_mesh2d& spe
 {
     
     // -------------------------------------------------------------------
-    // 0️ - Gather the geometry we need only once (node → coordinates)
+    // 0️ - Gather the geometry we need only once (node => coordinates)
     // -------------------------------------------------------------------
     std::unordered_map<int, Eigen::Vector2d> node_pos;
     node_pos.reserve(spec_mesh2d.spectral_node_list.size());
