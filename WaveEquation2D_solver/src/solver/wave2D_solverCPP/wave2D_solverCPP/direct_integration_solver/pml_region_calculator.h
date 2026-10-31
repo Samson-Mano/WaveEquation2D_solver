@@ -27,7 +27,14 @@ struct regionEdgeHash
 };
 
 
+struct regionBoundary
+{
+	std::vector<regionEdgeStore> boundaryedges;
 
+	std::vector<int> pml_trielements;
+	std::vector<int> pml_quadelements;
+
+};
 
 
 class pml_region_calculator
@@ -44,7 +51,23 @@ public:
 
 private:
 
+	std::vector<regionBoundary> pml_regions;
 
+	std::vector<std::vector<regionEdgeStore>> getRegionBoundaries(const std::vector<regionEdgeStore>& edges); // get the closed boundaries from the edges
+
+	std::vector<std::vector<regionEdgeStore>> getRegionBoundaries(const std::vector<regionEdgeStore>& edges,
+		const std::unordered_map<int, Eigen::Vector2d>& node_pos);
+
+	void setPMLRegionBoundaries(spectral_mesh2d spec_mesh2d,
+		const std::vector<std::vector<regionEdgeStore>>& region_boundaries,
+		const std::unordered_map<int, Eigen::Vector2d>& node_pos,
+		const std::unordered_set<int>& pml_trielements,
+		const std::unordered_set<int>& pml_quadelements);
+
+
+	bool pointInPolygon(const Eigen::Vector2d& p,
+		const std::vector<regionEdgeStore>& loop,
+		const std::unordered_map<int, Eigen::Vector2d>& pos);
 
 
 };

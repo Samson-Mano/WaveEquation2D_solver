@@ -129,7 +129,7 @@ void pml_distance_calculator::calculate_pml_distances(const spectral_mesh2d& spe
     // ----- triangles ----------------------------------------------------
     for (const auto& [eid, tri] : spec_mesh2d.spectral_trielement_list) 
     {
-        const std::vector<int> nodes = tri.lexi_ordered_node_ids;
+        const std::vector<int> nodes = tri.corner_nodes;
         insert_edges(eid, nodes);
         if (tri.materialid == PML_MATERIAL_ID)  
             pml_elements.insert(eid);
@@ -138,7 +138,7 @@ void pml_distance_calculator::calculate_pml_distances(const spectral_mesh2d& spe
     // ----- quadrilaterals ------------------------------------------------
     for (const auto& [eid, quad] : spec_mesh2d.spectral_quadelement_list) 
     {
-        const std::vector<int> nodes = quad.row_ordered_node_ids;
+        const std::vector<int> nodes = quad.corner_nodes;
         insert_edges(eid, nodes);
         if (quad.materialid == PML_MATERIAL_ID)
             pml_elements.insert(eid);
