@@ -29,7 +29,7 @@ struct regionEdgeHash
 
 struct regionBoundary
 {
-	std::vector<regionEdgeStore> boundaryedges;
+	// std::vector<regionEdgeStore> boundaryedges;
 
 
 	std::vector<regionEdgeStore> inner_edges; // PML <=> non-PML

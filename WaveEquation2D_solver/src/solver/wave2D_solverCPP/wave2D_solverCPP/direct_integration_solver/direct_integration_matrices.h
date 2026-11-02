@@ -43,7 +43,7 @@ typedef Eigen::SparseMatrix<double> SparseMatrix;
 #include "../spectral_elements/spectral_lib/spectral_quad_element.h"
 #include "../spectral_elements/spectral_lib/spectral_tri_element.h"
 
-#include "pml_distance_calculator.h"
+#include "pml_region_calculator.h"
 
 
 class nodal_load_store

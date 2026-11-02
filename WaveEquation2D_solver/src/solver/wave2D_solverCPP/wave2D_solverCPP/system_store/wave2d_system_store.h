@@ -196,6 +196,11 @@ public:
 	double max_geom_bound = 0.0;
 	double max_wave_speed = 0.0;
 
+
+	// Grading order m, 
+	double pml_sigma_max = 1.0; // Maximum PML damping coefficient
+
+
 	wave2d_system_store();
 	~wave2d_system_store() = default;
 

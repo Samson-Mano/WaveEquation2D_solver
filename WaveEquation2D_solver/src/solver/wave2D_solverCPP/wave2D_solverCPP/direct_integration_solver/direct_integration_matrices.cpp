@@ -36,9 +36,10 @@ void direct_integration_matrices::create_global_matrices()
 
 
 	// Perfectly Matched Layer (PML) information
-	std::unordered_map<int, double> pml_element_dist; // PML element id and distance from the nearest non-PML element
-	pml_distance_calculator pml_dist_calculator;
-	pml_dist_calculator.calculate_pml_distances(spec_mesh2d, pml_element_dist);
+	std::unordered_map<int, pmlDistanceStore> pml_element_dist; // PML element id and distance from the nearest non-PML element
+	
+	pml_region_calculator pml_calculator;
+	pml_calculator.set_pml_region(spec_mesh2d, pml_element_dist);
 
 	report("PML element distances set");
 
@@ -205,7 +206,14 @@ void direct_integration_matrices::create_global_matrices()
 				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
 				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
 
-				Eigen::dcomplex sxy = 1.0 - i * sigma_x / (omega * wave_speed);
+				// Get the PML distance for the current element
+				double dL_x = pml_element_dist[quad_elm.quad_id].dx / pml_element_dist[quad_elm.quad_id].Lx;
+				double dL_y = pml_element_dist[quad_elm.quad_id].dy / pml_element_dist[quad_elm.quad_id].Ly;
+
+				double sigma_x = wave_2dsystem_ptr->pml_sigma_max * std::pow(dL_x, 2);
+				double sigma_y = wave_2dsystem_ptr->pml_sigma_max * std::pow(dL_y, 2);
+
+				std::complex<double> sxy = 1.0 - i * sigma_x / (omega * wave_speed);
 				element_m_matrix = sxy * sxy * element_m_matrix;
 			}
 			else

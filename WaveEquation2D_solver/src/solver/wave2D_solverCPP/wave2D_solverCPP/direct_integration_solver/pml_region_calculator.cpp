@@ -51,7 +51,7 @@ void pml_region_calculator::set_pml_region(const spectral_mesh2d& spec_mesh2d, s
 	// ----- triangles ----------------------------------------------------
 	for (const auto& [eid, tri] : spec_mesh2d.spectral_trielement_list)
 	{
-		const std::vector<int> nodes = tri.lexi_ordered_node_ids;
+		const std::vector<int> nodes = tri.corner_nodes;
 
 		if (tri.materialid == PML_MATERIAL_ID)
 		{
@@ -63,7 +63,7 @@ void pml_region_calculator::set_pml_region(const spectral_mesh2d& spec_mesh2d, s
 	// ----- quadrilaterals ------------------------------------------------
 	for (const auto& [eid, quad] : spec_mesh2d.spectral_quadelement_list)
 	{
-		const std::vector<int> nodes = quad.row_ordered_node_ids;
+		const std::vector<int> nodes = quad.corner_nodes;
 
 		if (quad.materialid == PML_MATERIAL_ID)
 		{
@@ -332,6 +332,61 @@ void pml_region_calculator::setPMLRegionBoundaries(spectral_mesh2d spec_mesh2d,
 	const std::unordered_set<int>& pml_quadelements)
 {
 
+	auto makeEdge = [](int i, int j)
+		{
+			// Canonical edge (order the two node ids)
+
+			return (i < j) ? regionEdgeStore{ i, j } : regionEdgeStore{ j, i };
+		};
+
+	// -------------------------------------------------------------------
+	// 1️ - Build the pml edge => incident pml elements map
+	// -------------------------------------------------------------------
+	using EdgeMap = std::unordered_map<regionEdgeStore, std::vector<int>, regionEdgeHash>;
+
+	EdgeMap nonpml_edge_to_elements;
+	nonpml_edge_to_elements.reserve(spec_mesh2d.spectral_trielement_list.size() * 3 + spec_mesh2d.spectral_quadelement_list.size() * 4);
+
+	// Helper that inserts the edges of a generic element
+	auto insert_edges = [&](int elem_id, const std::vector<int>& nodes)
+		{
+			const int n = static_cast<int>(nodes.size());
+
+			for (int i = 0; i < n; ++i)
+			{
+				regionEdgeStore e = makeEdge(nodes[i], nodes[(i + 1) % n]);
+				nonpml_edge_to_elements[e].push_back(elem_id);
+			}
+		};
+
+
+	// ----- triangles ----------------------------------------------------
+	for (const auto& [eid, tri] : spec_mesh2d.spectral_trielement_list)
+	{
+		const std::vector<int> nodes = tri.corner_nodes;
+
+		if (tri.materialid != PML_MATERIAL_ID)
+		{
+			insert_edges(eid, nodes);
+		}
+	}
+
+	// ----- quadrilaterals ------------------------------------------------
+	for (const auto& [eid, quad] : spec_mesh2d.spectral_quadelement_list)
+	{
+		const std::vector<int> nodes = quad.corner_nodes;
+
+		if (quad.materialid != PML_MATERIAL_ID)
+		{
+			insert_edges(eid, nodes);
+		}
+	}
+
+
+
+
+	//--------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------
 	// Create a PML element visited map to track which PML elements have been processed
 	std::unordered_map<int, int> pml_element_visited;
 
@@ -362,8 +417,22 @@ void pml_region_calculator::setPMLRegionBoundaries(spectral_mesh2d spec_mesh2d,
 	for (const auto& boundary_edges : region_boundaries)
 	{
 		regionBoundary region_boundary;
-		region_boundary.boundaryedges = boundary_edges;
 
+		for (const auto& e : boundary_edges)
+		{
+			// Check if the edge is incident to a non-PML element
+			if (nonpml_edge_to_elements.find(e) != nonpml_edge_to_elements.end())
+			{
+				region_boundary.inner_edges.push_back(e);
+			}
+			else
+			{
+				region_boundary.outer_edges.push_back(e);
+			}
+		}
+
+
+		//-------------------------------------------------------------------------------------------------
 		for (const int id : pml_trielements)
 		{
 			// Check if the PML element has been visited
