@@ -262,6 +262,29 @@ private:
 	//________________________________________________________________________________________________
 
 
+	void get_PMLtrielement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		const std::complex<double>& s_x,
+		const std::complex<double>& s_y,
+		Eigen::MatrixXd& element_k_matrix,
+		Eigen::MatrixXd& element_m_matrix);
+
+
+
+	void get_PMLquadelement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
+		const std::vector<Eigen::Vector2d>& elem_coords,
+		const std::complex<double>& s_x,
+		const std::complex<double>& s_y,
+		Eigen::MatrixXd& element_k_matrix,
+		Eigen::MatrixXd& element_m_matrix);
+
+
+
+
+
+
+	//________________________________________________________________________________________________
+
 
 	void(*m_callback)(const char*) = nullptr;
 

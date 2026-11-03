@@ -113,19 +113,43 @@ void direct_integration_matrices::create_global_matrices()
 			Eigen::MatrixXd element_m_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element mass matrix
 
 
-			get_trielement_k_grad_k_mass_matrix(elem_nodes, elem_coords,
-				element_k_matrix, element_m_matrix);
-
 			int material_id = tri_elm.materialid;
 
 			if (material_id == 0)
 			{
-				// Perfectly matched layer (PML) material, set the normalized wave speed to default material id 1
-				material_id = 1;
+				// Perfectly matched layer (PML) material
+
+				// Get the PML distance for the current element
+				double dL_x = pml_element_dist[tri_elm.tri_id].dx / pml_element_dist[tri_elm.tri_id].Lx;
+				double dL_y = pml_element_dist[tri_elm.tri_id].dy / pml_element_dist[tri_elm.tri_id].Ly;
+
+				double sigma_max = wave_2dsystem_ptr->pml_sigma_max; // sigma max
+				double omega = wave_2dsystem_ptr->pml_omega; // PML frequency
+
+				double sigma_x = sigma_max * std::pow(dL_x, 2);
+				double sigma_y = sigma_max * std::pow(dL_y, 2);
+
+				std::complex<double> s_x(1.0, -(sigma_x / omega));
+				std::complex<double> s_y(1.0, -(sigma_y / omega));
+
+				get_PMLtrielement_k_grad_k_mass_matrix(elem_nodes, elem_coords, s_x, s_y,
+					element_k_matrix, element_m_matrix);
+
+				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
+				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+
+			}
+			else
+			{
+
+				get_trielement_k_grad_k_mass_matrix(elem_nodes, elem_coords,
+					element_k_matrix, element_m_matrix);
+
+				double wave_speed = spec_mesh2d.material_list[material_id].material_wave_speed; // get the material wave speed
+				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
 			}
 
-			double wave_speed = spec_mesh2d.material_list[material_id].material_wave_speed; // get the normalized material wave speed
-			element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+
 
 			//________________________________________________________________________________________________
 			// Step 3: Create Element field vector
@@ -193,31 +217,38 @@ void direct_integration_matrices::create_global_matrices()
 			Eigen::MatrixXd element_m_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element k mass matrix
 
 
-			get_quadelement_k_grad_k_mass_matrix(elem_nodes, elem_coords,
-				element_k_matrix, element_m_matrix);
-
-
 			int material_id = quad_elm.materialid;
 
 			if (material_id == 0)
 			{
 				// Perfectly matched layer (PML) material
 
-				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
-				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
-
 				// Get the PML distance for the current element
 				double dL_x = pml_element_dist[quad_elm.quad_id].dx / pml_element_dist[quad_elm.quad_id].Lx;
 				double dL_y = pml_element_dist[quad_elm.quad_id].dy / pml_element_dist[quad_elm.quad_id].Ly;
 
-				double sigma_x = wave_2dsystem_ptr->pml_sigma_max * std::pow(dL_x, 2);
-				double sigma_y = wave_2dsystem_ptr->pml_sigma_max * std::pow(dL_y, 2);
+				double sigma_max = wave_2dsystem_ptr->pml_sigma_max; // sigma max
+				double omega = wave_2dsystem_ptr->pml_omega; // PML frequency
 
-				std::complex<double> sxy = 1.0 - i * sigma_x / (omega * wave_speed);
-				element_m_matrix = sxy * sxy * element_m_matrix;
+				double sigma_x = sigma_max * std::pow(dL_x, 2);
+				double sigma_y = sigma_max * std::pow(dL_y, 2);
+
+				std::complex<double> s_x( 1.0, -(sigma_x / omega));
+				std::complex<double> s_y( 1.0, -(sigma_y / omega));
+
+				get_PMLquadelement_k_grad_k_mass_matrix(elem_nodes, elem_coords, s_x, s_y,
+					element_k_matrix, element_m_matrix);
+
+				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
+				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+
 			}
 			else
 			{
+
+				get_quadelement_k_grad_k_mass_matrix(elem_nodes, elem_coords,
+					element_k_matrix, element_m_matrix);
+
 				double wave_speed = spec_mesh2d.material_list[material_id].material_wave_speed; // get the material wave speed
 				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
 			}
@@ -510,6 +541,101 @@ void direct_integration_matrices::get_trielement_k_grad_k_mass_matrix(const std:
 
 
 
+
+void direct_integration_matrices::get_PMLtrielement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
+	const std::vector<Eigen::Vector2d>& elem_coords,
+	const std::complex<double>& s_x,
+	const std::complex<double>& s_y,
+	Eigen::MatrixXd& element_k_matrix,
+	Eigen::MatrixXd& element_m_matrix)
+{
+	int nen = static_cast<int>(elem_nodes.size());
+
+	Eigen::MatrixXd element_kx_matrix = Eigen::MatrixXd::Zero(nen, nen);
+	Eigen::MatrixXd element_ky_matrix = Eigen::MatrixXd::Zero(nen, nen);
+
+	// Get quadrature points
+	const auto& quadrature_points = this->triangle_quadrature_points;
+
+	// --- 1. Loop over quadrature points ---
+	for (int q = 0; q < static_cast<int>(quadrature_points.size()); q++)
+	{
+		double quadraturept_xi = quadrature_points[q].xi;
+		double quadraturept_eta = quadrature_points[q].eta;
+		double wt = quadrature_points[q].weight; // weights are normalized to 1.0
+
+		// --- 2. Evaluate shape functions ---
+		Eigen::VectorXd N(nen);
+		Eigen::VectorXd dN_dxi(nen); // [dN/dxi, dN/deta]
+		Eigen::VectorXd dN_deta(nen); // [dN/dxi, dN/deta]
+
+		spectral_tri_element::evaluate_triangle_shape_functions(quadraturept_xi, quadraturept_eta, spec_mesh2d.spectral_order,
+			this->inv_vandermonde_matrix, this->triangle_basis_terms,
+			N, dN_dxi, dN_deta);
+
+
+		// --- 3. Compute Jacobian ---
+		Eigen::Matrix2d J = Eigen::Matrix2d::Zero();
+
+		for (int i = 0; i < nen; i++)
+		{
+			double x = elem_coords[i].x();
+			double y = elem_coords[i].y();
+
+			J(0, 0) += dN_dxi(i) * x; // dx/dxi
+			J(0, 1) += dN_deta(i) * x; // dx/deta
+			J(1, 0) += dN_dxi(i) * y; // dy/dxi
+			J(1, 1) += dN_deta(i) * y; // dy/deta
+		}
+
+		double detJ = J.determinant();
+		Eigen::Matrix2d invJ = J.inverse();
+
+		// --- 4. Transform gradients ---
+		// [dN/dx; dN/dy] = invJ^T * [dN/dxi; dN/deta]
+		Eigen::MatrixXd dN_dx(nen, 2);  // Each row: [dN_i/dx, dN_i/dy]
+
+		for (int i = 0; i < nen; i++)
+		{
+			// Gradient in reference coordinates
+			Eigen::Vector2d grad_ref(dN_dxi(i), dN_deta(i));
+
+			// Transform to physical coordinates
+			Eigen::Vector2d grad_phys = invJ.transpose() * grad_ref;
+
+			dN_dx(i, 0) = grad_phys(0); // dN_i/dx
+			dN_dx(i, 1) = grad_phys(1); // dN_i/dy
+		}
+
+		// Quadrature weight including Jacobian determinant
+		double dV = detJ * wt;
+
+
+		// --- 5. Assemble matrices ---
+		for (int i = 0; i < nen; i++)
+		{
+			for (int j = 0; j < nen; j++)
+			{
+				double grad_dot = dN_dx.row(i).dot(dN_dx.row(j));
+
+				// Gradient (stiffness)
+				element_kx_matrix(i, j) += dN_dx(i, 0) * dN_dx(j, 0) * dV;  // dN_dx(i, 0) = dN_i/dx, dN_dx(j, 0) = dN_j/dx
+				element_ky_matrix(i, j) += dN_dx(i, 1) * dN_dx(j, 1) * dV;  // dN_dx(i, 1) = dN_i/dy, dN_dx(j, 1) = dN_j/dy
+
+				// Mass
+				element_m_matrix(i, j) += (N(i) * N(j)) * dV;
+			}
+		}
+	}
+
+	// Combine kx and ky matrices
+	element_k_matrix = (s_y / s_x) * element_kx_matrix + (s_x / s_y) * element_ky_matrix;
+	element_m_matrix = s_x * s_y * element_m_matrix;
+
+	//
+}
+
+
 void direct_integration_matrices::get_trielement_field_vector(const spectral_trielement_store& tri_elm,
 	Eigen::VectorXi& dirichlet_BC_flag)
 {
@@ -691,6 +817,98 @@ void direct_integration_matrices::get_quadelement_k_grad_k_mass_matrix(const std
 	//
 }
 
+
+
+void direct_integration_matrices::get_PMLquadelement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
+	const std::vector<Eigen::Vector2d>& elem_coords,
+	const std::complex<double>& s_x,
+	const std::complex<double>& s_y,
+	Eigen::MatrixXd& element_k_matrix,
+	Eigen::MatrixXd& element_m_matrix)
+{
+	int nen = static_cast<int>(elem_nodes.size());
+
+	Eigen::MatrixXd element_kx_matrix = Eigen::MatrixXd::Zero(nen, nen);
+	Eigen::MatrixXd element_ky_matrix = Eigen::MatrixXd::Zero(nen, nen);
+
+	// Get quadrature points
+	const auto& quadrature_points = this->quadrilateral_quadrature_points;
+
+	// --- 1. Loop over quadrature points ---
+	for (int q = 0; q < static_cast<int>(quadrature_points.size()); q++)
+	{
+		double quadraturept_xi = quadrature_points[q].xi;
+		double quadraturept_eta = quadrature_points[q].eta;
+		double wt = quadrature_points[q].weight;
+
+		// --- 2. Evaluate shape functions ---
+		Eigen::VectorXd N(nen);
+		Eigen::VectorXd dN_dxi(nen); // [dN/dxi, dN/deta]
+		Eigen::VectorXd dN_deta(nen); // [dN/dxi, dN/deta]
+
+		spectral_quad_element::evaluate_quadrilateral_shape_functions(quadraturept_xi, quadraturept_eta,
+			spec_mesh2d.spectral_order, gll_locations,
+			N, dN_dxi, dN_deta);
+
+		// --- 3. Compute Jacobian ---
+		Eigen::Matrix2d J = Eigen::Matrix2d::Zero();
+
+		for (int i = 0; i < nen; i++)
+		{
+			double x = elem_coords[i].x();
+			double y = elem_coords[i].y();
+
+			J(0, 0) += dN_dxi(i) * x; // dx/dxi
+			J(0, 1) += dN_deta(i) * x; // dx/deta
+			J(1, 0) += dN_dxi(i) * y; // dy/dxi
+			J(1, 1) += dN_deta(i) * y; // dy/deta
+		}
+
+		double detJ = J.determinant();
+		Eigen::Matrix2d invJ = J.inverse();
+
+		// --- 4. Transform gradients ---
+		Eigen::MatrixXd dN_dx(nen, 2);
+
+		for (int i = 0; i < nen; i++)
+		{
+			// Gradient in reference coordinates
+			Eigen::Vector2d grad_ref(dN_dxi(i), dN_deta(i));
+
+			// Transform to physical coordinates
+			Eigen::Vector2d grad_phys = invJ.transpose() * grad_ref;
+
+			dN_dx(i, 0) = grad_phys(0); // dN_i/dx
+			dN_dx(i, 1) = grad_phys(1); // dN_i/dy
+		}
+
+		// Quadrature weight including Jacobian determinant
+		double dV = detJ * wt;
+
+		// --- 5. Assemble matrices ---
+		// element_k_grad_matrix += (dN_dx * dN_dx.transpose()) * detJ * w;
+		// element_k_mass_matrix += (N * N.transpose()) * detJ * w;
+
+		for (int i = 0; i < nen; i++)
+		{
+			for (int j = 0; j < nen; j++)
+			{
+				// Gradient (stiffness)
+				element_kx_matrix(i, j) += dN_dx(i, 0) * dN_dx(j, 0) * dV; // dN_dx(i, 0) = dN_i/dx, dN_dx(j, 0) = dN_j/dx
+				element_ky_matrix(i, j) += dN_dx(i, 1) * dN_dx(j, 1) * dV; // dN_dx(i, 1) = dN_i/dy, dN_dx(j, 1) = dN_j/dy
+
+				// Mass
+				element_m_matrix(i, j) += (N(i) * N(j)) * dV;
+			}
+		}
+	}
+
+	// Combine kx and ky matrices
+	element_k_matrix = (s_y / s_x) * element_kx_matrix + (s_x / s_y) * element_ky_matrix;
+	element_m_matrix = s_x * s_y * element_m_matrix;
+
+	//
+}
 
 
 

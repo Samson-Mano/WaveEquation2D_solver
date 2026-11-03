@@ -30,7 +30,21 @@ void wave2d_system_store::normalize_material_wave_speeds()
 }
 
 
+void wave2d_system_store::set_PML_damping_coefficient()
+{
+	constexpr int m = 2; // Polynomial grading order for the PML damping profile
+	double max_bound = 10.0; // this->max_geom_bound; // Maximum spatial bound of the domain
 
+	double spatial_bound = max_bound * 0.1; // Assuming the PML region extends to the 10 % maximum spatial bound
+
+	double wave_impedance = 1.0; // Assuming normalized wave impedance for simplicity
+
+	this->pml_sigma_max = ((m + 1) * 0.8) / (wave_impedance * spatial_bound);
+
+	// Wave speed = frequency * wavelength
+	this->pml_omega = 2.0 * 3.14159265358979323846 * (this->max_wave_speed / max_bound); // PML frequency for the damping coefficient
+
+}
 
 
 uint64_t wave2d_system_store::get_model_signature() const

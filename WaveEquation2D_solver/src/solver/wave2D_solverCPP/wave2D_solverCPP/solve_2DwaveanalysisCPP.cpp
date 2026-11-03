@@ -434,6 +434,8 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	// Normalize the material wave speeds
 	wave_system.normalize_material_wave_speeds();
 
+	// Set the PML damping coefficient
+	wave_system.set_PML_damping_coefficient();
 	
 	// Perform modal analysis
 	if (SolverType == 0)

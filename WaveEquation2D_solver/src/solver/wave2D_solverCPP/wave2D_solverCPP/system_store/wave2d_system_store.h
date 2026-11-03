@@ -199,12 +199,15 @@ public:
 
 	// Grading order m, 
 	double pml_sigma_max = 1.0; // Maximum PML damping coefficient
+	double pml_omega = 1.0; // PML frequency for the damping coefficient
 
 
 	wave2d_system_store();
 	~wave2d_system_store() = default;
 
 	void normalize_material_wave_speeds();
+
+	void set_PML_damping_coefficient();
 
 
 	uint64_t get_model_signature() const;
