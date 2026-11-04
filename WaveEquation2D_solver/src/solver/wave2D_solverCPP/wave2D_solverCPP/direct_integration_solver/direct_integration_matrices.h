@@ -87,19 +87,24 @@ public:
 		stopwatch_events* stopwatch,
 		void(*callback)(const char*));
 
+	const int getNumDOF() const
+	{
+		return numDOF;
+	}
 
-	const Eigen::SparseMatrix<double>& getGlobalMMatrix() const
+
+	const Eigen::SparseMatrix<std::complex<double>>& getGlobalMMatrix() const
 	{
 		return global_m_matrix;
 	}
 
 
-	const Eigen::SparseMatrix<double>& getGlobalKMatrix() const
+	const Eigen::SparseMatrix<std::complex<double>>& getGlobalKMatrix() const
 	{
 		return global_k_matrix;
 	}
 
-	const Eigen::SparseMatrix<double>& getGlobalCMatrix() const
+	const Eigen::SparseMatrix<std::complex<double>>& getGlobalCMatrix() const
 	{
 		return global_c_matrix;
 	}
@@ -140,9 +145,9 @@ private:
 
 
 	int numDOF = 0;
-	Eigen::SparseMatrix<double> global_k_matrix; // Global ke Matrix [Ke]
-	Eigen::SparseMatrix<double> global_m_matrix; // Global Me Matrix [Me]
-	Eigen::SparseMatrix<double> global_c_matrix; // Global Ce Matrix [Ce]
+	Eigen::SparseMatrix<std::complex<double>> global_k_matrix; // Global ke Matrix [Ke]
+	Eigen::SparseMatrix<std::complex<double>> global_m_matrix; // Global Me Matrix [Me]
+	Eigen::SparseMatrix<std::complex<double>> global_c_matrix; // Global Ce Matrix [Ce]
 
 	Eigen::VectorXi global_dirichlet_BC_flags_vector; // Global boundary condition Vector (To track the nodes where prescribed field is applied)
 
@@ -173,8 +178,8 @@ private:
 
 	void get_trielement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
 		const std::vector<Eigen::Vector2d>& elem_coords,
-		Eigen::MatrixXd& element_k_matrix,
-		Eigen::MatrixXd& element_m_matrix);
+		Eigen::MatrixXcd& element_k_matrix,
+		Eigen::MatrixXcd& element_m_matrix);
 
 
 	void get_trielement_field_vector(const spectral_trielement_store& tri_elm,
@@ -185,8 +190,8 @@ private:
 
 	void get_quadelement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
 		const std::vector<Eigen::Vector2d>& elem_coords,
-		Eigen::MatrixXd& element_k_matrix,
-		Eigen::MatrixXd& element_m_matrix);
+		Eigen::MatrixXcd& element_k_matrix,
+		Eigen::MatrixXcd& element_m_matrix);
 
 
 	void get_quadelement_field_vector(const spectral_quadelement_store& quad_elm,
@@ -200,10 +205,10 @@ private:
 
 	void set_global_matrix(const std::vector<int>& elem_nodes,
 		int nen,
-		const Eigen::MatrixXd& element_k_matrix,
-		const Eigen::MatrixXd& element_m_matrix,
-		std::vector<Eigen::Triplet<double>>& k_triplets,
-		std::vector<Eigen::Triplet<double>>& m_triplets);
+		const Eigen::MatrixXcd& element_k_matrix,
+		const Eigen::MatrixXcd& element_m_matrix,
+		std::vector<Eigen::Triplet<std::complex<double>>>& k_triplets,
+		std::vector<Eigen::Triplet<std::complex<double>>>& m_triplets);
 
 
 
@@ -266,8 +271,8 @@ private:
 		const std::vector<Eigen::Vector2d>& elem_coords,
 		const std::complex<double>& s_x,
 		const std::complex<double>& s_y,
-		Eigen::MatrixXd& element_k_matrix,
-		Eigen::MatrixXd& element_m_matrix);
+		Eigen::MatrixXcd& element_k_matrix,
+		Eigen::MatrixXcd& element_m_matrix);
 
 
 
@@ -275,8 +280,8 @@ private:
 		const std::vector<Eigen::Vector2d>& elem_coords,
 		const std::complex<double>& s_x,
 		const std::complex<double>& s_y,
-		Eigen::MatrixXd& element_k_matrix,
-		Eigen::MatrixXd& element_m_matrix);
+		Eigen::MatrixXcd& element_k_matrix,
+		Eigen::MatrixXcd& element_m_matrix);
 
 
 

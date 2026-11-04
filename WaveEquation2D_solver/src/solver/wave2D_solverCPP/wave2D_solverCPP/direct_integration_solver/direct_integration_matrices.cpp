@@ -61,8 +61,8 @@ void direct_integration_matrices::create_global_matrices()
 	// get the quadrature points and the basis term
 	int spectral_order = spec_mesh2d.spectral_order;
 
-	std::vector<Eigen::Triplet<double>> k_triplets;
-	std::vector<Eigen::Triplet<double>> m_triplets;
+	std::vector<Eigen::Triplet<std::complex<double>>> k_triplets;
+	std::vector<Eigen::Triplet<std::complex<double>>> m_triplets;
 
 
 
@@ -109,8 +109,8 @@ void direct_integration_matrices::create_global_matrices()
 			// Step 2: Create element k_grad matrix
 			int nen = static_cast<int>(elem_nodes.size());
 
-			Eigen::MatrixXd element_k_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element k grad matrix
-			Eigen::MatrixXd element_m_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element mass matrix
+			Eigen::MatrixXcd element_k_matrix = Eigen::MatrixXcd::Zero(nen, nen); // Element k grad matrix
+			Eigen::MatrixXcd element_m_matrix = Eigen::MatrixXcd::Zero(nen, nen); // Element mass matrix
 
 
 			int material_id = tri_elm.materialid;
@@ -213,8 +213,8 @@ void direct_integration_matrices::create_global_matrices()
 			// Step 2: Create element k_grad matrix
 			int nen = static_cast<int>(elem_nodes.size());
 
-			Eigen::MatrixXd element_k_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element k grad matrix
-			Eigen::MatrixXd element_m_matrix = Eigen::MatrixXd::Zero(nen, nen); // Element k mass matrix
+			Eigen::MatrixXcd element_k_matrix = Eigen::MatrixXcd::Zero(nen, nen); // Element k grad matrix
+			Eigen::MatrixXcd element_m_matrix = Eigen::MatrixXcd::Zero(nen, nen); // Element k mass matrix
 
 
 			int material_id = quad_elm.materialid;
@@ -458,8 +458,8 @@ void direct_integration_matrices::create_global_damping_matrix(double global_dam
 
 void direct_integration_matrices::get_trielement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
 	const std::vector<Eigen::Vector2d>& elem_coords,
-	Eigen::MatrixXd& element_k_matrix,
-	Eigen::MatrixXd& element_m_matrix)
+	Eigen::MatrixXcd& element_k_matrix,
+	Eigen::MatrixXcd& element_m_matrix)
 {
 	int nen = static_cast<int>(elem_nodes.size());
 
@@ -546,13 +546,13 @@ void direct_integration_matrices::get_PMLtrielement_k_grad_k_mass_matrix(const s
 	const std::vector<Eigen::Vector2d>& elem_coords,
 	const std::complex<double>& s_x,
 	const std::complex<double>& s_y,
-	Eigen::MatrixXd& element_k_matrix,
-	Eigen::MatrixXd& element_m_matrix)
+	Eigen::MatrixXcd& element_k_matrix,
+	Eigen::MatrixXcd& element_m_matrix)
 {
 	int nen = static_cast<int>(elem_nodes.size());
 
-	Eigen::MatrixXd element_kx_matrix = Eigen::MatrixXd::Zero(nen, nen);
-	Eigen::MatrixXd element_ky_matrix = Eigen::MatrixXd::Zero(nen, nen);
+	Eigen::MatrixXcd element_kx_matrix = Eigen::MatrixXcd::Zero(nen, nen);
+	Eigen::MatrixXcd element_ky_matrix = Eigen::MatrixXcd::Zero(nen, nen);
 
 	// Get quadrature points
 	const auto& quadrature_points = this->triangle_quadrature_points;
@@ -737,8 +737,8 @@ void direct_integration_matrices::get_trielement_field_vector(const spectral_tri
 
 void direct_integration_matrices::get_quadelement_k_grad_k_mass_matrix(const std::vector<int>& elem_nodes,
 	const std::vector<Eigen::Vector2d>& elem_coords,
-	Eigen::MatrixXd& element_k_matrix,
-	Eigen::MatrixXd& element_m_matrix)
+	Eigen::MatrixXcd& element_k_matrix,
+	Eigen::MatrixXcd& element_m_matrix)
 {
 	int nen = static_cast<int>(elem_nodes.size());
 
@@ -823,13 +823,13 @@ void direct_integration_matrices::get_PMLquadelement_k_grad_k_mass_matrix(const 
 	const std::vector<Eigen::Vector2d>& elem_coords,
 	const std::complex<double>& s_x,
 	const std::complex<double>& s_y,
-	Eigen::MatrixXd& element_k_matrix,
-	Eigen::MatrixXd& element_m_matrix)
+	Eigen::MatrixXcd& element_k_matrix,
+	Eigen::MatrixXcd& element_m_matrix)
 {
 	int nen = static_cast<int>(elem_nodes.size());
 
-	Eigen::MatrixXd element_kx_matrix = Eigen::MatrixXd::Zero(nen, nen);
-	Eigen::MatrixXd element_ky_matrix = Eigen::MatrixXd::Zero(nen, nen);
+	Eigen::MatrixXcd element_kx_matrix = Eigen::MatrixXcd::Zero(nen, nen);
+	Eigen::MatrixXcd element_ky_matrix = Eigen::MatrixXcd::Zero(nen, nen);
 
 	// Get quadrature points
 	const auto& quadrature_points = this->quadrilateral_quadrature_points;
@@ -1018,10 +1018,10 @@ void direct_integration_matrices::get_quadelement_field_vector(const spectral_qu
 
 void direct_integration_matrices::set_global_matrix(const std::vector<int>& elem_nodes,
 	int nen,
-	const Eigen::MatrixXd& element_k_matrix,
-	const Eigen::MatrixXd& element_m_matrix,
-	std::vector<Eigen::Triplet<double>>& k_triplets,
-	std::vector<Eigen::Triplet<double>>& m_triplets)
+	const Eigen::MatrixXcd& element_k_matrix,
+	const Eigen::MatrixXcd& element_m_matrix,
+	std::vector<Eigen::Triplet<std::complex<double>>>& k_triplets,
+	std::vector<Eigen::Triplet<std::complex<double>>>& m_triplets)
 {
 
 	for (int i = 0; i < nen; i++)
@@ -1034,8 +1034,8 @@ void direct_integration_matrices::set_global_matrix(const std::vector<int>& elem
 			// get the global map id
 			int j_node_map = elem_nodes[j];
 
-			double k_val = element_k_matrix(i, j);
-			double m_val = element_m_matrix(i, j);
+			std::complex<double> k_val = element_k_matrix(i, j);
+			std::complex<double> m_val = element_m_matrix(i, j);
 
 
 			k_triplets.emplace_back(i_node_map, j_node_map, k_val);
