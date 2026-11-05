@@ -98,7 +98,6 @@ public:
 		return global_m_matrix;
 	}
 
-
 	const Eigen::SparseMatrix<std::complex<double>>& getGlobalKMatrix() const
 	{
 		return global_k_matrix;
@@ -109,18 +108,15 @@ public:
 		return global_c_matrix;
 	}
 
-
 	const Eigen::VectorXi& getGlobalDirichletBCFlagsVector() const
 	{
 		return global_dirichlet_BC_flags_vector;
 	}
 
-
 	const Eigen::VectorXd& getGlobalInitialFieldVector() const
 	{
 		return global_initial_field_vector;
 	}
-
 	
 	const Eigen::VectorXd& getGlobalInitialDerivFieldVector() const
 	{
@@ -129,6 +125,7 @@ public:
 
 	const Eigen::VectorXd& getGlobalLoadVector(double time) const;
 
+	const Eigen::VectorXd& getReducedGlobalLoadVector(double time) const;
 
 	void create_global_matrices();
 
@@ -155,6 +152,8 @@ private:
 	Eigen::VectorXd global_initial_derivfield_vector; // Global initial condition derivative field vector
 
 	std::unordered_map<int, nodal_load_store> load_maps; // Load maps for the nodes
+
+	std::unordered_map<int, int> free_map; // Map free DOF to Local indices
 
 	// Quadrature points for triangle element
 	std::vector<spectral_point> triangle_quadrature_points;

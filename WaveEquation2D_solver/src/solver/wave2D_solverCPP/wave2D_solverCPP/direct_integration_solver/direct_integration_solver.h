@@ -4,6 +4,20 @@
 #include "direct_integration_matrices.h"
 
 
+
+struct direct_integration_nodal_results_store
+{
+	int node_id = 0;
+
+	std::vector<double> field_vector; // Displacement or field values at the node over time
+	std::vector<double> field_derivative_vector; // Velocity or field derivative values at the node over time
+	std::vector<double> field_acceleration_vector; // Acceleration or field second derivative values at the node over time
+};
+
+
+
+
+
 class direct_integration_solver
 {
 

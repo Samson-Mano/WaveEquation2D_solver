@@ -31,7 +31,7 @@ struct source_load_vector_data
 
 
 
-struct nodal_results_store
+struct modal_superposition_nodal_results_store
 {
 	int node_id = 0;
 	
@@ -71,7 +71,7 @@ private:
 
 
 	void store_results(const modal_spectral_solver& modal_spec_solver,
-		const std::unordered_map<int, nodal_results_store>& nodal_results, 
+		const std::unordered_map<int, modal_superposition_nodal_results_store>& nodal_results, 
 		double geom_min_x, double geom_min_y, double scale_value);
 
 

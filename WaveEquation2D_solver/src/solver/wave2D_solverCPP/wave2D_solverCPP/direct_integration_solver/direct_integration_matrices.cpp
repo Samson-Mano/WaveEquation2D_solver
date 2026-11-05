@@ -423,6 +423,42 @@ void direct_integration_matrices::create_initialcondition_load_vector()
 			global_initial_derivfield_vector(i) /= initial_BC_derivfieldcount_vector(i);
 		}
 	}
+
+	// Find the fixed and free nodes dof
+	std::vector<int> free_dofs;
+	std::vector<int> fixed_dofs;
+
+	for (int i = 0; i < this->numDOF; ++i)
+	{
+		if (global_dirichlet_BC_flags_vector(i))
+			fixed_dofs.push_back(i);
+		else
+			free_dofs.push_back(i);
+	}
+
+	// Map free DOF to Local indices
+	this->free_map.clear();
+	for (int i = 0; i < free_dofs.size(); ++i)
+	{
+		this->free_map[free_dofs[i]] = i;
+	}
+
+
+
+
+	// Create the message string and convert to const char*
+	std::string sizeMsg = "Global Initial Field vector created. Size: " +
+		std::to_string(global_initial_field_vector.rows()) +
+		", Non-zeros: " + std::to_string(global_initial_field_vector.nonZeros());
+
+	report(sizeMsg.c_str());
+
+	sizeMsg = "Global Initial Derivative Field vector created. Size: " +
+		std::to_string(global_initial_derivfield_vector.rows()) +
+		", Non-zeros: " + std::to_string(global_initial_derivfield_vector.nonZeros());
+
+	report(sizeMsg.c_str());
+
 //
 }
 
@@ -451,6 +487,14 @@ void direct_integration_matrices::create_global_damping_matrix(double global_dam
 
 	global_c_matrix = alpha * global_m_matrix + beta * global_k_matrix;
 
+
+	// Create the message string and convert to const char*
+	std::string sizeMsg = "Global C matrix created. Size: " +
+		std::to_string(global_c_matrix.rows()) + "x" +
+		std::to_string(global_c_matrix.cols()) +
+		", Non-zeros: " + std::to_string(global_c_matrix.nonZeros());
+
+	report(sizeMsg.c_str());
 
 }
 
@@ -1848,6 +1892,28 @@ const Eigen::VectorXd& direct_integration_matrices::getGlobalLoadVector(double t
 	return global_load_vector;
 }
 
+
+const Eigen::VectorXd& direct_integration_matrices::getReducedGlobalLoadVector(double time) const
+{
+	int n_free = static_cast<int>(this->free_map.size());
+
+	Eigen::VectorXd reduced_global_load_vector(n_free);
+	reduced_global_load_vector.setZero();
+
+	for (const auto& [i, load_store] : load_maps)
+	{
+		if (this->free_map.find(i) == this->free_map.end())
+		{
+			continue; // Skip if the node is not in the free map
+		}
+
+		double amplitude = load_store.get_load_amplitude_at_time(time);
+		reduced_global_load_vector(this->free_map.at(i)) += amplitude;
+
+	}
+
+	return reduced_global_load_vector;
+}
 
 
 void nodal_load_store::add_loads(int load_set_id, const load_vector_store& load_values)

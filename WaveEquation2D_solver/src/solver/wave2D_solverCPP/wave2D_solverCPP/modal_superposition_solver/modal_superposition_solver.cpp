@@ -202,7 +202,7 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 
 	//____________________________________________________________________________________________________________________
 
-	std::unordered_map<int, nodal_results_store> nodal_results; // Map to store nodal results
+	std::unordered_map<int, modal_superposition_nodal_results_store> nodal_results; // Map to store nodal results
 
 	const int num_steps =
 		static_cast<int>(TotalSimulationTime / TimeIncrement) + 1;
@@ -416,7 +416,7 @@ bool modal_superposition_solver::perform_modal_superposition_solve(int inpt_num_
 
 
 void modal_superposition_solver::store_results(const modal_spectral_solver& modal_spec_solver,
-	const std::unordered_map<int, nodal_results_store>& nodal_results,
+	const std::unordered_map<int, modal_superposition_nodal_results_store>& nodal_results,
 	double geom_min_x, double geom_min_y, double scale_value)
 {
 	std::ofstream bin_file(this->output_file.c_str(), std::ios::binary);
@@ -498,7 +498,7 @@ void modal_superposition_solver::store_results(const modal_spectral_solver& moda
 		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
 
 		// Get the nodal results for the current node
-		const nodal_results_store& n_result =   nodal_results.at(node.n_id);
+		const modal_superposition_nodal_results_store& n_result =   nodal_results.at(node.n_id);
 
 		bin_file.write(reinterpret_cast<const char*>(n_result.field_vector.data()),
 			static_cast<std::streamsize>(n_result.field_vector.size() * sizeof(double)));
