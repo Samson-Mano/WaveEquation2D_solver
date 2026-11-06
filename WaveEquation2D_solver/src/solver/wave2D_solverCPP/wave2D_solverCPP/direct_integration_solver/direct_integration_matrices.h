@@ -92,6 +92,11 @@ public:
 		return numDOF;
 	}
 
+	const spectral_mesh2d& getSpectralMesh2D() const
+	{
+		return spec_mesh2d;
+	}
+
 
 	const Eigen::SparseMatrix<std::complex<double>>& getGlobalMMatrix() const
 	{

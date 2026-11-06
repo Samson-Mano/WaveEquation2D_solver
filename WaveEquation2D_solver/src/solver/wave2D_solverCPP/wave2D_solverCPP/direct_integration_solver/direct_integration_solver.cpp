@@ -89,7 +89,7 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 	std::vector<Eigen::Triplet<std::complex<double>>> Kt, Mt, Ct;
 	int n_free = static_cast<int>(free_dofs.size());
-
+	int n_fixed = static_cast<int>(fixed_dofs.size());
 
 	// Extract K_ff
 	for (int k = 0; k < global_k_matrix.outerSize(); ++k)
@@ -183,6 +183,8 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 	report("Reduced matrices created successfully");
 	//___________________________________________________________________________________________________________
+	std::unordered_map<int, direct_integration_nodal_results_store> nodal_results; // Map to store nodal results
+
 
 	const double sub_dt = TimeIncrement / number_of_intermediatesteps;
 
@@ -191,125 +193,220 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	const double gamma = 0.5;   // Newmark gamma
 	const double beta = 1.0 / 6.0;  // Newmark beta
 
-	// Initial calculation of the effective stiffness matrix
-	// Inverse of mass matrix
-	Eigen::SparseMatrix<std::complex<double>> M_ff_inv(n_free, n_free);
-	{
-		Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> solver;
-		solver.analyzePattern(M_ff);
-		solver.factorize(M_ff);
-		std::vector<Eigen::Triplet<std::complex<double>>> inv_triplets;
-		for (int k = 0; k < n_free; ++k)
-		{
-			Eigen::VectorXcd e_k = Eigen::VectorXcd::Zero(n_free);
-			e_k(k) = 1.0;
-			Eigen::VectorXcd x_k = solver.solve(e_k);
-			for (int j = 0; j < n_free; ++j)
-			{
-				if (std::abs(x_k(j)) > 1e-12)
-				{
-					inv_triplets.emplace_back(j, k, x_k(j));
-				}
-			}
-		}
-		M_ff_inv.setFromTriplets(inv_triplets.begin(), inv_triplets.end());
-	}
+	// --- Initial acceleration: solve M a0 = F0 - C v0 - K u0 ---
+	Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> M_solver;
+	M_solver.analyzePattern(M_ff);
+	M_solver.factorize(M_ff);
 
-	// Iniital acceleration
-	Eigen::VectorXcd initial_acceleration_free = M_ff_inv * (load_vector_free.cast<std::complex<double>>() - C_ff * initial_velocity_free.cast<std::complex<double>>() - K_ff * initial_displacement_free.cast<std::complex<double>>());
+	Eigen::VectorXcd u = initial_displacement_free.cast<std::complex<double>>();
+	Eigen::VectorXcd v = initial_velocity_free.cast<std::complex<double>>();
+	Eigen::VectorXcd F0 = load_vector_free.cast<std::complex<double>>();
+	Eigen::VectorXcd a = M_solver.solve(F0 - C_ff * v - K_ff * u);
 
-	Eigen::SparseMatrix<std::complex<double>> a1 = (1.0 / (beta * sub_dt * sub_dt)) * M_ff + (gamma / (beta * sub_dt)) * C_ff + K_ff;
+	Eigen::SparseMatrix<std::complex<double>> a1 = (1.0 / (beta * sub_dt * sub_dt)) * M_ff + (gamma / (beta * sub_dt)) * C_ff;
 	Eigen::SparseMatrix<std::complex<double>> a2 = (1.0 / (beta * sub_dt)) * M_ff + ((gamma / beta) - 1.0) * C_ff;
-	Eigen::SparseMatrix<std::complex<double>> a3 = ((1.0 / (2.0 * beta)) - 1.0) * M_ff + sub_dt * (gamma / (2.0 * beta) - 1.0) * C_ff;
+	Eigen::SparseMatrix<std::complex<double>> a3 = ((1.0 / (2.0 * beta)) - 1.0) * M_ff + sub_dt * ((gamma / (2.0 * beta)) - 1.0) * C_ff;
 
 	// Calculate the effective stiffness matrix
-	Eigen::SparseMatrix<std::complex<double>> effective_stiffness_matrix = K_ff + a1;
+	Eigen::SparseMatrix<std::complex<double>> K_eff = K_ff + a1;
+	K_eff.makeCompressed();
 
-	// Invert the effective stiffness matrix
-	Eigen::SparseMatrix<std::complex<double>> effective_stiffness_matrix_inv(n_free, n_free);
-	{
-		Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> solver;
-		solver.analyzePattern(effective_stiffness_matrix);
-		solver.factorize(effective_stiffness_matrix);
-		std::vector<Eigen::Triplet<std::complex<double>>> inv_triplets;
-		for (int k = 0; k < n_free; ++k)
-		{
-			Eigen::VectorXcd e_k = Eigen::VectorXcd::Zero(n_free);
-			e_k(k) = 1.0;
-			Eigen::VectorXcd x_k = solver.solve(e_k);
-			for (int j = 0; j < n_free; ++j)
-			{
-				if (std::abs(x_k(j)) > 1e-12)
-				{
-					inv_triplets.emplace_back(j, k, x_k(j));
-				}
-			}
-		}
-		effective_stiffness_matrix_inv.setFromTriplets(inv_triplets.begin(), inv_triplets.end());
-	}
-
-	// Results store
-	Eigen::VectorXcd displacement_free = initial_displacement_free;
-	Eigen::VectorXcd velocity_free = initial_velocity_free;
-	Eigen::VectorXcd acceleration_free = initial_acceleration_free;
-
-
-	std::unordered_map<int, direct_integration_nodal_results_store> nodal_results; // Map to store nodal results
-
-	// Store the results for the initial time step
-	for (int k = 0; k < n_free; ++k)
-	{
-		int global_idx = free_dofs[k];
-		auto& nodal_result = nodal_results[global_idx];
-		
-		nodal_result.node_id = global_idx;
-
-		nodal_result.field_vector[0] = displacement_free(k).real();
-		nodal_result.field_derivative_vector[0] = velocity_free(k).real();
-		nodal_result.field_acceleration_vector[0] = acceleration_free(k).real();
-	}
+	Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
+	K_solver.analyzePattern(K_eff);
+	K_solver.factorize(K_eff);
 
 
 	// Start of time integration loop
 	int number_of_mainsteps = static_cast<int>(TotalSimulationTime / TimeIncrement);
 	double current_time = 0.0;
 
+	// Store results at initial time step (t=0)
+	store_results_at_timestep(0, free_dofs, fixed_dofs, u, v, a, nodal_results);
+
+	// --- Time loop ---
+	double current_time = 0.0;
 	for (int main_step = 0; main_step < number_of_mainsteps; ++main_step)
 	{
 		for (int sub = 0; sub < number_of_intermediatesteps; ++sub)
 		{
-			double t_next = current_time + sub_dt;
+			const double t_next = current_time + sub_dt;
+			Eigen::VectorXcd F_next =
+				direct_integration_matrices_solver.getReducedGlobalLoadVector(t_next)
+				.cast<std::complex<double>>();
 
-			// Get the load vector at the next time step
-			Eigen::VectorXd load_vector_next = direct_integration_matrices_solver.getReducedGlobalLoadVector(t_next);
+			Eigen::VectorXcd rhs = F_next + a1 * u + a2 * v + a3 * a;
+			Eigen::VectorXcd u_next = K_solver.solve(rhs);
 
-			Eigen::VectorXcd effective_load_vector = load_vector_next.cast<std::complex<double>>() + a1 * displacement_free + a2 * velocity_free + a3 * acceleration_free;
+			Eigen::VectorXcd a_next =
+				(1.0 / (beta * sub_dt * sub_dt)) * (u_next - u)
+				- (1.0 / (beta * sub_dt)) * v
+				- ((1.0 / (2.0 * beta)) - 1.0) * a;
+			Eigen::VectorXcd v_next = v + sub_dt * ((1.0 - gamma) * a + gamma * a_next);
 
-			// Solve for the next displacement
-			Eigen::VectorXcd displacement_free_next = effective_stiffness_matrix_inv * effective_load_vector;
-
-			// Update velocity and acceleration
-			Eigen::VectorXcd acceleration_free_next = (1.0 / (beta * sub_dt * sub_dt)) * (displacement_free_next - displacement_free) - (1.0 / (beta * sub_dt)) * velocity_free - ((1.0 / (2.0 * beta)) - 1.0) * acceleration_free;
-			Eigen::VectorXcd velocity_free_next = velocity_free + sub_dt * ((1.0 - gamma) * acceleration_free + gamma * acceleration_free_next);
-
-			// Update the current state
-			displacement_free = displacement_free_next;
-			velocity_free = velocity_free_next;
-			acceleration_free = acceleration_free_next;
-
-			current_time = t_next;	
+			u = u_next; v = v_next; a = a_next;
+			current_time = t_next;
 		}
 
-		// After each main step, store the results to the output file
-
-
+		// store results at index main_step + 1 ...
+		store_results_at_timestep(main_step + 1, free_dofs, fixed_dofs, u, v, a, nodal_results);
 
 	}
 
 
+	const spectral_mesh2d& spec_mesh2d = direct_integration_matrices_solver.getSpectralMesh2D();
+	
+	store_results(spec_mesh2d, nodal_results, geom_min_x, geom_min_y, scale_value);
+
 	return false;
 }
 
+
+void direct_integration_solver::store_results_at_timestep(int main_step, 
+	const std::vector<int>& free_dofs, const std::vector<int>& fixed_dofs,
+	const Eigen::VectorXcd& u, const Eigen::VectorXcd& v, const Eigen::VectorXcd& a,
+	std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results)
+{
+
+	// Store results for free DOFs
+	for (int k = 0; k < free_dofs.size(); ++k)
+	{
+		int global_idx = free_dofs[k];
+		auto& nodal_result = nodal_results[global_idx];
+		nodal_result.node_id = global_idx;
+		nodal_result.field_vector[main_step] = u(k).real();
+		nodal_result.field_derivative_vector[main_step] = v(k).real();
+		nodal_result.field_acceleration_vector[main_step] = a(k).real();
+	}
+
+	// Store results for fixed DOFs (assumed to be zero)
+	for (int k = 0; k < fixed_dofs.size(); ++k)
+	{
+		int global_idx = fixed_dofs[k];
+		auto& nodal_result = nodal_results[global_idx];
+		nodal_result.node_id = global_idx;
+		nodal_result.field_vector[main_step] = 0.0;
+		nodal_result.field_derivative_vector[main_step] = 0.0;
+		nodal_result.field_acceleration_vector[main_step] = 0.0;
+	}
+}
+
+
+void direct_integration_solver::store_results(const spectral_mesh2d& spec_mesh2d, 
+	const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results,
+	double geom_min_x, double geom_min_y, double scale_value)
+{
+
+	std::ofstream bin_file(this->output_file.c_str(), std::ios::binary);
+
+	if (!bin_file.is_open())
+	{
+		std::string error_msg = "Failed to open output file: " + this->output_file;
+		report(error_msg.c_str());
+		throw std::runtime_error(error_msg);
+	}
+
+
+	int32_t node_points_count = static_cast<int32_t>(spec_mesh2d.renderer_node_points.size());
+	bin_file.write(reinterpret_cast<const char*>(&node_points_count), sizeof(int32_t));
+
+	// Write the nodes
+	for (const auto& node : spec_mesh2d.renderer_node_points)
+	{
+		int32_t nodeid = static_cast<int32_t>(node.n_id);
+		double scaled_x = (node.x / scale_value) + geom_min_x;
+		double scaled_y = (node.y / scale_value) + geom_min_y;
+
+		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&scaled_x), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&scaled_y), sizeof(double));
+
+	}
+
+	report("Results: Nodes written");
+
+	int32_t edge_lines_count = static_cast<int32_t>(spec_mesh2d.renderer_edge_lines.size());
+	bin_file.write(reinterpret_cast<const char*>(&edge_lines_count), sizeof(int32_t));
+
+	// Write the edges
+	for (const auto& edge : spec_mesh2d.renderer_edge_lines)
+	{
+		int32_t start_nodeid = static_cast<int32_t>(edge.nstart);
+		int32_t end_nodeid = static_cast<int32_t>(edge.nend);
+
+		bin_file.write(reinterpret_cast<const char*>(&start_nodeid), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&end_nodeid), sizeof(int32_t));
+	}
+
+	report("Results: Edges written");
+
+	int32_t triangles_count = static_cast<int32_t>(spec_mesh2d.renderer_element_triangles.size());
+	bin_file.write(reinterpret_cast<const char*>(&triangles_count), sizeof(int32_t));
+
+	// Write the triangles
+	for (const auto& tri : spec_mesh2d.renderer_element_triangles)
+	{
+		int32_t n1 = static_cast<int32_t>(tri.n1);
+		int32_t n2 = static_cast<int32_t>(tri.n2);
+		int32_t n3 = static_cast<int32_t>(tri.n3);
+
+		bin_file.write(reinterpret_cast<const char*>(&n1), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&n2), sizeof(int32_t));
+		bin_file.write(reinterpret_cast<const char*>(&n3), sizeof(int32_t));
+	}
+
+	report("Results: Triangles written");
+
+	int32_t time_vector_size = static_cast<int32_t>(time_vector.size());
+	bin_file.write(reinterpret_cast<const char*>(&time_vector_size), sizeof(int32_t));
+
+
+	// Write the time vector
+	bin_file.write(reinterpret_cast<const char*>(this->time_vector.data()),
+		static_cast<std::streamsize>(this->time_vector.size() * sizeof(double)));
+
+
+	report("Time vectors written");
+
+
+	for (const auto& node : spec_mesh2d.renderer_node_points)
+	{
+		int32_t nodeid = static_cast<int32_t>(node.n_id);
+		// Write the node ID
+		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
+
+		// Get the nodal results for the current node
+		const direct_integration_nodal_results_store& n_result = nodal_results.at(node.n_id);
+
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_vector.data()),
+			static_cast<std::streamsize>(n_result.field_vector.size() * sizeof(double)));
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_derivative_vector.data()),
+			static_cast<std::streamsize>(n_result.field_derivative_vector.size() * sizeof(double)));
+		bin_file.write(reinterpret_cast<const char*>(n_result.field_acceleration_vector.data()),
+			static_cast<std::streamsize>(n_result.field_acceleration_vector.size() * sizeof(double)));
+
+
+	}
+
+	report("Nodal results written");
+
+
+
+	bin_file.flush();
+
+	auto file_size = bin_file.tellp();  // tellp() for output file (tellg() is for input)
+
+	bin_file.close();
+
+	// Report Success and file size
+	std::string success_msg = "Results stored successfully: " +
+		this->output_file +
+		" (" + std::to_string(node_points_count) + " nodes, " +
+		std::to_string(triangles_count) + " triangles)";
+	report(success_msg.c_str());
+
+	//
+
+}
 
 
 

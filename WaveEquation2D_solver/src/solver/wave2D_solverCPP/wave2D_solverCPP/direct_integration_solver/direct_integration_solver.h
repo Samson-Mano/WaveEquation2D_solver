@@ -3,7 +3,7 @@
 #include "../system_store/stopwatch_events.h"
 #include "direct_integration_matrices.h"
 
-
+#include <fstream>
 
 struct direct_integration_nodal_results_store
 {
@@ -46,9 +46,13 @@ private:
 	std::vector<double> time_vector;
 
 
-	//void store_results(const modal_spectral_solver& modal_spec_solver,
-	//	const std::unordered_map<int, nodal_results_store>& nodal_results,
-	//	double geom_min_x, double geom_min_y, double scale_value);
+	void store_results_at_timestep(int main_step, const std::vector<int>& free_dofs, const std::vector<int>& fixed_dofs,
+		const Eigen::VectorXcd& u, const Eigen::VectorXcd& v, const Eigen::VectorXcd& a,
+		std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results);
+
+	void store_results(const spectral_mesh2d& spec_mesh2d, 
+		const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results,
+		double geom_min_x, double geom_min_y, double scale_value);
 
 
 	void(*m_callback)(const char*) = nullptr;

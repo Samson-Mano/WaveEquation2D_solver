@@ -11,7 +11,7 @@
 #include "system_store/wave2d_system_store.h"
 #include "system_store/stopwatch_events.h"
 #include "modal_superposition_solver/modal_superposition_solver.h"
-
+#include "direct_integration_solver/direct_integration_solver.h"
 
 int main()
 {
@@ -379,11 +379,29 @@ int main()
 	// Perform modal analysis
 	if (SolverType == 0)
 	{
-		// Direct Time Integration Solver
+		try
+		{
+			//_________________________________________________________
+			// Direct Time Integration Solver
+			direct_integration_solver direct_integration_solver;
 
+			direct_integration_solver.init(&wave_system, output_file_char, &stopwatch, m_callback);
 
+			// Perform direct time integration solve
+			isAnalysisSuccess = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
+				DampingRatio, TotalSimulationTime, TimeIncrement, geom_min_x, geom_min_y, scale_value);
 
-		isAnalysisSuccess = false;
+		}
+		catch (const std::exception& e)
+		{
+			std::cout << "Error during direct time integration analysis: " + std::string(e.what()) << std::endl;
+			isAnalysisSuccess = false;
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error during direct time integration analysis." << std::endl;
+			isAnalysisSuccess = false;
+		}
 
 	}
 	else if (SolverType == 1)
@@ -393,7 +411,6 @@ int main()
 		{
 			//_________________________________________________________
 			// Modal Superposition Solver
-
 			modal_superposition_solver modal_superposition_solver;
 
 			modal_superposition_solver.init(&wave_system, output_file_char, &stopwatch, m_callback);
