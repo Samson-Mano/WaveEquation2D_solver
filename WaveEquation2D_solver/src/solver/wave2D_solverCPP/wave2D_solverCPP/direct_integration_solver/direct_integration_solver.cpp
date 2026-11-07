@@ -65,12 +65,16 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 	Eigen::VectorXi global_dirichlet_BC_flags_vector = direct_integration_matrices_solver.getGlobalDirichletBCFlagsVector();
 
+	report("Matrices created successfully");
+
 	// Reduce the global matrices and vectors based on Dirichlet boundary conditions
 	// Find the fixed and free nodes dof
 	std::vector<int> free_dofs;
 	std::vector<int> fixed_dofs;
 
-	for (int i = 0; i < direct_integration_matrices_solver.getNumDOF(); ++i)
+	const int numDOF = direct_integration_matrices_solver.getNumDOF();
+
+	for (int i = 0; i < numDOF; ++i)
 	{
 		if (global_dirichlet_BC_flags_vector(i))
 			fixed_dofs.push_back(i);
@@ -185,11 +189,24 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	//___________________________________________________________________________________________________________
 	std::unordered_map<int, direct_integration_nodal_results_store> nodal_results; // Map to store nodal results
 
+	int number_of_mainsteps = static_cast<int>(TotalSimulationTime / TimeIncrement) + 1;
+	
+	for (int node_id = 0; node_id < numDOF; ++node_id)
+	{
+		auto& nr = nodal_results[node_id];
+		nr.node_id = node_id;
 
-	const double sub_dt = TimeIncrement / number_of_intermediatesteps;
+		nr.field_vector.resize(number_of_mainsteps + 1);
+		nr.field_derivative_vector.resize(number_of_mainsteps + 1);
+		nr.field_acceleration_vector.resize(number_of_mainsteps + 1);
+	}
+
+	this->time_vector.resize(number_of_mainsteps + 1);
 
 	// Newmark-beta method parameters 
 	// Linear acceleration method (unconditionally stable)
+	const double sub_dt = TimeIncrement / number_of_intermediatesteps;
+
 	const double gamma = 0.5;   // Newmark gamma
 	const double beta = 1.0 / 6.0;  // Newmark beta
 
@@ -216,15 +233,13 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	K_solver.factorize(K_eff);
 
 
-	// Start of time integration loop
-	int number_of_mainsteps = static_cast<int>(TotalSimulationTime / TimeIncrement);
-	double current_time = 0.0;
-
 	// Store results at initial time step (t=0)
 	store_results_at_timestep(0, free_dofs, fixed_dofs, u, v, a, nodal_results);
 
 	// --- Time loop ---
+	// Start of time integration loop
 	double current_time = 0.0;
+
 	for (int main_step = 0; main_step < number_of_mainsteps; ++main_step)
 	{
 		for (int sub = 0; sub < number_of_intermediatesteps; ++sub)

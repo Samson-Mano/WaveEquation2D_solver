@@ -41,7 +41,7 @@ int main()
 
 
 	// Read the solver settings
-	int SolverType = 1; // 0: Modal Superposition, 1: Direct Time Integration
+	int SolverType = 0; // 0: Modal Superposition, 1: Direct Time Integration
 	int HRefinement = 0; // 0, 1, 2
 	int SpectralOrderN = 3; // 3, 4, 5, 6, 7, 8, 9, 10
 
