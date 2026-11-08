@@ -183,7 +183,9 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 		initial_velocity_free(k) = initial_velocity(global_idx);
 	}
 
-	Eigen::VectorXd load_vector_free = direct_integration_matrices_solver.getReducedGlobalLoadVector(0.0);
+	Eigen::VectorXcd load_vector_at_t(n_free);
+
+	direct_integration_matrices_solver.getReducedGlobalLoadVector(0.0, load_vector_at_t);
 
 	report("Reduced matrices created successfully");
 	//___________________________________________________________________________________________________________
@@ -217,7 +219,7 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 	Eigen::VectorXcd u = initial_displacement_free.cast<std::complex<double>>();
 	Eigen::VectorXcd v = initial_velocity_free.cast<std::complex<double>>();
-	Eigen::VectorXcd F0 = load_vector_free.cast<std::complex<double>>();
+	Eigen::VectorXcd F0 = load_vector_at_t;
 	Eigen::VectorXcd a = M_solver.solve(F0 - C_ff * v - K_ff * u);
 
 	Eigen::SparseMatrix<std::complex<double>> a1 = (1.0 / (beta * sub_dt * sub_dt)) * M_ff + (gamma / (beta * sub_dt)) * C_ff;
@@ -245,11 +247,10 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 		for (int sub = 0; sub < number_of_intermediatesteps; ++sub)
 		{
 			const double t_next = current_time + sub_dt;
-			Eigen::VectorXcd F_next =
-				direct_integration_matrices_solver.getReducedGlobalLoadVector(t_next)
-				.cast<std::complex<double>>();
 
-			Eigen::VectorXcd rhs = F_next + a1 * u + a2 * v + a3 * a;
+			direct_integration_matrices_solver.getReducedGlobalLoadVector(t_next, load_vector_at_t);
+
+			Eigen::VectorXcd rhs = load_vector_at_t + a1 * u + a2 * v + a3 * a;
 			Eigen::VectorXcd u_next = K_solver.solve(rhs);
 
 			Eigen::VectorXcd a_next =

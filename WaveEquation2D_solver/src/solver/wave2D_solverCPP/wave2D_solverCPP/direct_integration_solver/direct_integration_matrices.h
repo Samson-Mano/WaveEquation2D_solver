@@ -73,6 +73,12 @@ private:
 
 };
 
+struct LoadContribution 
+{
+	int free_index;
+	const nodal_load_store* store;
+};
+
 
 
 class direct_integration_matrices
@@ -130,7 +136,7 @@ public:
 
 	const Eigen::VectorXd& getGlobalLoadVector(double time) const;
 
-	const Eigen::VectorXd& getReducedGlobalLoadVector(double time) const;
+	const void getReducedGlobalLoadVector(double time, Eigen::VectorXcd& reduced_global_load_vector) const;
 
 	void create_global_matrices();
 
@@ -177,6 +183,12 @@ private:
 	// Quadrature points for quadrilateral element
 	std::vector<spectral_point> quadrilateral_quadrature_points;
 	
+
+	std::vector<LoadContribution> load_contributions;  // precomputed
+	std::vector<int> free_indices;       // parallel to loads
+	Eigen::VectorXd load_buffer;        // sized once
+	Eigen::VectorXcd load_complex_buffer;// sized once
+
 
 	//________________________________________________________________________________________________
 

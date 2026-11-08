@@ -444,6 +444,18 @@ void direct_integration_matrices::create_initialcondition_load_vector()
 	}
 
 
+	// Setup the load contributions for free DOFs
+	int n_free = static_cast<int>(free_map.size());
+	load_buffer.resize(n_free);
+	load_contributions.clear();
+	load_contributions.reserve(load_maps.size());
+
+	for (const auto& [i, load_store] : load_maps) 
+	{
+		auto it = free_map.find(i);
+		if (it == free_map.end()) continue;
+		load_contributions.push_back({ it->second, &load_store });
+	}
 
 
 	// Create the message string and convert to const char*
@@ -1893,26 +1905,19 @@ const Eigen::VectorXd& direct_integration_matrices::getGlobalLoadVector(double t
 }
 
 
-const Eigen::VectorXd& direct_integration_matrices::getReducedGlobalLoadVector(double time) const
+const void direct_integration_matrices::getReducedGlobalLoadVector(double time, Eigen::VectorXcd& reduced_global_load_vector) const
 {
-	int n_free = static_cast<int>(this->free_map.size());
 
-	Eigen::VectorXd reduced_global_load_vector(n_free);
-	reduced_global_load_vector.setZero();
+	reduced_global_load_vector.real().setZero();
+	reduced_global_load_vector.imag().setZero();
 
 	for (const auto& [i, load_store] : load_maps)
 	{
-		if (this->free_map.find(i) == this->free_map.end())
-		{
-			continue; // Skip if the node is not in the free map
-		}
-
 		double amplitude = load_store.get_load_amplitude_at_time(time);
-		reduced_global_load_vector(this->free_map.at(i)) += amplitude;
+		reduced_global_load_vector.real()(this->free_map.at(i)) += amplitude;
 
 	}
 
-	return reduced_global_load_vector;
 }
 
 
