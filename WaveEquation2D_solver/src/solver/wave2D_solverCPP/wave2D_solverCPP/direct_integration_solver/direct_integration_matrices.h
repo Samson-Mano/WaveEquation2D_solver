@@ -29,6 +29,7 @@ typedef Eigen::SparseMatrix<double> SparseMatrix;
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <Eigen/PardisoSupport>
 
 #pragma warning(pop)
 
@@ -188,7 +189,6 @@ private:
 	std::vector<int> free_indices;       // parallel to loads
 	Eigen::VectorXd load_buffer;        // sized once
 	Eigen::VectorXcd load_complex_buffer;// sized once
-
 
 	//________________________________________________________________________________________________
 

@@ -27,7 +27,7 @@ void direct_integration_solver::init(wave2d_system_store * wave_2dsystem_ptr,
 	// CRITICAL: Copy the string to std::string for permanent storage
 	this->output_file = std::string(output_file_char);
 
-	std::string msg = "Output file set to: " + this->output_file;
+	msg = "Output file set to: " + this->output_file;
 	report(msg.c_str());
 
 }
@@ -64,8 +64,6 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	Eigen::SparseMatrix<std::complex<double>> global_c_matrix = direct_integration_matrices_solver.getGlobalCMatrix();
 
 	Eigen::VectorXi global_dirichlet_BC_flags_vector = direct_integration_matrices_solver.getGlobalDirichletBCFlagsVector();
-
-	report("Matrices created successfully");
 
 	// Reduce the global matrices and vectors based on Dirichlet boundary conditions
 	// Find the fixed and free nodes dof
@@ -172,6 +170,9 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	C_ff.makeCompressed();
 
 
+	report("Matrices created successfully_____________________________________");
+
+
 	Eigen::VectorXd initial_displacement_free(n_free);
 	Eigen::VectorXd initial_velocity_free(n_free);
 
@@ -222,15 +223,26 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	Eigen::VectorXcd F0 = load_vector_at_t;
 	Eigen::VectorXcd a = M_solver.solve(F0 - C_ff * v - K_ff * u);
 
-	Eigen::SparseMatrix<std::complex<double>> a1 = (1.0 / (beta * sub_dt * sub_dt)) * M_ff + (gamma / (beta * sub_dt)) * C_ff;
-	Eigen::SparseMatrix<std::complex<double>> a2 = (1.0 / (beta * sub_dt)) * M_ff + ((gamma / beta) - 1.0) * C_ff;
-	Eigen::SparseMatrix<std::complex<double>> a3 = ((1.0 / (2.0 * beta)) - 1.0) * M_ff + sub_dt * ((gamma / (2.0 * beta)) - 1.0) * C_ff;
+	// Precompute Newmark scalars
+	const double inv_beta_dt2 = 1.0 / (beta * sub_dt * sub_dt);
+	const double inv_beta_dt = 1.0 / (beta * sub_dt);
+	const double half_beta_m1 = (1.0 / (2.0 * beta)) - 1.0;
+
+	const double dt_gammainv2beta_m1 = sub_dt * ((gamma / (2.0 * beta)) - 1.0);
+	const double gammainvbeta_m1 = (gamma / beta) - 1.0;
+	const double gammainvbetadt = (gamma / (beta * sub_dt));
+
+
+	Eigen::SparseMatrix<std::complex<double>> a1 = inv_beta_dt2 * M_ff + gammainvbetadt * C_ff;
+	Eigen::SparseMatrix<std::complex<double>> a2 = inv_beta_dt * M_ff + gammainvbeta_m1 * C_ff;
+	Eigen::SparseMatrix<std::complex<double>> a3 = half_beta_m1 * M_ff + dt_gammainv2beta_m1 * C_ff;
 
 	// Calculate the effective stiffness matrix
 	Eigen::SparseMatrix<std::complex<double>> K_eff = K_ff + a1;
 	K_eff.makeCompressed();
 
-	Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
+	// Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
+	Eigen::PardisoLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
 	K_solver.analyzePattern(K_eff);
 	K_solver.factorize(K_eff);
 
@@ -241,6 +253,13 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	// --- Time loop ---
 	// Start of time integration loop
 	double current_time = 0.0;
+	time_vector[0] = current_time;
+
+	report("Starting time integration loop_____________________________________");
+	Eigen::VectorXcd rhs(n_free), u_next(n_free), v_next(n_free), a_next(n_free);
+
+
+	int next_milestone = 10;  // Start with 10 %
 
 	for (int main_step = 0; main_step < number_of_mainsteps; ++main_step)
 	{
@@ -250,30 +269,54 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 			direct_integration_matrices_solver.getReducedGlobalLoadVector(t_next, load_vector_at_t);
 
-			Eigen::VectorXcd rhs = load_vector_at_t + a1 * u + a2 * v + a3 * a;
-			Eigen::VectorXcd u_next = K_solver.solve(rhs);
+			rhs = load_vector_at_t;
+			rhs.noalias() += a1 * u;
+			rhs.noalias() += a2 * v;
+			rhs.noalias() += a3 * a;
+			
 
-			Eigen::VectorXcd a_next =
-				(1.0 / (beta * sub_dt * sub_dt)) * (u_next - u)
-				- (1.0 / (beta * sub_dt)) * v
-				- ((1.0 / (2.0 * beta)) - 1.0) * a;
-			Eigen::VectorXcd v_next = v + sub_dt * ((1.0 - gamma) * a + gamma * a_next);
+			u_next.noalias() = K_solver.solve(rhs);
 
-			u = u_next; v = v_next; a = a_next;
+			v_next = gammainvbetadt * (u_next - u) - gammainvbeta_m1 * v - dt_gammainv2beta_m1 * a;
+			a_next = inv_beta_dt2 * (u_next - u) - inv_beta_dt * v - half_beta_m1 * a;
+
+			u.swap(u_next);
+			v.swap(v_next);
+			a.swap(a_next);
+
 			current_time = t_next;
 		}
 
 		// store results at index main_step + 1 ...
 		store_results_at_timestep(main_step + 1, free_dofs, fixed_dofs, u, v, a, nodal_results);
 
+		// Add to time vector
+		time_vector[main_step + 1] = current_time;
+
+		// Report progress
+		int progress = static_cast<int>(100.0 * (main_step + 1) / number_of_mainsteps);
+		if (progress >= next_milestone)
+		{
+			msg = "Time integration progress: " + std::to_string(progress) + "%";
+			report(msg.c_str());
+			next_milestone += 10;  // Update next milestone
+		}
+
 	}
 
+
+	// Report completion
+	msg = "Direct time integration analysis completed successfully.";
+	report(msg.c_str());
 
 	const spectral_mesh2d& spec_mesh2d = direct_integration_matrices_solver.getSpectralMesh2D();
 	
 	store_results(spec_mesh2d, nodal_results, geom_min_x, geom_min_y, scale_value);
 
-	return false;
+	msg = "Direct time integration results stored successfully in: " + this->output_file;
+	report(msg.c_str());
+
+	return true;
 }
 
 

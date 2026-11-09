@@ -45,6 +45,8 @@ private:
 
 	std::vector<double> time_vector;
 
+	std::string msg = "";
+
 
 	void store_results_at_timestep(int main_step, const std::vector<int>& free_dofs, const std::vector<int>& fixed_dofs,
 		const Eigen::VectorXcd& u, const Eigen::VectorXcd& v, const Eigen::VectorXcd& a,

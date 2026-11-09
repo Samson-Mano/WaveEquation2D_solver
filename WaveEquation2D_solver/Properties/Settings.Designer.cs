@@ -61,7 +61,7 @@ namespace WaveEquation2D_solver.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int Sett_solver_type {
             get {
                 return ((int)(this["Sett_solver_type"]));

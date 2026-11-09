@@ -52,6 +52,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo_ico_png.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTK, Version=3.3.3.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.3.3\lib\net20\OpenTK.dll</HintPath>
@@ -256,6 +259,8 @@ rmdir /S /Q "$(TargetDir)src"
 xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libwinpthread-1.dll" "$(TargetDir)" /Y /I
 rmdir /S /Q "$(TargetDir)src"
 xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\openblas.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libiomp5md.dll" "$(TargetDir)" /Y /I
 rmdir /S /Q "$(TargetDir)src"</PostBuildEvent>
   </PropertyGroup>
 </Project>
