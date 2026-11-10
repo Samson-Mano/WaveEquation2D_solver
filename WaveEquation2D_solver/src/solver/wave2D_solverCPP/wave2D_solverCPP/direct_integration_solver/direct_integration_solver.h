@@ -31,12 +31,10 @@ public:
 
 
 	bool perform_direct_integration_solve(int number_of_intermediatesteps, double global_damping_ratio,
-		double TotalSimulationTime, double TimeIncrement,
-		double geom_min_x, double geom_min_y, double scale_value);
+		double TotalSimulationTime, double TimeIncrement);
 
 
 private:
-
 	wave2d_system_store* wave_2dsystem_ptr;
 	stopwatch_events* m_stopwatch;
 
@@ -53,8 +51,7 @@ private:
 		std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results);
 
 	void store_results(const spectral_mesh2d& spec_mesh2d, 
-		const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results,
-		double geom_min_x, double geom_min_y, double scale_value);
+		const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results);
 
 
 	void(*m_callback)(const char*) = nullptr;

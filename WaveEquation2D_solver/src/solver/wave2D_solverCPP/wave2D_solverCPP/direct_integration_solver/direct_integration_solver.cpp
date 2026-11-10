@@ -37,10 +37,8 @@ void direct_integration_solver::init(wave2d_system_store * wave_2dsystem_ptr,
 
 
 bool direct_integration_solver::perform_direct_integration_solve(int number_of_intermediatesteps, 
-	double global_damping_ratio, double TotalSimulationTime, double TimeIncrement, 
-	double geom_min_x, double geom_min_y, double scale_value)
+	double global_damping_ratio, double TotalSimulationTime, double TimeIncrement)
 {
-
 	// Step 1: Create the direct integration global matrices
 	direct_integration_matrices direct_integration_matrices_solver;
 
@@ -311,7 +309,7 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 
 	const spectral_mesh2d& spec_mesh2d = direct_integration_matrices_solver.getSpectralMesh2D();
 	
-	store_results(spec_mesh2d, nodal_results, geom_min_x, geom_min_y, scale_value);
+	store_results(spec_mesh2d, nodal_results);
 
 	msg = "Direct time integration results stored successfully in: " + this->output_file;
 	report(msg.c_str());
@@ -351,8 +349,7 @@ void direct_integration_solver::store_results_at_timestep(int main_step,
 
 
 void direct_integration_solver::store_results(const spectral_mesh2d& spec_mesh2d, 
-	const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results,
-	double geom_min_x, double geom_min_y, double scale_value)
+	const std::unordered_map<int, direct_integration_nodal_results_store>& nodal_results)
 {
 
 	std::ofstream bin_file(this->output_file.c_str(), std::ios::binary);
@@ -372,12 +369,10 @@ void direct_integration_solver::store_results(const spectral_mesh2d& spec_mesh2d
 	for (const auto& node : spec_mesh2d.renderer_node_points)
 	{
 		int32_t nodeid = static_cast<int32_t>(node.n_id);
-		double scaled_x = (node.x / scale_value) + geom_min_x;
-		double scaled_y = (node.y / scale_value) + geom_min_y;
 
 		bin_file.write(reinterpret_cast<const char*>(&nodeid), sizeof(int32_t));
-		bin_file.write(reinterpret_cast<const char*>(&scaled_x), sizeof(double));
-		bin_file.write(reinterpret_cast<const char*>(&scaled_y), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node.x), sizeof(double));
+		bin_file.write(reinterpret_cast<const char*>(&node.y), sizeof(double));
 
 	}
 

@@ -33,7 +33,7 @@ void wave2d_system_store::normalize_material_wave_speeds()
 void wave2d_system_store::set_PML_damping_coefficient()
 {
 	constexpr int m = 2; // Polynomial grading order for the PML damping profile
-	double max_bound = 10.0; // this->max_geom_bound; // Maximum spatial bound of the domain
+	double max_bound = this->max_geom_bound; // Maximum spatial bound of the domain
 
 	double spatial_bound = max_bound * 0.1; // Assuming the PML region extends to the 10 % maximum spatial bound
 

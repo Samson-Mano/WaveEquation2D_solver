@@ -166,15 +166,17 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	double scale_value = 10.0 / max_bound;
 
 
-
-	// Scale the model coordinates to fit within the 10.0 x 10.0 box
-	for (auto& node_pair : h_refinement_model.node_list)
+	// Scale the model coordinates to fit within the 10.0 x 10.0 box if SolverType is 1 (Modal Superposition)
+	if (SolverType == 1)
 	{
-		node_store& node = node_pair.second;
-		node.x_coord = (node.x_coord - geom_min_x) * scale_value;
-		node.y_coord = (node.y_coord - geom_min_y) * scale_value;
+		// Scale the model coordinates to fit within the 10.0 x 10.0 box
+		for (auto& node_pair : h_refinement_model.node_list)
+		{
+			node_store& node = node_pair.second;
+			node.x_coord = (node.x_coord - geom_min_x) * scale_value;
+			node.y_coord = (node.y_coord - geom_min_y) * scale_value;
+		}
 	}
-
 
 
 	stopwatch_elapsed_str.str("");       // clear the string content

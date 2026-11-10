@@ -135,8 +135,8 @@ void direct_integration_matrices::create_global_matrices()
 				get_PMLtrielement_k_grad_k_mass_matrix(elem_nodes, elem_coords, s_x, s_y,
 					element_k_matrix, element_m_matrix);
 
-				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
-				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+				double max_wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
+				element_k_matrix = (max_wave_speed * max_wave_speed) * element_k_matrix;
 
 			}
 			else
@@ -239,8 +239,8 @@ void direct_integration_matrices::create_global_matrices()
 				get_PMLquadelement_k_grad_k_mass_matrix(elem_nodes, elem_coords, s_x, s_y,
 					element_k_matrix, element_m_matrix);
 
-				double wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
-				element_k_matrix = (wave_speed * wave_speed) * element_k_matrix;
+				double max_wave_speed = wave_2dsystem_ptr->max_wave_speed; // get the maximum wave speed of the medium
+				element_k_matrix = (max_wave_speed * max_wave_speed) * element_k_matrix;
 
 			}
 			else
