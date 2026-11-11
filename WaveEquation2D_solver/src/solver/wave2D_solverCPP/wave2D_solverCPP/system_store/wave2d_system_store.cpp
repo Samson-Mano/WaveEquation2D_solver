@@ -37,7 +37,7 @@ void wave2d_system_store::set_PML_damping_coefficient()
 
 	double spatial_bound = max_bound * 0.1; // Assuming the PML region extends to the 10 % maximum spatial bound
 
-	double wave_impedance = 1.0; // Assuming normalized wave impedance for simplicity
+	double wave_impedance = 1.0; // wave impedance  = density * wave_speed
 
 	this->pml_sigma_max = ((m + 1) * 0.8) / (wave_impedance * spatial_bound);
 

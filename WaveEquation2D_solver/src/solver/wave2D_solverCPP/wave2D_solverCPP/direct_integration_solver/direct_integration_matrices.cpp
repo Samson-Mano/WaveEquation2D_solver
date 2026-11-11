@@ -123,7 +123,7 @@ void direct_integration_matrices::create_global_matrices()
 				double dL_x = pml_element_dist[tri_elm.tri_id].dx / pml_element_dist[tri_elm.tri_id].Lx;
 				double dL_y = pml_element_dist[tri_elm.tri_id].dy / pml_element_dist[tri_elm.tri_id].Ly;
 
-				double sigma_max = wave_2dsystem_ptr->pml_sigma_max; // sigma max
+				double sigma_max = wave_2dsystem_ptr->pml_sigma_max / wave_2dsystem_ptr->max_wave_speed; // sigma max
 				double omega = wave_2dsystem_ptr->pml_omega; // PML frequency
 
 				double sigma_x = sigma_max * std::pow(dL_x, 2);
@@ -227,7 +227,7 @@ void direct_integration_matrices::create_global_matrices()
 				double dL_x = pml_element_dist[quad_elm.quad_id].dx / pml_element_dist[quad_elm.quad_id].Lx;
 				double dL_y = pml_element_dist[quad_elm.quad_id].dy / pml_element_dist[quad_elm.quad_id].Ly;
 
-				double sigma_max = wave_2dsystem_ptr->pml_sigma_max; // sigma max
+				double sigma_max = wave_2dsystem_ptr->pml_sigma_max / wave_2dsystem_ptr->max_wave_speed; // sigma max
 				double omega = wave_2dsystem_ptr->pml_omega; // PML frequency
 
 				double sigma_x = sigma_max * std::pow(dL_x, 2);

@@ -453,7 +453,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 			// Perform direct time integration solve
 			(*isAnalysisSuccess) = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
-				DampingRatio, TotalSimulationTime, TimeIncrement, geom_min_x, geom_min_y, scale_value);
+				DampingRatio, TotalSimulationTime, TimeIncrement);
 
 		}
 		catch (const std::exception& e)
