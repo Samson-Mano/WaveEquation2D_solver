@@ -3,6 +3,74 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# ======================
+# ALLOW ONLY bin/x64/Release
+# ======================
+
+# First, ignore ALL bin folders
+bin/
+# x64/
+
+# Then, specifically unignore bin/x64/Release and ALL its contents
+!bin/
+!bin/x64/
+!bin/x64/Release/
+!bin/x64/Release/*
+
+# Explicitly allow executable files if they exist
+!bin/x64/Release/*.exe
+!bin/x64/Release/*.dll
+!bin/x64/Release/*.pdb
+
+# ======================
+# IGNORE ALL OTHER RELEASE FOLDERS
+# ======================
+# x64/
+# [Rr]elease/
+*/[Rr]elease/
+*/*/[Rr]elease/
+
+# ======================
+# VISUAL STUDIO IGNORES (keep these at bottom)
+# ======================
+[Dd]ebug/
+[Dd]ebugPublic/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+
+
+# System files
+Thumbs.db
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Large files
+*.bin
+*.dat
+*.h5
+*.hdf5
+*.log
+*.tmp
+*.temp
+
+
+
 # User-specific files
 *.rsuser
 *.suo
@@ -16,22 +84,9 @@
 # Mono auto generated files
 mono_crash.*
 
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Oo]ut/
-[Ll]og/
-[Ll]ogs/
+#__________________________________________________________________________________________________
+#__________________________________________________________________________________________________
+
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -362,3 +417,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 *.bin
+/WaveEquation2D_solver/src/solver/wave2D_solverCPP/wave2D_solverCPP/x64/Release
+/WaveEquation2D_solver/src/solver/wave2D_solverCPP/x64/Release
