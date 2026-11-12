@@ -419,3 +419,5 @@ FodyWeavers.xsd
 *.bin
 /WaveEquation2D_solver/src/solver/wave2D_solverCPP/wave2D_solverCPP/x64/Release
 /WaveEquation2D_solver/src/solver/wave2D_solverCPP/x64/Release
+/WaveEquation2D_solver/bin/x64/Release/wave2D_solverCPP.dll
+/WaveEquation2D_solver/src/solver/wave2D_DI_solverCPP/wave2D_DI_solverCPP/x64/Release
