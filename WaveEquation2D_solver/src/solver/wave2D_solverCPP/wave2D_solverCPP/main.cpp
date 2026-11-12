@@ -11,12 +11,12 @@
 #include "system_store/wave2d_system_store.h"
 #include "system_store/stopwatch_events.h"
 #include "modal_superposition_solver/modal_superposition_solver.h"
-#include "direct_integration_solver/direct_integration_solver.h"
+
 
 int main()
 {
 
-	const char* input_file = "quad_grid50x50.bin";  // "test_four_square.bin";   // Adjust path here
+	const char* input_file = "test_four_square.bin";   // Adjust path here
 	// const char* output_file = "model_output.bin"; // Optional
 
 	// Example placeholder
@@ -109,8 +109,6 @@ int main()
 
 	// Determine the scaling factor to fit the geometry within a 10 x 10 box
 	double scale_value = 10.0 / max_bound;
-
-
 
 	// Scale the model coordinates to fit within the 10.0 x 10.0 box
 	for (auto& node_pair : h_refinement_model.node_list)
@@ -379,29 +377,29 @@ int main()
 	// Perform modal analysis
 	if (SolverType == 0)
 	{
-		try
-		{
-			//_________________________________________________________
-			// Direct Time Integration Solver
-			direct_integration_solver direct_integration_solver;
+		//try
+		//{
+		//	//_________________________________________________________
+		//	// Direct Time Integration Solver
+		//	direct_integration_solver direct_integration_solver;
 
-			direct_integration_solver.init(&wave_system, output_file_char, &stopwatch, m_callback);
+		//	direct_integration_solver.init(&wave_system, output_file_char, &stopwatch, m_callback);
 
-			// Perform direct time integration solve
-			isAnalysisSuccess = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
-				DampingRatio, TotalSimulationTime, TimeIncrement);
+		//	// Perform direct time integration solve
+		//	isAnalysisSuccess = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
+		//		DampingRatio, TotalSimulationTime, TimeIncrement);
 
-		}
-		catch (const std::exception& e)
-		{
-			std::cout << "Error during direct time integration analysis: " + std::string(e.what()) << std::endl;
-			isAnalysisSuccess = false;
-		}
-		catch (...)
-		{
-			std::cout << "Unknown error during direct time integration analysis." << std::endl;
-			isAnalysisSuccess = false;
-		}
+		//}
+		//catch (const std::exception& e)
+		//{
+		//	std::cout << "Error during direct time integration analysis: " + std::string(e.what()) << std::endl;
+		//	isAnalysisSuccess = false;
+		//}
+		//catch (...)
+		//{
+		//	std::cout << "Unknown error during direct time integration analysis." << std::endl;
+		//	isAnalysisSuccess = false;
+		//}
 
 	}
 	else if (SolverType == 1)

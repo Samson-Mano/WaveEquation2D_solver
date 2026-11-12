@@ -239,8 +239,8 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 	Eigen::SparseMatrix<std::complex<double>> K_eff = K_ff + a1;
 	K_eff.makeCompressed();
 
-	// Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
-	Eigen::PardisoLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
+	Eigen::SparseLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
+	// Eigen::PardisoLU<Eigen::SparseMatrix<std::complex<double>>> K_solver;
 	K_solver.analyzePattern(K_eff);
 	K_solver.factorize(K_eff);
 
@@ -272,7 +272,6 @@ bool direct_integration_solver::perform_direct_integration_solve(int number_of_i
 			rhs.noalias() += a2 * v;
 			rhs.noalias() += a3 * a;
 			
-
 			u_next.noalias() = K_solver.solve(rhs);
 
 			v_next = gammainvbetadt * (u_next - u) - gammainvbeta_m1 * v - dt_gammainv2beta_m1 * a;

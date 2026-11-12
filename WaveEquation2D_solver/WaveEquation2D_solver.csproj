@@ -12,6 +12,21 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -222,6 +237,94 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\quad_grid50x50.bin" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\wave2D_DI_solverCPP.vcxproj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.cpp.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.cpp.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.cpp.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.h.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.h.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.h.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_matrices.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.cpp.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.cpp.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.cpp.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.h.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.h.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.h.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\direct_integration_solver.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\gll_utility.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\hash_utils.h.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\hash_utils.h.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\hash_utils.h.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\h_refinement_store.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\main.cpp.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\main.cpp.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\main.cpp.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\main.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\pml_distance_calculator.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\pml_region_calculator.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\solve_DI_2DwaveanalysisCPP.cpp.obj.dt.d.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\solve_DI_2DwaveanalysisCPP.cpp.obj.dt.module.json" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\solve_DI_2DwaveanalysisCPP.cpp.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\solve_DI_2DwaveanalysisCPP.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\spectral_mesh2d.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\spectral_quad_element.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\spectral_tri_element.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\stopwatch_events.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\triangle_dunavant_rule.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\unique_id_control.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\vc145.idb" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\vcpkg.applocal.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\CL.command.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\Cl.items.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\CL.read.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\CL.write.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\link.command.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\link.read.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\link.secondary.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\link.write.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33.tlog\wave2D_DI_solverCPP.lastbuildstate" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.Build.CppClean.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.exe.recipe" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.ilk" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2d_system_store.cpp.obj.dt.module.json.command" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2d_system_store.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\direct_integration_matrices.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\direct_integration_solver.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\gll_utility.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\h_refinement_store.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\main.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\pml_distance_calculator.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\pml_region_calculator.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\solve_DI_2DwaveanalysisCPP.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\spectral_mesh2d.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\spectral_quad_element.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\spectral_tri_element.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\stopwatch_events.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\triangle_dunavant_rule.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\unique_id_control.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\vcpkg.applocal.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\CL.command.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\Cl.items.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\CL.read.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\CL.write.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\link.command.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\link.read.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\link.secondary.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\link.write.1.tlog" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33.tlog\wave2D_DI_solverCPP.lastbuildstate" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.Build.CppClean.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.dll.recipe" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.iobj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.ipdb" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.log" />
+    <None Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2d_system_store.obj" />
+    <None Include="src\solver\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.exp" />
+    <None Include="src\solver\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.lib" />
+    <None Include="src\solver\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.exp" />
+    <None Include="src\solver\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.lib" />
     <None Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.exp" />
     <None Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.lib" />
   </ItemGroup>
@@ -232,6 +335,46 @@
     <Content Include="Example_model\txt_file\circle_158_quad.txt" />
     <Content Include="Example_model\txt_file\grid_50x50_quad.txt" />
     <Content Include="logo_ico_png.ico" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP.slnx" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\direct_integration_matrices.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\direct_integration_matrices.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\direct_integration_solver.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\direct_integration_solver.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\pml_distance_calculator.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\pml_distance_calculator.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\pml_region_calculator.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\direct_integration_solver\pml_region_calculator.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\h_refinement\h_refinement_store.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\h_refinement\h_refinement_store.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\main.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\solve_DI_2DwaveanalysisCPP.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\gll_utility.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\gll_utility.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\spectral_quad_element.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\spectral_quad_element.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\spectral_tri_element.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_lib\spectral_tri_element.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_mesh2d.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\spectral_mesh2d.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\triangle_duvant_rule\triangle_dunavant_rule.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\triangle_duvant_rule\triangle_dunavant_rule.hpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\unique_id_control.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\spectral_elements\unique_id_control.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\system_store\hash_utils.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\system_store\stopwatch_events.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\system_store\stopwatch_events.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\system_store\wave2d_system_store.cpp" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\system_store\wave2d_system_store.h" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\wave2D_DI_solverCPP.vcxproj.filters" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\wave2D_DI_solverCPP.vcxproj.user" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\vc145.pdb" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.vcxproj.FileListAbsolute.txt" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\vc145.pdb" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.vcxproj.FileListAbsolute.txt" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.exe" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\x64\Debug\wave2D_DI_solverCPP.pdb" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.dll" />
+    <Content Include="src\solver\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.pdb" />
     <Content Include="src\solver\wave2D_solverCPP\x64\Release\wave2D_solverCPP.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -241,6 +384,22 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Example_model\bin_file\" />
+    <Folder Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\microsoft\STL\" />
+    <Folder Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Debug\wave2D_D.73919f33_MD.tlog\" />
+    <Folder Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\microsoft\STL\" />
+    <Folder Include="src\solver\wave2D_DI_solverCPP\wave2D_DI_solverCPP\x64\Release\wave2D_D.73919f33_MD.tlog\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -260,7 +419,8 @@ xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libwinpthread-1.dll"
 rmdir /S /Q "$(TargetDir)src"
 xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\openblas.dll" "$(TargetDir)" /Y /I
 rmdir /S /Q "$(TargetDir)src"
-xcopy "$(ProjectDir)src\solver\wave2D_solverCPP\x64\Release\libiomp5md.dll" "$(TargetDir)" /Y /I
-rmdir /S /Q "$(TargetDir)src"</PostBuildEvent>
+xcopy "$(ProjectDir)src\solver\wave2D_DI_solverCPP\x64\Release\wave2D_DI_solverCPP.dll" "$(TargetDir)" /Y /I
+rmdir /S /Q "$(TargetDir)src"
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

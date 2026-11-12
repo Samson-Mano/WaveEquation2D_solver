@@ -1,0 +1,220 @@
+#pragma once
+
+
+#pragma warning(push)
+#pragma warning (disable : 26451)
+#pragma warning (disable : 26495)
+#pragma warning (disable : 6255)
+#pragma warning (disable : 6294)
+#pragma warning (disable : 26813)
+#pragma warning (disable : 26454)
+#pragma warning (disable : 4244)
+#pragma warning (disable : 4091)
+#pragma warning (disable : 6011)
+#pragma warning (disable : 6387)
+
+
+#include "hash_utils.h"
+
+#include <Eigen/Dense>
+#include <unordered_map>
+
+
+#include <cstdint>
+#include <bit>          // std::bit_cast (C++20)
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <type_traits>
+
+using hash_utils::fnv_mix;
+
+#pragma warning(pop)
+
+
+struct load_vector_store
+{
+	int constraint_set_id = 0;
+
+	double sourceamplitude = 0.0; // Source amplitude in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	
+	
+	// Source term types
+	// 0 = Half sine pulse
+	// 1 = Rectangular pulse
+	// 2 = Triangular pulse
+	// 3 = Step force with finite rise
+	// 4 = Full sine pulse
+	// 5 = Harmonic/ periodic excitation
+
+	int sourcetype = -1; // Source type in the node 
+	double sourcestarttime = 0.0; // Source start time in the node	
+
+};
+
+
+
+struct node_store
+{
+	int node_id = 0;
+	double x_coord = 0.0;
+	double y_coord = 0.0;
+
+	bool isboundarynode = false;
+
+	//_____________________________________________________________________
+	bool isFieldBC = false;
+	bool isSource = false;
+
+	double fieldvalue = 0.0; // Field value in the node
+
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the node	
+
+};
+
+
+
+struct edge_store
+{
+	int edge_id = 0;
+	int startnodeid = 0;
+	int endnodeid = 0;
+
+	int leftfaceid = -1; // The face on the left side of the edge (when looking from start node to end node)
+	int rightfaceid = -1; // The face on the right side of the edge (when looking from start node to end node)
+
+	bool isboundaryedge = false;
+
+	//_____________________________________________________________________
+	bool isFieldBC = false;
+	bool isDerivFieldBC = false;
+	bool isSource = false;
+
+	double fieldvalue = 0.0;
+	double normalderivfieldvalue = 0.0;
+
+	std::unordered_map<int, load_vector_store> source_values; // Source values for the edges	
+
+
+	//double sourcevalue = 0.0; // Source value in the node
+	//double sourcefrequency = 0.0; // Source frequency in the node
+	//int sourcetype = -1; // Source type in the node
+	//double sourcestarttime = 0.0; // Source start time in the node	
+
+};
+
+
+struct trielement_store
+{
+	int tri_id = 0;
+	int nodeid1 = 0;
+	int nodeid2 = 0;
+	int nodeid3 = 0;
+	int materialid = 0;
+
+};
+
+struct quadelement_store
+{
+	int quad_id = 0;
+	int nodeid1 = 0;
+	int nodeid2 = 0;
+	int nodeid3 = 0;
+	int nodeid4 = 0;
+	int materialid = 0;
+
+};
+
+
+struct node_constraint_store
+{
+	int node_constraint_set_id = 0;
+	std::vector<int> constraint_node_ids;
+
+	bool isFieldBC = false;
+	bool isSource = false;
+	double fieldvalue = 0.0; // Field value in the node
+
+	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
+
+};
+
+
+struct edge_constraint_store
+{
+	int edge_constraint_set_id = 0;
+
+	std::vector<int> constraint_edge_startpt_ids;
+	std::vector<int> constraint_edge_endpt_ids;
+	std::vector<int> constraint_edge_ids;
+
+	bool isFieldBC = false;
+	bool isDerivFieldBC = false;
+	bool isSource = false;
+
+	double fieldvalue = 0.0;
+	double normalderivfieldvalue = 0.0;
+
+	double sourcevalue = 0.0; // Source value in the node
+	double sourcefrequency = 0.0; // Source frequency in the node
+	int sourcetype = -1; // Source type in the node
+	double sourcestarttime = 0.0; // Source start time in the node	
+
+};
+
+
+
+struct material_store
+{
+	int materialid = 0;
+	double material_wave_speed = 0.0;
+	double norm_wave_speed = 0.0;
+};
+
+
+class wave2d_system_store
+{
+public:
+	int spectral_order = -1; // Spectral order of the finite element method (3, 4, 5, 6, 7, 8, 9, 10)
+	std::unordered_map<int, node_store> node_list;
+	std::unordered_map<int, edge_store> edge_list;
+	std::unordered_map<int, trielement_store> trielement_list;
+	std::unordered_map<int, quadelement_store> quadelement_list;
+
+	std::unordered_map<int, material_store> material_list;
+
+
+	std::unordered_map<int, node_constraint_store> node_constraint_list;
+	std::unordered_map<int, edge_constraint_store> edge_constraint_list;	
+
+	std::unordered_map<int, std::vector<int>> node_edge_map;
+
+	double max_geom_bound = 0.0;
+	double max_wave_speed = 0.0;
+
+
+	// Grading order m, 
+	double pml_sigma_max = 1.0; // Maximum PML damping coefficient
+	double pml_omega = 1.0; // PML frequency for the damping coefficient
+
+
+	wave2d_system_store();
+	~wave2d_system_store() = default;
+
+	void normalize_material_wave_speeds();
+
+	void set_PML_damping_coefficient();
+
+
+	uint64_t get_model_signature() const;
+
+private:
+
+};
+
+
+

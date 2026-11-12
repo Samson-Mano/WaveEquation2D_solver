@@ -111,13 +111,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\openGL\boost_1_84_0;C:\openGL\eigen-3.4.0;C:\openGL\spectra-1.2.0\include;C:\openGL\eigen-3.4.0\unsupported\;C:\Program Files (x86)\Intel\oneAPI\mkl\2026.2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\openGL\boost_1_84_0;C:\openGL\eigen-3.4.0;C:\openGL\spectra-1.2.0\include;C:\openGL\eigen-3.4.0\unsupported\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);libarpack.lib;lapack.lib;openblas.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;mkl_core.lib;libiomp5md.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Intel\oneAPI\mkl\2026.2\lib;C:\Program Files (x86)\Intel\oneAPI\compiler\2026.2\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);libarpack.lib;lapack.lib;openblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -132,23 +133,21 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\openGL\boost_1_84_0;C:\openGL\eigen-3.4.0;C:\openGL\spectra-1.2.0\include;C:\openGL\eigen-3.4.0\unsupported\;C:\Program Files (x86)\Intel\oneAPI\mkl\2026.2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\openGL\boost_1_84_0;C:\openGL\eigen-3.4.0;C:\openGL\spectra-1.2.0\include;C:\openGL\eigen-3.4.0\unsupported\</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);libarpack.lib;lapack.lib;openblas.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;mkl_core.lib;libiomp5md.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Intel\oneAPI\mkl\2026.2\lib;C:\Program Files (x86)\Intel\oneAPI\compiler\2026.2\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);libarpack.lib;lapack.lib;openblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="direct_integration_solver\direct_integration_matrices.cpp" />
-    <ClCompile Include="direct_integration_solver\direct_integration_solver.cpp" />
-    <ClCompile Include="direct_integration_solver\pml_distance_calculator.cpp" />
-    <ClCompile Include="direct_integration_solver\pml_region_calculator.cpp" />
     <ClCompile Include="h_refinement\h_refinement_store.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modal_superposition_solver\MinvKOp.cpp" />
@@ -166,10 +165,6 @@
     <ClCompile Include="system_store\wave2d_system_store.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="direct_integration_solver\direct_integration_matrices.h" />
-    <ClInclude Include="direct_integration_solver\direct_integration_solver.h" />
-    <ClInclude Include="direct_integration_solver\pml_distance_calculator.h" />
-    <ClInclude Include="direct_integration_solver\pml_region_calculator.h" />
     <ClInclude Include="h_refinement\h_refinement_store.h" />
     <ClInclude Include="modal_superposition_solver\MinvKOp.h" />
     <ClInclude Include="modal_superposition_solver\modal_spectral_solver.h" />

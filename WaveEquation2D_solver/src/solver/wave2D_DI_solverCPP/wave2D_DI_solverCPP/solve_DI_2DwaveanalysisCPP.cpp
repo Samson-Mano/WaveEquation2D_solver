@@ -1,0 +1,494 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cmath>
+#include <string>
+#include <cstdint>
+#include <iomanip>
+#include <sstream>
+
+#include "h_refinement/h_refinement_store.h"
+#include "system_store/wave2d_system_store.h"
+#include "system_store/stopwatch_events.h"
+#include "direct_integration_solver/direct_integration_solver.h"
+
+
+#pragma pack(push, 1)
+struct SolverSettings
+{
+	int SolverType;
+	int HRefinement; // 0, 1, 2
+	int SpectralOrderN; // 3, 4, 5, 6, 7, 8, 9, 10
+
+	double TotalSimulationTime; // Total simulation time
+	double TimeIncrement;         // Time increment for the simulation
+	double DampingRatio; // Global Damping ratio for the analysis
+
+	int NumberOfModes;          // Number of modes to consider in the analysis
+	int IntermediateSteps;      // Number of intermediate steps
+
+	int ExtendConstraints; // 0 or 1
+	int SaveHRefinedModel; // 0 or 1
+
+};
+#pragma pack(pop)
+
+
+
+// Function to solve the system setting from C# or Python
+extern "C" __declspec(dllexport) void solve_DI_2DwaveanalysisCPP(const char* input_file,
+	const char* output_file,
+	SolverSettings* settings,
+	bool* isAnalysisSuccess,
+	void(*callback)(const char*))
+{
+
+
+	if (callback) callback("Initializing solver...");
+	(*isAnalysisSuccess) = false;
+
+
+
+	std::string msg = "";
+
+	if (!settings)
+	{
+		msg = "Solver settings error";
+		if (callback) callback(msg.c_str());
+
+		return;
+	}
+
+
+	// Example placeholder
+	std::ifstream infile(input_file, std::ios::binary);
+	std::ofstream outfile(output_file, std::ios::binary);
+
+	// Read the solver settings
+	int SolverType = settings->SolverType;
+	int HRefinement = settings->HRefinement; // 0, 1, 2
+	int SpectralOrderN = settings->SpectralOrderN; // 3, 4, 5, 6, 7, 8, 9, 10
+
+	double TotalSimulationTime = settings->TotalSimulationTime; // Total simulation time
+	double TimeIncrement = settings->TimeIncrement;         // Time increment for the simulation
+	double DampingRatio = settings->DampingRatio; // Global Damping ratio for the analysis
+
+	int NumberOfModes = settings->NumberOfModes;          // Number of modes to consider in the analysis
+	int IntermediateSteps = settings->IntermediateSteps;      // Number of intermediate steps
+
+	int ExtendConstraints = settings->ExtendConstraints; // 0 or 1
+	int SaveHRefinedModel = settings->SaveHRefinedModel; // 0 or 1
+
+
+	msg = "H Refinement order = " + std::to_string(HRefinement) + ", Spectral order = " +
+		std::to_string(SpectralOrderN);
+
+	if (callback) callback(msg.c_str());
+
+
+	stopwatch_events stopwatch;
+	std::stringstream stopwatch_elapsed_str;
+
+	// Start the solver stop watch
+	stopwatch.start();
+
+
+
+	if (!infile.is_open())
+	{
+		msg = "Error: Unable to open input file: " + std::string(input_file);
+		if (callback) callback(msg.c_str());
+
+		(*isAnalysisSuccess) = false;
+
+		// std::cerr << "Error: Unable to open input file: " << input_file << std::endl;
+		return;
+	}
+
+
+	if (!outfile.is_open())
+	{
+		msg = "Error: Unable to open output file: " + std::string(output_file);
+		if (callback) callback(msg.c_str());
+
+		(*isAnalysisSuccess) = false;
+
+		// std::cerr << "Error: Unable to open output file: " << output_file << std::endl;
+		return;
+	}
+
+	// Find the geometry extents (min and max coordinates) for scaling
+	double geom_min_x = std::numeric_limits<double>::max();
+	double geom_max_x = std::numeric_limits<double>::lowest();
+	double geom_min_y = std::numeric_limits<double>::max();
+	double geom_max_y = std::numeric_limits<double>::lowest();
+
+
+	//_______________________________________________________________________________________
+	// Read the elements for H Refinement module
+
+	h_refinement_store h_refinement_model;
+
+	// ---------- Nodes ----------
+	int32_t nodeCount;
+	infile.read(reinterpret_cast<char*>(&nodeCount), 4);
+
+	for (int i = 0; i < nodeCount; i++)
+	{
+		int32_t node_id = 0; double x_coord = 0.0, y_coord = 0.0;
+
+		infile.read(reinterpret_cast<char*>(&node_id), 4);
+		infile.read(reinterpret_cast<char*>(&x_coord), 8);
+		infile.read(reinterpret_cast<char*>(&y_coord), 8);
+
+		// Find the geometry extents
+		geom_min_x = std::min(geom_min_x, x_coord);
+		geom_max_x = std::max(geom_max_x, x_coord);
+		geom_min_y = std::min(geom_min_y, y_coord);
+		geom_max_y = std::max(geom_max_y, y_coord);
+
+		// Add node to the H Refinement system store
+		h_refinement_model.add_node(node_id, x_coord, y_coord);
+
+	}
+
+	// Calculate the scaling factor based on the geometry extents
+	double geom_width = geom_max_x - geom_min_x;
+	double geom_height = geom_max_y - geom_min_y;
+
+	double max_bound = std::max(geom_width, geom_height);
+
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading nodes at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+
+	// ---------- Tri Elements ----------
+	int32_t triCount;
+	infile.read(reinterpret_cast<char*>(&triCount), 4);
+
+	for (int i = 0; i < triCount; i++)
+	{
+		int32_t tri_id = 0, nodeid1 = 0, nodeid2 = 0, nodeid3 = 0, materialid = 0;
+
+		infile.read(reinterpret_cast<char*>(&tri_id), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid1), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid2), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid3), 4);
+		infile.read(reinterpret_cast<char*>(&materialid), 4);
+
+		// Add tri element to the H Refinement system store
+		h_refinement_model.add_trielement(tri_id, nodeid1, nodeid2, nodeid3, materialid);
+
+	}
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading triangular elements at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+	// ---------- Quad Elements ----------
+	int32_t quadCount;
+	infile.read(reinterpret_cast<char*>(&quadCount), 4);
+
+	for (int i = 0; i < quadCount; i++)
+	{
+		int32_t quad_id = 0, nodeid1 = 0, nodeid2 = 0, nodeid3 = 0, nodeid4 = 0, materialid = 0;
+
+		infile.read(reinterpret_cast<char*>(&quad_id), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid1), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid2), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid3), 4);
+		infile.read(reinterpret_cast<char*>(&nodeid4), 4);
+		infile.read(reinterpret_cast<char*>(&materialid), 4);
+
+		// Add quad element to the H Refinement system store
+		h_refinement_model.add_quadelement(quad_id, nodeid1, nodeid2, nodeid3, nodeid4, materialid);
+
+	}
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading quadrilateral elements at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+
+	// ---------- Materials ----------
+	int32_t matCount;
+	infile.read(reinterpret_cast<char*>(&matCount), 4);
+
+	for (int i = 0; i < matCount; i++)
+	{
+		int32_t materialid = 0, numelement = 0;
+		double material_wave_speed = 0.0;
+
+		infile.read(reinterpret_cast<char*>(&materialid), 4);
+
+		int32_t nameLen;
+		infile.read(reinterpret_cast<char*>(&nameLen), 4);
+
+		std::string matname(nameLen, '\0');
+		infile.read(&matname[0], nameLen);
+
+		infile.read(reinterpret_cast<char*>(&material_wave_speed), 8);
+
+
+		if (materialid == 0)
+		{
+			// Perfectly matched layer (PML) material properties
+			material_wave_speed = 1.0; // to avoid division by zero
+		}
+
+		// Add material to the H Refinement system store
+		h_refinement_model.add_material(materialid, material_wave_speed);
+
+	}
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading materials at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+
+
+	// ---------- Node Constraints ----------
+	int32_t ndCnstCount;
+	infile.read(reinterpret_cast<char*>(&ndCnstCount), 4);
+
+	for (int i = 0; i < ndCnstCount; i++)
+	{
+		int32_t nodeConstraintsetid = 0;
+		double fieldvalue = 0.0, sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
+		int32_t sourcetype = -1;
+		bool isFieldBC = false, isSource = false;
+
+		infile.read(reinterpret_cast<char*>(&nodeConstraintsetid), 4);
+		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
+		infile.read(reinterpret_cast<char*>(&sourcevalue), 8);
+		infile.read(reinterpret_cast<char*>(&sourcefrequency), 8);
+		infile.read(reinterpret_cast<char*>(&sourcetype), 4);
+		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
+		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isSource), 1);
+
+
+		int32_t nodeidCount;
+		infile.read(reinterpret_cast<char*>(&nodeidCount), 4);
+
+		std::vector<int> node_id_list;
+
+		for (int j = 0; j < nodeidCount; j++)
+		{
+			int32_t node_id = 0;
+			infile.read(reinterpret_cast<char*>(&node_id), 4);
+
+			// Update the constraint of the node where constraints are applied
+			node_id_list.push_back(node_id);
+		}
+
+		// Add node constraints to the H Refinement system store
+		h_refinement_model.add_nodeconstraint(nodeConstraintsetid, node_id_list, isFieldBC, isSource,
+			fieldvalue, sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
+
+	}
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading node constraints at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+
+
+	// ---------- Edge Constraints ----------
+	int32_t edCnstCount;
+	infile.read(reinterpret_cast<char*>(&edCnstCount), 4);
+
+	for (int i = 0; i < edCnstCount; i++)
+	{
+		int32_t edgeConstraintsetid = 0;
+		double fieldvalue = 0.0, normalderivfieldvalue = 0.0;
+		double sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
+		int32_t sourcetype = -1;
+		bool isFieldBC = false, isDerivFieldBC = false, isSource = false;
+
+		infile.read(reinterpret_cast<char*>(&edgeConstraintsetid), 4);
+		infile.read(reinterpret_cast<char*>(&fieldvalue), 8);
+		infile.read(reinterpret_cast<char*>(&normalderivfieldvalue), 8);
+		infile.read(reinterpret_cast<char*>(&sourcevalue), 8);
+		infile.read(reinterpret_cast<char*>(&sourcefrequency), 8);
+		infile.read(reinterpret_cast<char*>(&sourcetype), 4);
+		infile.read(reinterpret_cast<char*>(&sourcestarttime), 8);
+		infile.read(reinterpret_cast<char*>(&isFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isDerivFieldBC), 1);
+		infile.read(reinterpret_cast<char*>(&isSource), 1);
+
+		int32_t edgeidCount;
+		infile.read(reinterpret_cast<char*>(&edgeidCount), 4);
+
+		std::vector<int> edge_id_list;
+		std::vector<int> edge_startpt_id_list;
+		std::vector<int> edge_endpt_id_list;
+
+		for (int j = 0; j < edgeidCount; j++)
+		{
+			int32_t edge_id = 0;
+			infile.read(reinterpret_cast<char*>(&edge_id), 4);
+			edge_id_list.push_back(edge_id);
+
+			int32_t startnode_id = 0;
+			infile.read(reinterpret_cast<char*>(&startnode_id), 4);
+			edge_startpt_id_list.push_back(startnode_id);
+
+			int32_t endnode_id = 0;
+			infile.read(reinterpret_cast<char*>(&endnode_id), 4);
+			edge_endpt_id_list.push_back(endnode_id);
+
+		}
+
+
+		// Add edge constraints to the H Refinement system store
+		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_startpt_id_list, edge_endpt_id_list, edge_id_list,
+			isFieldBC, isDerivFieldBC, isSource,
+			fieldvalue, normalderivfieldvalue,
+			sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
+
+	}
+
+	stopwatch_elapsed_str.str("");       // clear the string content
+	stopwatch_elapsed_str.clear();       // clear any error flags
+	stopwatch_elapsed_str << std::fixed << std::setprecision(6) << stopwatch.elapsed();
+
+	msg = "Finished reading edge constraints at " + stopwatch_elapsed_str.str() + " secs";
+	if (callback) callback(msg.c_str());
+
+
+
+	// Create the edge
+	h_refinement_model.create_edge_wireframe();
+
+	// Preform refinement
+	h_refinement_model.perform_refinement(HRefinement, ExtendConstraints, &stopwatch, callback);
+
+
+	// Print the H Refined binary file for testing
+	if (SaveHRefinedModel == 1 && HRefinement > 0)
+	{
+		h_refinement_model.save_hrefined_model();
+	}
+
+	//______________________________________________________________________________________
+	// Copy H Refined Mesh to the wave analyzer
+	wave2d_system_store wave_system;
+
+	wave_system.spectral_order = SpectralOrderN;
+
+	wave_system.node_list = std::move(h_refinement_model.node_list);
+	wave_system.edge_list = std::move(h_refinement_model.edge_list);
+	wave_system.trielement_list = std::move(h_refinement_model.trielement_list);
+	wave_system.quadelement_list = std::move(h_refinement_model.quadelement_list);
+
+	wave_system.material_list = std::move(h_refinement_model.material_list);
+
+	wave_system.node_constraint_list = std::move(h_refinement_model.node_constraint_list);
+	wave_system.edge_constraint_list = std::move(h_refinement_model.edge_constraint_list);
+
+	wave_system.node_edge_map = std::move(h_refinement_model.node_edge_map);
+
+	// Set the maximum geometry bound for scaling
+	wave_system.max_geom_bound = max_bound;
+
+	// Normalize the material wave speeds
+	wave_system.normalize_material_wave_speeds();
+
+	// Set the PML damping coefficient
+	wave_system.set_PML_damping_coefficient();
+
+	// Perform modal analysis
+	if (SolverType == 0)
+	{
+		try
+		{
+			//_________________________________________________________
+			// Direct Time Integration Solver
+			direct_integration_solver direct_integration_solver;
+
+			direct_integration_solver.init(&wave_system, output_file, &stopwatch, callback);
+
+			// Perform direct time integration solve
+			(*isAnalysisSuccess) = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
+				DampingRatio, TotalSimulationTime, TimeIncrement);
+
+		}
+		catch (const std::exception& e)
+		{
+			msg = "Error during direct time integration analysis: " + std::string(e.what());
+			if (callback) callback(msg.c_str());
+			(*isAnalysisSuccess) = false;
+		}
+		catch (...)
+		{
+			msg = "Unknown error during direct time integration analysis.";
+			if (callback) callback(msg.c_str());
+			(*isAnalysisSuccess) = false;
+		}
+
+	}
+	else if (SolverType == 1)
+	{
+
+		//try
+		//{
+		//	//_________________________________________________________
+		//	// Modal Superposition Solver
+		//	modal_superposition_solver modal_superposition_solver;
+
+		//	modal_superposition_solver.init(&wave_system, output_file, &stopwatch, callback);
+
+		//	// Perform modal superposition solve
+		//	(*isAnalysisSuccess) = modal_superposition_solver.perform_modal_superposition_solve(NumberOfModes,
+		//		DampingRatio, TotalSimulationTime, TimeIncrement, geom_min_x, geom_min_y, scale_value);
+
+		//}
+		//catch (const std::exception& e)
+		//{
+		//	msg = "Error during modal superposition analysis: " + std::string(e.what());
+		//	if (callback) callback(msg.c_str());
+		//	(*isAnalysisSuccess) = false;
+		//}
+		//catch (...)
+		//{
+		//	msg = "Unknown error during modal superposition analysis.";
+		//	if (callback) callback(msg.c_str());
+		//	(*isAnalysisSuccess) = false;
+		//}
+
+	}
+
+
+	//_________________________________________________________
+	// Close the files
+	infile.close();
+	outfile.close();
+
+}
+
+
+
+

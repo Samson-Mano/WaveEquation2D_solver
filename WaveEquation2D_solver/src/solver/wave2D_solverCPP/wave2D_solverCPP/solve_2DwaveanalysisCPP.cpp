@@ -11,7 +11,6 @@
 #include "system_store/wave2d_system_store.h"
 #include "system_store/stopwatch_events.h"
 #include "modal_superposition_solver/modal_superposition_solver.h"
-#include "direct_integration_solver/direct_integration_solver.h"
 
 
 #pragma pack(push, 1)
@@ -167,16 +166,15 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 
 	// Scale the model coordinates to fit within the 10.0 x 10.0 box if SolverType is 1 (Modal Superposition)
-	if (SolverType == 1)
-	{
+
 		// Scale the model coordinates to fit within the 10.0 x 10.0 box
-		for (auto& node_pair : h_refinement_model.node_list)
-		{
-			node_store& node = node_pair.second;
-			node.x_coord = (node.x_coord - geom_min_x) * scale_value;
-			node.y_coord = (node.y_coord - geom_min_y) * scale_value;
-		}
+	for (auto& node_pair : h_refinement_model.node_list)
+	{
+		node_store& node = node_pair.second;
+		node.x_coord = (node.x_coord - geom_min_x) * scale_value;
+		node.y_coord = (node.y_coord - geom_min_y) * scale_value;
 	}
+
 
 
 	stopwatch_elapsed_str.str("");       // clear the string content
@@ -292,7 +290,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 	for (int i = 0; i < ndCnstCount; i++)
 	{
 		int32_t nodeConstraintsetid = 0;
-		double fieldvalue = 0.0 , sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
+		double fieldvalue = 0.0, sourcevalue = 0.0, sourcefrequency = 0.0, sourcestarttime = 0.0;
 		int32_t sourcetype = -1;
 		bool isFieldBC = false, isSource = false;
 
@@ -374,7 +372,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 			int32_t startnode_id = 0;
 			infile.read(reinterpret_cast<char*>(&startnode_id), 4);
-			edge_startpt_id_list.push_back(startnode_id);		
+			edge_startpt_id_list.push_back(startnode_id);
 
 			int32_t endnode_id = 0;
 			infile.read(reinterpret_cast<char*>(&endnode_id), 4);
@@ -386,7 +384,7 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 		// Add edge constraints to the H Refinement system store
 		h_refinement_model.add_edgeconstraint(edgeConstraintsetid, edge_startpt_id_list, edge_endpt_id_list, edge_id_list,
 			isFieldBC, isDerivFieldBC, isSource,
-			fieldvalue, normalderivfieldvalue, 
+			fieldvalue, normalderivfieldvalue,
 			sourcevalue, sourcefrequency, sourcetype, sourcestarttime);
 
 	}
@@ -439,35 +437,35 @@ extern "C" __declspec(dllexport) void solve_2DwaveanalysisCPP(const char* input_
 
 	// Set the PML damping coefficient
 	wave_system.set_PML_damping_coefficient();
-	
+
 	// Perform modal analysis
 	if (SolverType == 0)
 	{
-		try
-		{
-			//_________________________________________________________
-			// Direct Time Integration Solver
-			direct_integration_solver direct_integration_solver;
+		//try
+		//{
+		//	//_________________________________________________________
+		//	// Direct Time Integration Solver
+		//	direct_integration_solver direct_integration_solver;
 
-			direct_integration_solver.init(&wave_system, output_file, &stopwatch, callback);
+		//	direct_integration_solver.init(&wave_system, output_file, &stopwatch, callback);
 
-			// Perform direct time integration solve
-			(*isAnalysisSuccess) = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
-				DampingRatio, TotalSimulationTime, TimeIncrement);
+		//	// Perform direct time integration solve
+		//	(*isAnalysisSuccess) = direct_integration_solver.perform_direct_integration_solve(IntermediateSteps,
+		//		DampingRatio, TotalSimulationTime, TimeIncrement);
 
-		}
-		catch (const std::exception& e)
-		{
-			msg = "Error during direct time integration analysis: " + std::string(e.what());
-			if (callback) callback(msg.c_str());
-			(*isAnalysisSuccess) = false;
-		}
-		catch (...)
-		{
-			msg = "Unknown error during direct time integration analysis.";
-			if (callback) callback(msg.c_str());
-			(*isAnalysisSuccess) = false;
-		}
+		//}
+		//catch (const std::exception& e)
+		//{
+		//	msg = "Error during direct time integration analysis: " + std::string(e.what());
+		//	if (callback) callback(msg.c_str());
+		//	(*isAnalysisSuccess) = false;
+		//}
+		//catch (...)
+		//{
+		//	msg = "Unknown error during direct time integration analysis.";
+		//	if (callback) callback(msg.c_str());
+		//	(*isAnalysisSuccess) = false;
+		//}
 
 	}
 	else if (SolverType == 1)

@@ -29,7 +29,7 @@ typedef Eigen::SparseMatrix<double> SparseMatrix;
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
-#include <Eigen/PardisoSupport>
+// #include <Eigen/PardisoSupport> // Using Intel MKL Pardiso solver makes the DLL size over 100 MB
 
 #pragma warning(pop)
 

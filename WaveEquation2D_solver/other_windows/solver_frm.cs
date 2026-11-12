@@ -320,16 +320,33 @@ namespace WaveEquation2D_solver.other_windows
 
                 bool isAnalysisSuccess = false;
 
-
-                // Run solver asynchronously
-                await Task.Run(() =>
+                if(solver_settings.SolverType == 0) // Direct Integration method
                 {
-                    // Call C++ solver
-                    wave2DSolverInterop.solve_2DwaveanalysisCPP(inputPath, outputPath, 
-                        ref solver_settings,
-                        ref isAnalysisSuccess, OnStatusUpdate);
+                    AppendStatus("Running Direct Integration solver...\n");
+                    // Run solver asynchronously
+                    await Task.Run(() =>
+                    {
+                        // Call C++ solver
+                        wave2DSolverInterop.solve_DI_2DwaveanalysisCPP(inputPath, outputPath,
+                            ref solver_settings,
+                            ref isAnalysisSuccess, OnStatusUpdate);
 
-                });
+                    });
+                }
+                else if (solver_settings.SolverType == 1) // Modal Superposition method
+                {
+                    AppendStatus("Running Modal Superposition solver...\n");
+                    // Run solver asynchronously
+                    await Task.Run(() =>
+                    {
+                        // Call C++ solver
+                        wave2DSolverInterop.solve_2DwaveanalysisCPP(inputPath, outputPath,
+                            ref solver_settings,
+                            ref isAnalysisSuccess, OnStatusUpdate);
+
+                    });
+                }
+
 
 
                 if (isAnalysisSuccess)

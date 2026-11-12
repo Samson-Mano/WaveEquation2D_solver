@@ -50,6 +50,15 @@ namespace WaveEquation2D_solver.src.solver
 
 
 
+        // Import the DLL function (updated to accept callback)
+        [DllImport("wave2D_DI_solverCPP.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void solve_DI_2DwaveanalysisCPP(
+            [MarshalAs(UnmanagedType.LPStr)] string inputPath,
+            [MarshalAs(UnmanagedType.LPStr)] string outputPath,
+            ref SolverSettings settings,
+            ref bool isAnalysisSuccess,
+            CallbackDelegate callback
+        );
 
 
 
